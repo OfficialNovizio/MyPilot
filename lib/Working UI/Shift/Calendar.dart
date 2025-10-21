@@ -1,17 +1,18 @@
+import 'package:emptyproject/Working%20UI/Constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'salary_detailed_screen.dart';
-import '../controllers/app_controller.dart';
-import '../models/shift.dart';
-import '../utils/time_utils.dart';
-import 'shift_form.dart';
-import 'import_screen.dart';
+import '../../screens/salary_detailed_screen.dart';
+import '../app_controller.dart';
+import '../../models/shift.dart';
+import '../../utils/time_utils.dart';
+import '../../screens/shift_form.dart';
+import '../../screens/import_screen.dart';
 
-class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({super.key});
+class Calendar extends StatefulWidget {
+  const Calendar({super.key});
   @override
-  State<CalendarScreen> createState() => _CalendarScreenState();
+  State<Calendar> createState() => _CalendarState();
 }
 
 class _DayEvent {
@@ -21,7 +22,7 @@ class _DayEvent {
   _DayEvent(this.type, {this.jobId, this.shift});
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
+class _CalendarState extends State<Calendar> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
@@ -248,119 +249,110 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final c = Get.find<AppController>();
-    return Obx(() => Scaffold(
-          appBar: AppBar(
-            title: const Text('Calendar'),
-            actions: [
-              IconButton(
-                tooltip: 'Import from photo',
-                onPressed: () => Get.to(() => const ImportScreen()),
-                icon: const Icon(Icons.document_scanner_outlined),
-              ),
-            ],
-          ),
-          body: Column(children: [
-            TableCalendar(
-              firstDay: DateTime(2020, 1, 1),
-              lastDay: DateTime(2035, 12, 31),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (d) => isSameDay(d, _selectedDay),
-              onDaySelected: (selected, focused) {
-                setState(() {
-                  _selectedDay = selected;
-                  _focusedDay = focused;
-                });
-                _openDaySheet(c, selected);
-              },
-              calendarFormat: CalendarFormat.month,
-              startingDayOfWeek: c.settings.value.weekStartsOnMonday ? StartingDayOfWeek.monday : StartingDayOfWeek.sunday,
-              headerStyle: const HeaderStyle(titleCentered: true, formatButtonVisible: false),
-              calendarStyle: const CalendarStyle(
-                outsideDaysVisible: true,
-                todayDecoration: BoxDecoration(color: Color(0xFF2563EB), shape: BoxShape.circle),
-                selectedDecoration: BoxDecoration(color: Color(0xFF16A34A), shape: BoxShape.circle),
-                markersMaxCount: 4,
-              ),
-              eventLoader: (day) => _eventsForDay(c, day),
-              calendarBuilders: CalendarBuilders(
-                markerBuilder: (context, day, events) {
-                  if (events.isEmpty) return const SizedBox.shrink();
-                  final ctr = Get.find<AppController>();
-                  final shifts = events.where((e) => (e as _DayEvent).type == 'shift').cast<_DayEvent>().toList();
-                  final stats = events.where((e) => (e as _DayEvent).type == 'stat').cast<_DayEvent>().toList();
-                  final pays = events.where((e) => (e as _DayEvent).type == 'payday').cast<_DayEvent>().toList();
+    return Obx(
+      () => Column(
+        children: [
+          TableCalendar(
+            firstDay: DateTime(2020, 1, 1),
+            lastDay: DateTime(2035, 12, 31),
+            focusedDay: _focusedDay,
+            selectedDayPredicate: (d) => isSameDay(d, _selectedDay),
+            onDaySelected: (selected, focused) {
+              setState(() {
+                _selectedDay = selected;
+                _focusedDay = focused;
+              });
+              _openDaySheet(c, selected);
+            },
+            calendarFormat: CalendarFormat.month,
+            startingDayOfWeek: c.settings.value.weekStartsOnMonday ? StartingDayOfWeek.monday : StartingDayOfWeek.sunday,
+            headerStyle: const HeaderStyle(titleCentered: true, formatButtonVisible: false),
+            calendarStyle: const CalendarStyle(
+              outsideTextStyle: TextStyle(color: Colors.red),
+              outsideDaysVisible: true,
+              defaultTextStyle: TextStyle(color: Colors.white),
+              todayDecoration: BoxDecoration(color: Color(0xFF2563EB), shape: BoxShape.circle),
+              selectedDecoration: BoxDecoration(color: Color(0xFF16A34A), shape: BoxShape.circle),
+              markersMaxCount: 4,
+            ),
+            eventLoader: (day) => _eventsForDay(c, day),
+            calendarBuilders: CalendarBuilders(
+              markerBuilder: (context, day, events) {
+                if (events.isEmpty) return const SizedBox.shrink();
+                final ctr = Get.find<AppController>();
+                final shifts = events.where((e) => (e as _DayEvent).type == 'shift').cast<_DayEvent>().toList();
+                final stats = events.where((e) => (e as _DayEvent).type == 'stat').cast<_DayEvent>().toList();
+                final pays = events.where((e) => (e as _DayEvent).type == 'payday').cast<_DayEvent>().toList();
 
-                  final dots = <Widget>[];
-                  for (final e in shifts.take(3)) {
-                    final job = ctr.jobs.firstWhereOrNull((j) => j.id == e.jobId);
-                    dots.add(Container(
-                      width: 6,
-                      height: 6,
-                      margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                      decoration: BoxDecoration(
-                        color: ctr.jobColor(job?.colorHex ?? '#16a34a'),
-                        shape: BoxShape.circle,
-                      ),
-                    ));
-                  }
-
-                  // Payday badge follows job color
-                  Color paydayBg = Colors.green.shade700;
-                  Color paydayFg = Colors.white;
-                  if (pays.isNotEmpty) {
-                    final firstPay = pays.first;
-                    final job = ctr.jobs.firstWhereOrNull((j) => j.id == firstPay.jobId);
-                    paydayBg = ctr.jobColor(job?.colorHex ?? '#16a34a');
-                    paydayFg = paydayBg.computeLuminance() < 0.5 ? Colors.white : Colors.black;
-                  }
-
-                  return Stack(clipBehavior: Clip.none, children: [
-                    Positioned.fill(
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Row(mainAxisSize: MainAxisSize.min, children: dots),
-                      ),
+                final dots = <Widget>[];
+                for (final e in shifts.take(3)) {
+                  final job = ctr.jobs.firstWhereOrNull((j) => j.id == e.jobId);
+                  dots.add(Container(
+                    width: 6,
+                    height: 6,
+                    margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                    decoration: BoxDecoration(
+                      color: ctr.jobColor(job?.colorHex ?? '#16a34a'),
+                      shape: BoxShape.circle,
                     ),
-                    if (pays.isNotEmpty)
-                      Positioned(
-                        right: -1,
-                        top: -2,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: paydayBg,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: paydayFg.withOpacity(.25)),
-                          ),
-                          child: Text(
-                            '\$',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              color: paydayFg,
-                            ),
+                  ));
+                }
+
+                // Payday badge follows job color
+                Color paydayBg = Colors.green.shade700;
+                Color paydayFg = Colors.white;
+                if (pays.isNotEmpty) {
+                  final firstPay = pays.first;
+                  final job = ctr.jobs.firstWhereOrNull((j) => j.id == firstPay.jobId);
+                  paydayBg = ctr.jobColor(job?.colorHex ?? '#16a34a');
+                  paydayFg = paydayBg.computeLuminance() < 0.5 ? Colors.white : Colors.black;
+                }
+
+                return Stack(clipBehavior: Clip.none, children: [
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Row(mainAxisSize: MainAxisSize.min, children: dots),
+                    ),
+                  ),
+                  if (pays.isNotEmpty)
+                    Positioned(
+                      right: -1,
+                      top: -2,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: paydayBg,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: paydayFg.withOpacity(.25)),
+                        ),
+                        child: Text(
+                          '\$',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: paydayFg,
                           ),
                         ),
                       ),
-                    if (stats.isNotEmpty)
-                      const Positioned(
-                        left: -1,
-                        top: -4,
-                        child: Icon(Icons.star, size: 10, color: Color(0xFFFFC107)),
-                      ),
-                  ]);
-                },
-              ),
+                    ),
+                  if (stats.isNotEmpty)
+                    const Positioned(
+                      left: -1,
+                      top: -4,
+                      child: Icon(Icons.star, size: 10, color: Color(0xFFFFC107)),
+                    ),
+                ]);
+              },
             ),
-            Expanded(
-              child: ListView(padding: const EdgeInsets.all(12), children: [
-                _MonthSummary(month: _focusedDay),
-                const SizedBox(height: 8),
-                _PayPeriods(),
-              ]),
-            ),
-          ]),
-        ));
+          ),
+          SizedBox(height: height * .02),
+          _MonthSummary(month: _focusedDay),
+          const SizedBox(height: 8),
+          _PayPeriods(),
+        ],
+      ),
+    );
   }
 }
 
@@ -384,28 +376,47 @@ class _MonthSummary extends StatelessWidget {
       onTap: () => Get.to(
         () => SalaryDetailsScreen(month: month),
       ),
-      child: Card(
+      child: Container(
+        decoration: BoxDecoration(
+          color: ProjectColors.greenColor,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        margin: EdgeInsets.symmetric(horizontal: width * .02),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text("Month Summary — ${month.month}/${month.year}", style: const TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                textWidget(text: "Month Summary", fontSize: .02, fontWeight: FontWeight.bold),
+                textWidget(
+                    text: "Combined: ${(combined['hours'] ?? 0).toStringAsFixed(1)} h • \$${(combined['pay'] ?? 0).toStringAsFixed(2)}",
+                    fontSize: .015,
+                    fontWeight: FontWeight.bold),
+              ],
+            ),
+            textWidget(text: "${month.month}/${month.year}", fontSize: .02, fontWeight: FontWeight.bold),
+            SizedBox(height: height * .01),
             for (final j in c.jobs)
-              ListTile(
-                dense: true,
-                leading: CircleAvatar(backgroundColor: c.jobColor(j.colorHex), radius: 6),
-                title: Text(j.name),
-                trailing: Text(
-                  "${(perJob[j.id]!['hours'] ?? 0.0).toStringAsFixed(1)} h   •   \$${(perJob[j.id]!['pay'] ?? 0.0).toStringAsFixed(2)}",
+              Padding(
+                padding: EdgeInsets.only(top: height * .01),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(backgroundColor: c.jobColor(j.colorHex), radius: height * .01),
+                        SizedBox(width: width * .02),
+                        textWidget(text: j.name, fontSize: .02, fontWeight: FontWeight.w400),
+                      ],
+                    ),
+                    textWidget(
+                        text: '${(perJob[j.id]!['hours'] ?? 0.0).toStringAsFixed(1)} h   •   \$${(perJob[j.id]!['pay'] ?? 0.0).toStringAsFixed(2)}',
+                        fontSize: .02,
+                        fontWeight: FontWeight.w400),
+                  ],
                 ),
               ),
-            const Divider(),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                "Combined: ${(combined['hours'] ?? 0).toStringAsFixed(1)} h • \$${(combined['pay'] ?? 0).toStringAsFixed(2)}",
-              ),
-            ),
           ]),
         ),
       ),

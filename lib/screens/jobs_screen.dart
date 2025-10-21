@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/app_controller.dart';
+import '../Working UI/app_controller.dart';
 import '../models/job.dart';
 
 class JobsScreen extends StatelessWidget {

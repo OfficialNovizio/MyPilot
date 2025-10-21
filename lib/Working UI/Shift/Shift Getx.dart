@@ -1,8 +1,71 @@
+import 'package:emptyproject/Working%20UI/Shift/Calendar.dart';
+import 'package:emptyproject/Working%20UI/app_controller.dart';
+import 'package:emptyproject/models/shift.dart';
+import 'package:emptyproject/screens/analytic_screen.dart';
+import 'package:emptyproject/utils/time_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../Working UI/app_controller.dart';
-import '../models/shift.dart';
-import '../utils/time_utils.dart';
+
+enum shiftEnums {
+  calendar,
+  overview,
+  deposits,
+  projections,
+}
+
+class ShiftController extends GetxController {
+  RxString? activeShift = "Calendar".obs;
+  Rx<Widget>? shiftScreen = Rx<Widget>(Calendar());
+  Rx<DateTime> focusedDay = DateTime.now().obs;
+  Rx<DateTime>? selectedDay;
+
+  void openEditShift(AppController c, Shift s) {
+    Get.bottomSheet(ShiftForm(existing: s), isScrollControlled: true);
+  }
+
+  RxList<Map> shiftStats = RxList<Map>([
+    {
+      "Route": shiftEnums.calendar,
+      "Title": "Calendar",
+    },
+    {
+      "Route": shiftEnums.overview,
+      "Title": "Overview",
+    },
+    {
+      "Route": shiftEnums.deposits,
+      "Title": "Deposits",
+    },
+    {
+      "Route": shiftEnums.projections,
+      "Title": "Projection",
+    },
+  ]);
+
+  void changeShiftTabs(shiftEnums screen) {
+    switch (screen) {
+      case shiftEnums.calendar:
+        activeShift!.value = 'Calendar';
+        shiftScreen!.value = Calendar();
+
+        break;
+      case shiftEnums.overview:
+        activeShift!.value = 'Overview';
+        shiftScreen!.value = OverviewTab();
+        break;
+      case shiftEnums.deposits:
+        activeShift!.value = 'Deposits';
+        shiftScreen!.value = DepositsTab();
+        break;
+      case shiftEnums.projections:
+        activeShift!.value = 'Projection';
+        shiftScreen!.value = ProjectionTab();
+        break;
+    }
+    print(activeShift!.value);
+    activeShift!.refresh();
+  }
+}
 
 class ShiftForm extends StatefulWidget {
   final String? initialDate; // YYYY-MM-DD
@@ -32,7 +95,7 @@ class _ShiftFormState extends State<ShiftForm> {
       text: widget.existing?.date ?? widget.initialDate ?? ymd(DateTime.now()),
     );
     startCtl = TextEditingController(text: widget.existing?.start ?? "09:00");
-    endCtl   = TextEditingController(text: widget.existing?.end   ?? "17:00");
+    endCtl = TextEditingController(text: widget.existing?.end ?? "17:00");
     breakCtl = TextEditingController(text: (widget.existing?.breakMin ?? 0).toString());
     notesCtl = TextEditingController(text: widget.existing?.notes ?? "");
 
@@ -62,7 +125,11 @@ class _ShiftFormState extends State<ShiftForm> {
 
   @override
   void dispose() {
-    dateCtl.dispose(); startCtl.dispose(); endCtl.dispose(); breakCtl.dispose(); notesCtl.dispose();
+    dateCtl.dispose();
+    startCtl.dispose();
+    endCtl.dispose();
+    breakCtl.dispose();
+    notesCtl.dispose();
     super.dispose();
   }
 
@@ -82,13 +149,13 @@ class _ShiftFormState extends State<ShiftForm> {
         child: ListView(controller: controller, children: [
           Center(
             child: Container(
-              height: 4, width: 44,
+              height: 4,
+              width: 44,
               decoration: BoxDecoration(color: Colors.grey[700], borderRadius: BorderRadius.circular(4)),
             ),
           ),
           const SizedBox(height: 12),
-          Text(widget.existing == null ? 'Add Shift' : 'Edit Shift',
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+          Text(widget.existing == null ? 'Add Shift' : 'Edit Shift', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
           const SizedBox(height: 12),
 
           DropdownButtonFormField<String>(
@@ -115,9 +182,7 @@ class _ShiftFormState extends State<ShiftForm> {
             ),
             onTap: () async {
               final existing = dateCtl.text.trim();
-              final initial = (existing.isNotEmpty)
-                  ? DateTime.tryParse(existing) ?? DateTime.now()
-                  : DateTime.now();
+              final initial = (existing.isNotEmpty) ? DateTime.tryParse(existing) ?? DateTime.now() : DateTime.now();
               final picked = await showDatePicker(
                 context: context,
                 initialDate: initial,
@@ -127,8 +192,8 @@ class _ShiftFormState extends State<ShiftForm> {
                 builder: (ctx, child) => Theme(
                   data: Theme.of(ctx).copyWith(
                     colorScheme: Theme.of(ctx).colorScheme.copyWith(
-                      primary: const Color(0xFF16A34A),
-                    ),
+                          primary: const Color(0xFF16A34A),
+                        ),
                   ),
                   child: child!,
                 ),

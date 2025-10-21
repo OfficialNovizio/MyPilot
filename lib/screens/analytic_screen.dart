@@ -1,10 +1,11 @@
 import 'dart:math';
+import 'package:emptyproject/Working%20UI/Constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-import '../controllers/app_controller.dart';
+import '../Working UI/app_controller.dart';
 import '../models/job.dart';
 
 class _Slice {
@@ -41,14 +42,17 @@ class DashboardState extends GetxController {
   }
 }
 
-class AnalyticsScreen extends StatelessWidget {
+class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
 
   @override
+  State<AnalyticsScreen> createState() => _AnalyticsScreenState();
+}
+
+class _AnalyticsScreenState extends State<AnalyticsScreen> {
+  @override
   Widget build(BuildContext context) {
     // Ensure controllers exist
-    if (!Get.isRegistered<AppController>()) Get.put(AppController());
-    if (!Get.isRegistered<DashboardState>()) Get.put(DashboardState());
     final app = Get.find<AppController>();
     final a = Get.find<DashboardState>();
     a.initJobs(app.jobs.map((e) => e.id));
@@ -68,12 +72,12 @@ class AnalyticsScreen extends StatelessWidget {
             ],
           ),
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: [
-            _OverviewTab(),
-            _DepositsTab(),
-            _CompareTab(),
-            _ProjectionTab(),
+            OverviewTab(),
+            DepositsTab(),
+            CompareTab(),
+            ProjectionTab(),
           ],
         ),
       ),
@@ -85,8 +89,8 @@ class AnalyticsScreen extends StatelessWidget {
 /*                                OVERVIEW TAB                                */
 /* -------------------------------------------------------------------------- */
 
-class _OverviewTab extends StatelessWidget {
-  const _OverviewTab();
+class OverviewTab extends StatelessWidget {
+  const OverviewTab();
 
   @override
   Widget build(BuildContext context) {
@@ -96,38 +100,40 @@ class _OverviewTab extends StatelessWidget {
       a.initJobs(app.jobs.map((e) => e.id));
       final selectedJobs = app.jobs.where((j) => a.jobs.contains(j.id)).toList();
 
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+      return Column(
         children: [
-          _OverviewControls(),
-          const SizedBox(height: 8),
+          SizedBox(height: height * .05),
+          OverviewControls(),
+          SizedBox(height: height * .02),
+          CompareMiniCard(period: a.period.value, metric: a.metric.value, jobs: selectedJobs),
 
-          // Compare mini KPI
-          _CompareMiniCard(period: a.period.value, metric: a.metric.value, jobs: selectedJobs),
-
-          const SizedBox(height: 12),
+          SizedBox(height: height * .01),
+          CompareTab(),
+          SizedBox(height: height * .01),
           // Stable donut
-          _PayComposition(period: a.period.value, jobs: selectedJobs),
-
-          const SizedBox(height: 12),
-          _InsightsCard(period: a.period.value, jobs: selectedJobs),
+          PayComposition(period: a.period.value, jobs: selectedJobs),
+          SizedBox(height: height * .01),
+          InsightsCard(period: a.period.value, jobs: selectedJobs),
         ],
       );
     });
   }
 }
 
-class _OverviewControls extends StatelessWidget {
+class OverviewControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final a = Get.find<DashboardState>();
     final app = Get.find<AppController>();
 
     Widget chip(String label, bool sel, VoidCallback onTap) => ChoiceChip(
-          label: Text(label),
+          label: textWidget(text: label, fontSize: .015),
           selected: sel,
           onSelected: (_) => onTap(),
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          backgroundColor: ProjectColors.greenColor.withOpacity(0.6),
+          selectedColor: ProjectColors.greenColor,
+          avatarBorder: Border.all(color: Colors.transparent),
         );
 
     return Obx(() => Column(
@@ -137,25 +143,26 @@ class _OverviewControls extends StatelessWidget {
               chip('Weekly', a.period.value == 'weekly', () => a.period.value = 'weekly'),
               chip('Biweekly', a.period.value == 'biweekly', () => a.period.value = 'biweekly'),
               chip('Monthly', a.period.value == 'monthly', () => a.period.value = 'monthly'),
-              const SizedBox(width: 12),
               chip('Net', a.metric.value == 'net', () => a.metric.value = 'net'),
               chip('Gross', a.metric.value == 'gross', () => a.metric.value = 'gross'),
               chip('Hours', a.metric.value == 'hours', () => a.metric.value = 'hours'),
               chip('OT', a.metric.value == 'ot', () => a.metric.value = 'ot'),
             ]),
-            const SizedBox(height: 6),
+            SizedBox(height: height * .02),
             Wrap(spacing: 8, children: [
               chip('vs Last', a.baseline.value == 'last', () => a.baseline.value = 'last'),
               chip('vs Avg(3)', a.baseline.value == 'avg', () => a.baseline.value = 'avg'),
             ]),
-            const SizedBox(height: 6),
+            SizedBox(height: height * .02),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
                 for (final j in app.jobs)
                   FilterChip(
-                    label: Text(j.name),
+                    label: textWidget(text: j.name, fontSize: .015),
+                    selectedColor: ProjectColors.greenColor,
+                    backgroundColor: ProjectColors.greenColor.withOpacity(0.6),
                     selected: a.jobs.contains(j.id),
                     onSelected: (_) {
                       if (a.jobs.contains(j.id)) {
@@ -168,7 +175,9 @@ class _OverviewControls extends StatelessWidget {
                   ),
                 if (app.jobs.isNotEmpty)
                   FilterChip(
-                    label: const Text('Both'),
+                    label: textWidget(text: 'Both', fontSize: .015),
+                    selectedColor: ProjectColors.greenColor,
+                    backgroundColor: ProjectColors.greenColor.withOpacity(0.6),
                     selected: a.jobs.length == app.jobs.length,
                     onSelected: (_) {
                       a.jobs
@@ -183,11 +192,11 @@ class _OverviewControls extends StatelessWidget {
   }
 }
 
-class _CompareMiniCard extends StatelessWidget {
+class CompareMiniCard extends StatelessWidget {
   final String period;
   final String metric;
   final List<Job> jobs;
-  const _CompareMiniCard({required this.period, required this.metric, required this.jobs});
+  const CompareMiniCard({required this.period, required this.metric, required this.jobs});
 
   @override
   Widget build(BuildContext context) {
@@ -212,23 +221,23 @@ class _CompareMiniCard extends StatelessWidget {
 
     final diff = current - base;
     final up = diff >= 0;
-    final color = up ? const Color(0xFF16A34A) : const Color(0xFFEF4444);
+    final color = up ? const Color(0xFF013415) : const Color(0xFFEF4444);
 
     return _Card(
       title: 'Compare — ${_metricTitle(metric)}',
       trailing: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: height * .01, vertical: height * .01),
         decoration: BoxDecoration(
-          color: color.withOpacity(.15),
-          border: Border.all(color: color.withOpacity(.6)),
+          color: color,
+          border: Border.all(color: color),
           borderRadius: BorderRadius.circular(999),
         ),
-        child: Text('${up ? '+' : ''}${diff.toStringAsFixed(2)}', style: TextStyle(color: color, fontWeight: FontWeight.w700)),
+        child: textWidget(text: '${up ? '+' : ''}${diff.toStringAsFixed(2)}', fontSize: .015, fontWeight: FontWeight.w400, color: Colors.white),
       ),
       child: Row(
         children: [
           Expanded(child: _kpi('Current', current, metric)),
-          const SizedBox(width: 12),
+          // SizedBox(width: width * .012),
           Expanded(child: _kpi('Last', base, metric)),
         ],
       ),
@@ -238,17 +247,17 @@ class _CompareMiniCard extends StatelessWidget {
   Widget _kpi(String label, double v, String metric) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
-          const SizedBox(height: 4),
-          Text(_fmt(metric, v), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          textWidget(text: label, fontSize: .015, color: ProjectColors.pureBlackColor),
+          SizedBox(height: height * .005),
+          textWidget(text: _fmt(metric, v), fontSize: .02, color: ProjectColors.pureBlackColor, fontWeight: FontWeight.w800),
         ],
       );
 }
 
-class _PayComposition extends StatelessWidget {
+class PayComposition extends StatelessWidget {
   final String period;
   final List<Job> jobs;
-  const _PayComposition({required this.period, required this.jobs});
+  const PayComposition({required this.period, required this.jobs});
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +291,7 @@ class _PayComposition extends StatelessWidget {
     }
 
     final slices = [
-      _Slice('Net', net, const Color(0xFF22C55E)),
+      _Slice('Net', net, const Color(0xFF035D24)),
       _Slice('Income', income, const Color(0xFFEF4444)),
       _Slice('CPP', cpp, const Color(0xFF60A5FA)),
       _Slice('EI', ei, const Color(0xFFF59E0B)),
@@ -295,18 +304,18 @@ class _PayComposition extends StatelessWidget {
       child: Column(
         children: [
           SizedBox(
-            height: 190,
+            height: height * .25,
             child: PieChart(
               PieChartData(
-                centerSpaceRadius: 48,
+                centerSpaceRadius: height * .06,
                 sectionsSpace: 1,
                 sections: [
-                  for (final s in slices) PieChartSectionData(value: s.value, color: s.color, title: '', radius: 55),
+                  for (final s in slices) PieChartSectionData(value: s.value, color: s.color, title: '', radius: height * .06),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: height * .01),
           Wrap(
             spacing: 12,
             runSpacing: 6,
@@ -314,10 +323,13 @@ class _PayComposition extends StatelessWidget {
               for (final s in slices) _legendDot(s.color, '${s.label} ${_money(s.value)}'),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: height * .01),
           Align(
             alignment: Alignment.centerRight,
-            child: Text('Effective deduction: ${gross == 0 ? '0.0' : (((gross - net) / gross) * 100).toStringAsFixed(1)}%'),
+            child: textWidget(
+                text: 'Effective deduction: ${gross == 0 ? '0.0' : (((gross - net) / gross) * 100).toStringAsFixed(1)}%',
+                fontSize: .015,
+                fontWeight: FontWeight.w400),
           ),
         ],
       ),
@@ -325,10 +337,10 @@ class _PayComposition extends StatelessWidget {
   }
 }
 
-class _InsightsCard extends StatelessWidget {
+class InsightsCard extends StatelessWidget {
   final String period;
   final List<Job> jobs;
-  const _InsightsCard({required this.period, required this.jobs});
+  const InsightsCard({required this.period, required this.jobs});
 
   @override
   Widget build(BuildContext context) {
@@ -352,8 +364,8 @@ class _InsightsCard extends StatelessWidget {
 /*                               DEPOSITS TAB                                 */
 /* -------------------------------------------------------------------------- */
 
-class _DepositsTab extends StatelessWidget {
-  const _DepositsTab();
+class DepositsTab extends StatelessWidget {
+  const DepositsTab();
 
   @override
   Widget build(BuildContext context) {
@@ -364,62 +376,13 @@ class _DepositsTab extends StatelessWidget {
       a.initJobs(app.jobs.map((e) => e.id));
       final selected = app.jobs.where((j) => a.jobs.contains(j.id)).toList();
 
-      // Controls
-      final controls = _Card(
-        title: 'Filters',
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Wrap(spacing: 8, runSpacing: 8, children: [
-              for (final j in app.jobs)
-                FilterChip(
-                  label: Text(j.name),
-                  selected: a.jobs.contains(j.id),
-                  onSelected: (_) {
-                    if (a.jobs.contains(j.id))
-                      a.jobs.remove(j.id);
-                    else
-                      a.jobs.add(j.id);
-                  },
-                ),
-              if (app.jobs.isNotEmpty)
-                FilterChip(
-                  label: const Text('Both'),
-                  selected: a.jobs.length == app.jobs.length,
-                  onSelected: (_) {
-                    a.jobs
-                      ..clear()
-                      ..addAll(app.jobs.map((e) => e.id));
-                  },
-                ),
-            ]),
-            const SizedBox(height: 8),
-            Row(children: [
-              const Text('Show:'),
-              const SizedBox(width: 8),
-              _seg<int>(
-                value: a.depositLookBack.value,
-                items: const {2: '2 back', 3: '3 back', 4: '4 back'},
-                onChanged: (v) => a.depositLookBack.value = v,
-              ),
-              const SizedBox(width: 8),
-              _seg<int>(
-                value: a.depositLookForward.value,
-                items: const {2: '2 next', 3: '3 next', 4: '4 next'},
-                onChanged: (v) => a.depositLookForward.value = v,
-              ),
-            ]),
-          ],
-        ),
-      );
-
       // Build timeline points (sorted by date)
-      final points = <_DepositPoint>[];
+      final points = <DepositPoint>[];
       void addJob(Job j) {
         final ps = app.periodsAround(j, back: a.depositLookBack.value, forward: a.depositLookForward.value);
         for (final p in ps) {
           final net = app.estimateNetForPeriod(j, p);
-          points.add(_DepositPoint(p.deposit, net, j.id));
+          points.add(DepositPoint(p.deposit, net, j.id));
         }
       }
 
@@ -428,10 +391,61 @@ class _DepositsTab extends StatelessWidget {
 
       final maxY = max<double>(1, points.fold(0, (m, e) => e.net > m ? e.net : m));
 
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+      return Column(
         children: [
-          controls,
+          SizedBox(height: height * .02),
+          _Card(
+            title: 'Filters',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  for (final j in app.jobs)
+                    FilterChip(
+                      label: textWidget(text: j.name, fontSize: .015),
+                      selected: a.jobs.contains(j.id),
+                      onSelected: (_) {
+                        if (a.jobs.contains(j.id)) {
+                          a.jobs.remove(j.id);
+                        } else {
+                          a.jobs.add(j.id);
+                        }
+                      },
+                    ),
+                  if (app.jobs.isNotEmpty)
+                    FilterChip(
+                      label: const Text('Both'),
+                      selected: a.jobs.length == app.jobs.length,
+                      onSelected: (_) {
+                        a.jobs
+                          ..clear()
+                          ..addAll(app.jobs.map((e) => e.id));
+                      },
+                    ),
+                ]),
+                SizedBox(height: height * .01),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(children: [
+                    textWidget(text: 'Show:', fontSize: .015, fontWeight: FontWeight.bold),
+                    SizedBox(width: width * .02),
+                    _seg<int>(
+                      value: a.depositLookBack.value,
+                      items: const {2: '2 back', 3: '3 back', 4: '4 back'},
+                      onChanged: (v) => a.depositLookBack.value = v,
+                    ),
+                    SizedBox(width: width * .02),
+                    _seg<int>(
+                      value: a.depositLookForward.value,
+                      items: const {2: '2 next', 3: '3 next', 4: '4 next'},
+                      onChanged: (v) => a.depositLookForward.value = v,
+                    ),
+                  ]),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: height * .01),
           _Card(
             title: 'Upcoming & Recent Deposits',
             child: AspectRatio(
@@ -453,7 +467,7 @@ class _DepositsTab extends StatelessWidget {
                     LineChartBarData(
                       isCurved: true,
                       barWidth: 3,
-                      color: const Color(0xFF22C55E),
+                      color: const Color(0xFFFFFFFF),
                       spots: [
                         for (int i = 0; i < points.length; i++) FlSpot(i.toDouble(), points[i].net),
                       ],
@@ -477,65 +491,68 @@ class _DepositsTab extends StatelessWidget {
             ),
           ),
           // Per-job upcoming cards
-          for (final j in selected) _JobDepositRow(job: j),
+          for (final j in selected) JobDepositRow(job: j),
         ],
       );
     });
   }
 }
 
-class _DepositPoint {
+class DepositPoint {
   final DateTime d;
   final double net;
   final String job;
-  _DepositPoint(this.d, this.net, this.job);
+  DepositPoint(this.d, this.net, this.job);
 }
 
-class _JobDepositRow extends StatelessWidget {
+class JobDepositRow extends StatelessWidget {
   final Job job;
-  const _JobDepositRow({required this.job});
+  const JobDepositRow({required this.job});
 
   @override
   Widget build(BuildContext context) {
     final c = Get.find<AppController>();
     final periods = c.periodsAround(job, back: 0, forward: 2);
-    return _Card(
-      title: job.name,
-      leading: CircleAvatar(radius: 6, backgroundColor: c.jobColor(job.colorHex)),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (final p in periods)
-              Container(
-                margin: const EdgeInsets.only(right: 10),
-                padding: const EdgeInsets.all(12),
-                width: 170,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF121315),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFF232427)),
+    return Padding(
+      padding: EdgeInsets.only(top: height * .01),
+      child: _Card(
+        title: job.name,
+        leading: CircleAvatar(radius: 6, backgroundColor: c.jobColor(job.colorHex)),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (final p in periods)
+                Container(
+                  margin: EdgeInsets.only(right: width * .01),
+                  padding: EdgeInsets.all(12),
+                  width: width * .35,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF121315),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFF232427)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      textWidget(text: '${_md(p.start)} → ${_md(p.end)}', fontSize: .015, color: ProjectColors.whiteColor),
+                      SizedBox(height: height * .01),
+                      Row(children: [
+                        Icon(Icons.attach_money, size: height * .02, color: Color(0xFF16A34A)),
+                        SizedBox(width: width * .02),
+                        textWidget(text: _money(c.estimateNetForPeriod(job, p)), fontSize: .015, color: ProjectColors.whiteColor),
+                      ]),
+                      SizedBox(height: height * .01),
+                      Row(children: [
+                        Icon(Icons.savings_outlined, size: height * .02, color: ProjectColors.whiteColor),
+                        SizedBox(width: width * .02),
+                        textWidget(text: 'Deposit: ${_md(p.deposit)}', fontSize: .012, color: ProjectColors.whiteColor),
+                      ]),
+                    ],
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('${_md(p.start)} → ${_md(p.end)}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                    const SizedBox(height: 6),
-                    Row(children: [
-                      const Icon(Icons.attach_money, size: 16, color: Color(0xFF16A34A)),
-                      const SizedBox(width: 4),
-                      Text(_money(c.estimateNetForPeriod(job, p))),
-                    ]),
-                    const SizedBox(height: 6),
-                    Row(children: [
-                      const Icon(Icons.savings_outlined, size: 14, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Text('Deposit: ${_md(p.deposit)}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                    ]),
-                  ],
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -546,8 +563,8 @@ class _JobDepositRow extends StatelessWidget {
 /*                               COMPARE TAB                                  */
 /* -------------------------------------------------------------------------- */
 
-class _CompareTab extends StatelessWidget {
-  const _CompareTab();
+class CompareTab extends StatelessWidget {
+  const CompareTab();
 
   @override
   Widget build(BuildContext context) {
@@ -587,8 +604,7 @@ class _CompareTab extends StatelessWidget {
 
       final colors = jobs.map((j) => app.jobColor(j.colorHex)).toList();
 
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+      return Column(
         children: [
           _Card(
             title: 'Compare (${_periodLabel(a.period.value)}) — ${_metricTitle(a.metric.value)}',
@@ -639,8 +655,8 @@ class _CompareTab extends StatelessWidget {
 /*                              PROJECTION TAB                                */
 /* -------------------------------------------------------------------------- */
 
-class _ProjectionTab extends StatelessWidget {
-  const _ProjectionTab();
+class ProjectionTab extends StatelessWidget {
+  const ProjectionTab();
 
   @override
   Widget build(BuildContext context) {
@@ -664,10 +680,11 @@ class _ProjectionTab extends StatelessWidget {
                 onChanged: (v) => a.projScope.value = v,
               ),
             ]),
-            const SizedBox(height: 10),
+            SizedBox(height: height * .01),
             for (final j in jobs) _HoursPickerRow(job: j),
-            const SizedBox(height: 6),
-            const Text('Projection assumes no stat-day premium and uses your job tax settings.', style: TextStyle(color: Colors.grey)),
+            SizedBox(height: height * .01),
+            textWidget(
+                text: 'Projection assumes no stat-day premium and uses your job tax settings.', fontSize: .012, color: ProjectColors.pureBlackColor),
           ],
         ),
       );
@@ -703,19 +720,25 @@ class _ProjectionTab extends StatelessWidget {
       }
       final chartMax = max<double>(1, max(net, prevNet)) * 1.3;
 
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+      return Column(
         children: [
+          SizedBox(height: height * .02),
           header,
+          SizedBox(height: height * .01),
           _Card(
             title: 'Combined — ${_periodLabel(a.projScope.value)}',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Hours: ' + jobs.map((j) => '${j.name} ${a.projHours[j.id]!.toStringAsFixed(0)}h').join('  •  ')),
-                const SizedBox(height: 8),
-                AspectRatio(
-                  aspectRatio: 16 / 7,
+                textWidget(
+                  text: 'Hours: ${jobs.map((j) => '${j.name} ${a.projHours[j.id]!.toStringAsFixed(0)}h').join('  •  ')}',
+                  fontWeight: FontWeight.bold,
+                  fontSize: .015,
+                ),
+                SizedBox(height: height * .04),
+                Container(
+                  height: height * .3,
+                  color: Colors.transparent,
                   child: BarChart(
                     BarChartData(
                       minY: 0,
@@ -727,22 +750,25 @@ class _ProjectionTab extends StatelessWidget {
                         rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                         topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                         bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (v, _) => Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(v == 0 ? 'Projected' : 'Previous'),
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (v, _) => textWidget(
+                              text: v == 0 ? 'Projected' : 'Previous',
+                              fontSize: .015,
+                              color: ProjectColors.whiteColor,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )),
+                        ),
                       ),
                       barGroups: [
-                        BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: net, width: 22, color: const Color(0xFF22C55E))]),
-                        BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: prevNet, width: 22, color: const Color(0xFF9CA3AF))]),
+                        BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: net, width: width * .04, color: Color(0xFF22C55E))]),
+                        BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: prevNet, width: width * .04, color: const Color(0xFF9CA3AF))]),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: height * .01),
                 _bullets([
                   'Gross ${_money(gross)}',
                   'Net ${_money(net)}',
@@ -751,7 +777,11 @@ class _ProjectionTab extends StatelessWidget {
               ],
             ),
           ),
-          for (final j in jobs) _jobEstCard(j, estPerJob[j.id]!),
+          for (final j in jobs)
+            Padding(
+              padding: EdgeInsets.only(top: height * .01),
+              child: _jobEstCard(j, estPerJob[j.id]!),
+            ),
         ],
       );
     });
@@ -773,7 +803,7 @@ class _HoursPickerRow extends StatelessWidget {
       return ListTile(
         contentPadding: EdgeInsets.zero,
         leading: CircleAvatar(radius: 6, backgroundColor: dot),
-        title: Text(job.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: textWidget(text: job.name, fontSize: .02, fontWeight: FontWeight.bold),
         trailing: OutlinedButton(
           onPressed: () async {
             final values = List<double>.generate(81, (i) => (i + 10).toDouble()); // 10..90
@@ -812,7 +842,12 @@ class _HoursPickerRow extends StatelessWidget {
             );
             if (sel != null) a.projHours[job.id] = sel;
           },
-          child: Text('${h.toStringAsFixed(0)} h'),
+          child: textWidget(
+            text: '${h.toStringAsFixed(0)} h',
+            fontSize: .015,
+            color: ProjectColors.pureBlackColor,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       );
     });
@@ -880,8 +915,12 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return Container(
+      decoration: BoxDecoration(
+        color: ProjectColors.greenColor,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      margin: EdgeInsets.symmetric(horizontal: width * .02),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -891,7 +930,7 @@ class _Card extends StatelessWidget {
               Row(
                 children: [
                   if (leading != null) ...[leading!, const SizedBox(width: 8)],
-                  Text(title!, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  textWidget(text: title!, fontSize: .018, fontWeight: FontWeight.w600),
                   const Spacer(),
                   if (trailing != null) trailing!,
                 ],
@@ -908,20 +947,24 @@ class _Card extends StatelessWidget {
 
 Widget _kv(String k, String v, {bool strong = false}) => Row(
       children: [
-        Expanded(child: Text(k)),
-        Text(v, style: TextStyle(fontWeight: strong ? FontWeight.w700 : FontWeight.w400)),
+        Expanded(
+          child: textWidget(text: k, fontWeight: FontWeight.bold, fontSize: .015),
+        ),
+        textWidget(text: v, fontWeight: FontWeight.bold, fontSize: .015),
       ],
     );
 
 Widget _legendDot(Color c, String text) => Row(mainAxisSize: MainAxisSize.min, children: [
-      Container(width: 8, height: 8, decoration: BoxDecoration(color: c, shape: BoxShape.circle)),
-      const SizedBox(width: 6),
-      Text(text),
+      Container(width: height * .01, height: width * .02, decoration: BoxDecoration(color: c, shape: BoxShape.circle)),
+      SizedBox(width: width * .02),
+      textWidget(text: text, fontWeight: FontWeight.bold, fontSize: .015),
     ]);
 
 Widget _bullets(List<String> lines) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [for (final s in lines) Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Text('• $s'))],
+      children: [
+        for (final s in lines) Padding(padding: EdgeInsets.symmetric(vertical: height * .002), child: textWidget(text: '• $s', fontSize: .015))
+      ],
     );
 
 /* -------------------------------------------------------------------------- */
@@ -975,8 +1018,13 @@ Widget _seg<T>({required T value, required Map<T, String> items, required ValueC
     children: items.entries.map((e) {
       final sel = e.key == value;
       return ChoiceChip(
-        label: Text(e.value),
+        label: textWidget(text: e.value, fontSize: .015, color: ProjectColors.whiteColor),
         selected: sel,
+        backgroundColor: ProjectColors.pureBlackColor.withOpacity(0.6),
+        shadowColor: Colors.transparent,
+        avatarBorder: Border.all(color: Colors.transparent),
+        disabledColor: ProjectColors.pureBlackColor.withOpacity(0.6),
+        selectedColor: ProjectColors.pureBlackColor,
         onSelected: (_) => onChanged(e.key),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       );

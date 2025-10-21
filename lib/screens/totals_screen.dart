@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../controllers/app_controller.dart';
+import '../Working UI/app_controller.dart';
 import '../utils/ics_export.dart';
 
 class TotalsScreen extends StatelessWidget {
