@@ -1,6 +1,6 @@
+import 'package:emptyproject/Working%20UI/Account/Account.dart';
 import 'package:emptyproject/Working%20UI/Shift/Shift%20Screen.dart';
 import 'package:emptyproject/screens/analytic_screen.dart';
-import 'package:emptyproject/screens/jobs_screen.dart';
 import 'package:emptyproject/screens/totals_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -51,7 +51,7 @@ class DashboardController extends GetxController {
         break;
       case ScreenEnums.account:
         activeIcon!.value = 'Account';
-        currentScreen!.value = JobsScreen();
+        currentScreen!.value = AccountScreen();
 
         break;
     }

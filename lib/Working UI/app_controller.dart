@@ -29,7 +29,7 @@ class AppController extends GetxController {
         colorHex: '#16a34a',
         wage: 0,
         payFrequency: 'weekly',
-        lastPaychequeIso: null,
+        lastPaychequeIso: DateTime.now(),
         weekStartDOW: 4,
         statMultiplier: 1.5,
         statDays: []),
@@ -39,11 +39,13 @@ class AppController extends GetxController {
         colorHex: '#2563eb',
         wage: 16,
         payFrequency: 'weekly',
-        lastPaychequeIso: null,
+        lastPaychequeIso: DateTime.now(),
         weekStartDOW: 7,
         statMultiplier: 1.5,
         statDays: []),
   ].obs;
+
+  RxList colorChoices = ['#16a34a', '#2563eb', '#e11d48', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#14b8a6', '#ef4444'].obs;
 
   final shifts = <Shift>[].obs;
   final settings = AppSettings(weekStartsOnMonday: true, overtimeEnabled: true, overtimeThresholdWeekly: 40).obs;
@@ -290,7 +292,7 @@ class AppController extends GetxController {
   }
 
   List<PayPeriod> periodsAround(Job j, {int back = 0, int forward = 2}) {
-    final base = parseIso(j.lastPaychequeIso) ?? DateTime.now();
+    final base = j.lastPaychequeIso ?? DateTime.now();
     final len = _lenDays(j);
     final now = DateTime.now();
     int n = ((now.difference(base).inDays) / len).floor();
@@ -304,7 +306,7 @@ class AppController extends GetxController {
   }
 
   DateTime? nextDeposit(Job j) {
-    final base = parseIso(j.lastPaychequeIso);
+    final base = j.lastPaychequeIso;
     if (base == null) return null;
     final len = _lenDays(j);
     final now = DateTime.now();
@@ -347,7 +349,7 @@ class AppController extends GetxController {
 
   // Returns deposit dates (YYYY-MM-DD) for this job that fall in the given month.
   List<String> depositYmdsForMonth(Job j, DateTime month) {
-    final base = parseIso(j.lastPaychequeIso); // your existing parse
+    final base = j.lastPaychequeIso; // your existing parse
     if (base == null) return [];
 
     final stepDays = j.payFrequency == 'biweekly' ? 14 : 7;
@@ -415,7 +417,7 @@ class AppController extends GetxController {
     final now = DateTime.now();
 
     List<PayPeriod> nextPeriods(Job j, int back) {
-      final base = parseIso(j.lastPaychequeIso) ?? now;
+      final base = j.lastPaychequeIso ?? now;
       final step = _lenDays(j);
       // walk backwards from the first upcoming period start
       int n = ((now.difference(base).inDays) / step).floor();
@@ -482,17 +484,34 @@ class AppController extends GetxController {
 // Average of last N periods (quick baseline)
   PeriodStat avgPayrollPeriod(Job j, int n) {
     final list = periodsAround(j, back: n - 1, forward: 0);
-    double g=0,h=0,ot=0,net=0, inc=0,cpp=0,ei=0,oth=0,post=0, statU=0;
+    double g = 0, h = 0, ot = 0, net = 0, inc = 0, cpp = 0, ei = 0, oth = 0, post = 0, statU = 0;
     for (final p in list) {
       final s = toPeriodStat(j, p);
-      g+=s.gross; h+=s.hours; ot+=s.ot; net+=s.net; inc+=s.income; cpp+=s.cpp; ei+=s.ei; oth+=s.other; post+=s.post; statU+=s.statUplift;
+      g += s.gross;
+      h += s.hours;
+      ot += s.ot;
+      net += s.net;
+      inc += s.income;
+      cpp += s.cpp;
+      ei += s.ei;
+      oth += s.other;
+      post += s.post;
+      statU += s.statUplift;
     }
     final d = max(1, list.length).toDouble();
     return PeriodStat(
       start: list.first.start,
       end: list.first.end,
-      gross: g/d, net: net/d, hours: h/d, ot: ot/d,
-      income: inc/d, cpp: cpp/d, ei: ei/d, other: oth/d, post: post/d, statUplift: statU/d,
+      gross: g / d,
+      net: net / d,
+      hours: h / d,
+      ot: ot / d,
+      income: inc / d,
+      cpp: cpp / d,
+      ei: ei / d,
+      other: oth / d,
+      post: post / d,
+      statUplift: statU / d,
     );
   }
 
@@ -502,9 +521,9 @@ class AppController extends GetxController {
     final gross = p.pay;
 
     final income = gross * (t.incomeTaxPct / 100.0);
-    final cpp    = gross * (t.cppPct       / 100.0);
-    final ei     = gross * (t.eiPct        / 100.0);
-    final other  = gross * (t.otherPct     / 100.0);
+    final cpp = gross * (t.cppPct / 100.0);
+    final ei = gross * (t.eiPct / 100.0);
+    final other = gross * (t.otherPct / 100.0);
     final preNet = (gross - (income + cpp + ei + other)).clamp(0, double.infinity).toDouble();
 
     // post-tax expense %, if your TaxConfig has it; else 0
@@ -512,12 +531,22 @@ class AppController extends GetxController {
     final net = (preNet - post).clamp(0, double.infinity).toDouble();
 
     // simple estimate of stat uplift (what portion came from stat multiplier vs base)
-    final statUplift = max(0.0, (j.statMultiplier - 1.0)) * (p.hours == 0 ? 0 : (p.pay / j.statMultiplier - (p.pay - (j.statMultiplier - 1) * j.wage * (p.hours))));
+    final statUplift =
+        max(0.0, (j.statMultiplier - 1.0)) * (p.hours == 0 ? 0 : (p.pay / j.statMultiplier - (p.pay - (j.statMultiplier - 1) * j.wage * (p.hours))));
 
     return PeriodStat(
-      start: p.start, end: p.end,
-      gross: gross, net: net, hours: p.hours, ot: p.overtime,
-      income: income, cpp: cpp, ei: ei, other: other, post: post, statUplift: statUplift,
+      start: p.start,
+      end: p.end,
+      gross: gross,
+      net: net,
+      hours: p.hours,
+      ot: p.overtime,
+      income: income,
+      cpp: cpp,
+      ei: ei,
+      other: other,
+      post: post,
+      statUplift: statUplift,
     );
   }
 
@@ -529,13 +558,13 @@ class AppController extends GetxController {
     // use your existing monthSummary() + monthNetSummary() if you prefer;
     // here we aggregate from actual shifts in that month for the job.
     final start = DateTime(month.year, month.month, 1);
-    final end   = DateTime(month.year, month.month + 1, 1);
+    final end = DateTime(month.year, month.month + 1, 1);
 
-    double hours=0, statHours=0, gross=0;
+    double hours = 0, statHours = 0, gross = 0;
     for (final s in shifts.where((x) => x.jobId == j.id)) {
       final sd = DateTime.parse(s.date);
       if (sd.isBefore(start) || !sd.isBefore(end)) continue;
-      final mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24*60);
+      final mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24 * 60);
       final h = mins / 60.0;
       hours += h;
       final isStat = j.statDays.contains(s.date) || (s.isStat == true);
@@ -547,12 +576,12 @@ class AppController extends GetxController {
     // deductions
     final t = taxFor(j.id);
     final income = gross * (t.incomeTaxPct / 100.0);
-    final cpp    = gross * (t.cppPct       / 100.0);
-    final ei     = gross * (t.eiPct        / 100.0);
-    final other  = gross * (t.otherPct     / 100.0);
+    final cpp = gross * (t.cppPct / 100.0);
+    final ei = gross * (t.eiPct / 100.0);
+    final other = gross * (t.otherPct / 100.0);
     final preNet = (gross - (income + cpp + ei + other)).clamp(0, double.infinity).toDouble();
-    final post   = preNet * ((t.postTaxExpensePct ?? 0) / 100.0);
-    final net    = (preNet - post).clamp(0, double.infinity).toDouble();
+    final post = preNet * ((t.postTaxExpensePct ?? 0) / 100.0);
+    final net = (preNet - post).clamp(0, double.infinity).toDouble();
 
     // rough OT sum in the month: sum weekly across monthStart-aligned weeks
     // (kept light for UI — your existing OT logic in weeklyTotals can be reused if preferred)
@@ -561,17 +590,37 @@ class AppController extends GetxController {
     // stat uplift (approx)
     final statUplift = (j.statMultiplier - 1.0) * j.wage * statHours;
 
-    return MonthBucket(gross: gross, net: net, hours: hours, ot: ot, income: income, cpp: cpp, ei: ei, other: other, post: post, statUplift: statUplift);
+    return MonthBucket(
+        gross: gross, net: net, hours: hours, ot: ot, income: income, cpp: cpp, ei: ei, other: other, post: post, statUplift: statUplift);
   }
 
 // Average of last N months (for CompareKind.avg monthly baseline)
   MonthBucket monthAvg({required int count, required DateTime anchor, required Job job}) {
-    double g=0,n=0,h=0,ot=0,inc=0,cpp=0,ei=0,oth=0,post=0, uplift=0;
-    for (int i=1; i<=count; i++) {
+    double g = 0, n = 0, h = 0, ot = 0, inc = 0, cpp = 0, ei = 0, oth = 0, post = 0, uplift = 0;
+    for (int i = 1; i <= count; i++) {
       final m = monthBucket(DateTime(anchor.year, anchor.month - i, 1), job);
-      g+=m.gross; n+=m.net; h+=m.hours; ot+=m.ot; inc+=m.income; cpp+=m.cpp; ei+=m.ei; oth+=m.other; post+=m.post; uplift+=m.statUplift;
+      g += m.gross;
+      n += m.net;
+      h += m.hours;
+      ot += m.ot;
+      inc += m.income;
+      cpp += m.cpp;
+      ei += m.ei;
+      oth += m.other;
+      post += m.post;
+      uplift += m.statUplift;
     }
     final d = count.toDouble();
-    return MonthBucket(gross: g/d, net: n/d, hours: h/d, ot: ot/d, income: inc/d, cpp: cpp/d, ei: ei/d, other: oth/d, post: post/d, statUplift: uplift/d);
+    return MonthBucket(
+        gross: g / d,
+        net: n / d,
+        hours: h / d,
+        ot: ot / d,
+        income: inc / d,
+        cpp: cpp / d,
+        ei: ei / d,
+        other: oth / d,
+        post: post / d,
+        statUplift: uplift / d);
   }
 }

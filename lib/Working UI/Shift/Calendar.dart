@@ -1,13 +1,12 @@
 import 'package:emptyproject/Working%20UI/Constants.dart';
+import 'package:emptyproject/Working%20UI/Controllers.dart';
+import 'package:emptyproject/Working%20UI/Shift/Shift%20Getx.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../screens/salary_detailed_screen.dart';
 import '../app_controller.dart';
-import '../../models/shift.dart';
 import '../../utils/time_utils.dart';
-import '../../screens/shift_form.dart';
-import '../../screens/import_screen.dart';
 
 class Calendar extends StatefulWidget {
   const Calendar({super.key});
@@ -15,237 +14,7 @@ class Calendar extends StatefulWidget {
   State<Calendar> createState() => _CalendarState();
 }
 
-class _DayEvent {
-  final String type; // 'shift', 'stat', 'payday'
-  final String? jobId;
-  final Shift? shift;
-  _DayEvent(this.type, {this.jobId, this.shift});
-}
-
 class _CalendarState extends State<Calendar> {
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-
-  // ====== NEW: helpers for edit / delete from calendar bottom sheet ======
-  void _openEditShift(AppController c, Shift s) {
-    // If your ShiftForm uses a different param name (e.g. initial: s),
-    // change `existing:` below to match your constructor.
-    Get.bottomSheet(ShiftForm(existing: s), isScrollControlled: true);
-  }
-
-  Future<void> _confirmDeleteShift(AppController c, Shift s) async {
-    final ok = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Delete shift?'),
-        content: const Text('This cannot be undone.'),
-        actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Get.back(result: true), child: const Text('Delete')),
-        ],
-      ),
-      barrierDismissible: true,
-    );
-    if (ok == true) c.deleteShift(s.id);
-  }
-  // ======================================================================
-
-  Iterable<DateTime> _paydaysForJobInRange(AppController c, DateTime from, DateTime to, String jobId) sync* {
-    final j = c.jobs.firstWhereOrNull((e) => e.id == jobId);
-    if (j == null) return;
-    final base = c.parseIso(j.lastPaychequeIso);
-    if (base == null) return;
-    final step = j.payFrequency == 'biweekly' ? 14 : 7;
-    var d = base;
-    while (d.isBefore(from)) d = d.add(Duration(days: step));
-    while (!d.isAfter(to)) {
-      yield d;
-      d = d.add(Duration(days: step));
-    }
-  }
-
-  List<_DayEvent> _eventsForDay(AppController c, DateTime day) {
-    final y = ymd(day);
-    final shifts = c.shifts.where((s) => s.date == y).toList();
-    final events = <_DayEvent>[];
-    for (final s in shifts) {
-      final job = c.jobs.firstWhereOrNull((j) => j.id == s.jobId);
-      if (job == null) continue;
-      final isStat = job.statDays.contains(y);
-      events.add(_DayEvent(isStat ? 'stat' : 'shift', jobId: s.jobId, shift: s));
-    }
-    final monthStart = DateTime(_focusedDay.year, _focusedDay.month, 1).subtract(const Duration(days: 7));
-    final monthEnd = DateTime(_focusedDay.year, _focusedDay.month + 1, 1).add(const Duration(days: 7));
-    for (final j in c.jobs) {
-      for (final d in _paydaysForJobInRange(c, monthStart, monthEnd, j.id)) {
-        if (d.year == day.year && d.month == day.month && d.day == day.day) {
-          events.add(_DayEvent('payday', jobId: j.id));
-        }
-      }
-    }
-    return events;
-  }
-
-  void _openDaySheet(AppController c, DateTime day) {
-    final y = ymd(day);
-    final events = _eventsForDay(c, day);
-    final shifts = events.where((e) => e.type == 'shift' || e.type == 'stat').toList();
-    final paydays = events.where((e) => e.type == 'payday').toList();
-
-    Get.bottomSheet(
-      DraggableScrollableSheet(
-        initialChildSize: 0.55,
-        minChildSize: 0.35,
-        maxChildSize: 0.9,
-        builder: (_, controller) => Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF0F1012),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-          child: ListView(controller: controller, children: [
-            Center(
-              child: Container(
-                height: 4,
-                width: 44,
-                decoration: BoxDecoration(
-                  color: Colors.grey[700],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "Details — ${monthDay(day)}",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-            if (paydays.isNotEmpty) ...[
-              const Text('Payday(s)', style: TextStyle(fontWeight: FontWeight.w700)),
-              const SizedBox(height: 6),
-              for (final p in paydays)
-                Builder(builder: (_) {
-                  final j = c.jobs.firstWhereOrNull((x) => x.id == p.jobId);
-                  return ListTile(
-                    dense: true,
-                    leading: CircleAvatar(
-                      backgroundColor: c.jobColor(j?.colorHex ?? '#16a34a'),
-                      radius: 6,
-                    ),
-                    title: Text(j?.name ?? 'Job'),
-                    trailing: const Text('Deposit'),
-                  );
-                }),
-              const SizedBox(height: 10),
-              const Divider(),
-              const SizedBox(height: 10),
-            ],
-            const Text('Shifts', style: TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 6),
-
-            if (shifts.isEmpty)
-              const Text('No shifts on this day', style: TextStyle(color: Colors.grey))
-            else
-              // ====== NEW: editable shift items (tap edit, swipe delete, icons) ======
-              ...shifts.map((e) {
-                final s = e.shift!;
-                final j = c.jobs.firstWhereOrNull((x) => x.id == s.jobId);
-                final mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24 * 60);
-                final hours = mins / 60.0;
-                final isStat = e.type == 'stat';
-
-                return Dismissible(
-                  key: ValueKey(s.id),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFB00020),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.delete, color: Colors.white),
-                  ),
-                  confirmDismiss: (_) async {
-                    await _confirmDeleteShift(c, s);
-                    return false; // handled manually
-                  },
-                  child: InkWell(
-                    onTap: () => _openEditShift(c, s),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF121315),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFF232427)),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: c.jobColor(j?.colorHex ?? '#16a34a'),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(children: [
-                                  Text(j?.name ?? 'Job', style: const TextStyle(fontWeight: FontWeight.w600)),
-                                  if (isStat) ...[
-                                    const SizedBox(width: 6),
-                                    const Icon(Icons.star, size: 14, color: Color(0xFFFFC107)),
-                                  ],
-                                  const Spacer(),
-                                  IconButton(
-                                    tooltip: "Edit",
-                                    icon: const Icon(Icons.edit_outlined, size: 18),
-                                    onPressed: () => _openEditShift(c, s),
-                                  ),
-                                  IconButton(
-                                    tooltip: "Delete",
-                                    icon: const Icon(Icons.delete_outline, size: 18),
-                                    onPressed: () => _confirmDeleteShift(c, s),
-                                  ),
-                                ]),
-                                const SizedBox(height: 2),
-                                Text(
-                                  "${s.start} → ${s.end}  •  Break ${s.breakMin}m  •  ${hours.toStringAsFixed(2)} h",
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            // ========================================================================
-
-            const SizedBox(height: 14),
-            FilledButton.icon(
-              onPressed: () => Get.bottomSheet(
-                ShiftForm(initialDate: y),
-                isScrollControlled: true,
-              ),
-              icon: const Icon(Icons.add),
-              label: const Text('Add shift'),
-            ),
-          ]),
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final c = Get.find<AppController>();
@@ -255,14 +24,14 @@ class _CalendarState extends State<Calendar> {
           TableCalendar(
             firstDay: DateTime(2020, 1, 1),
             lastDay: DateTime(2035, 12, 31),
-            focusedDay: _focusedDay,
-            selectedDayPredicate: (d) => isSameDay(d, _selectedDay),
+            focusedDay: shift.focusedDay.value,
+            selectedDayPredicate: (d) => isSameDay(d, shift.selectedDay!.value),
             onDaySelected: (selected, focused) {
               setState(() {
-                _selectedDay = selected;
-                _focusedDay = focused;
+                shift.selectedDay!.value = selected;
+                shift.focusedDay.value = focused;
               });
-              _openDaySheet(c, selected);
+              shift.openDaySheet(c, selected);
             },
             calendarFormat: CalendarFormat.month,
             startingDayOfWeek: c.settings.value.weekStartsOnMonday ? StartingDayOfWeek.monday : StartingDayOfWeek.sunday,
@@ -275,14 +44,14 @@ class _CalendarState extends State<Calendar> {
               selectedDecoration: BoxDecoration(color: Color(0xFF16A34A), shape: BoxShape.circle),
               markersMaxCount: 4,
             ),
-            eventLoader: (day) => _eventsForDay(c, day),
+            eventLoader: (day) => shift.eventsForDay(c, day),
             calendarBuilders: CalendarBuilders(
               markerBuilder: (context, day, events) {
                 if (events.isEmpty) return const SizedBox.shrink();
                 final ctr = Get.find<AppController>();
-                final shifts = events.where((e) => (e as _DayEvent).type == 'shift').cast<_DayEvent>().toList();
-                final stats = events.where((e) => (e as _DayEvent).type == 'stat').cast<_DayEvent>().toList();
-                final pays = events.where((e) => (e as _DayEvent).type == 'payday').cast<_DayEvent>().toList();
+                final shifts = events.where((e) => (e as DayEvent).type == 'shift').cast<DayEvent>().toList();
+                final stats = events.where((e) => (e as DayEvent).type == 'stat').cast<DayEvent>().toList();
+                final pays = events.where((e) => (e as DayEvent).type == 'payday').cast<DayEvent>().toList();
 
                 final dots = <Widget>[];
                 for (final e in shifts.take(3)) {
@@ -347,7 +116,7 @@ class _CalendarState extends State<Calendar> {
             ),
           ),
           SizedBox(height: height * .02),
-          _MonthSummary(month: _focusedDay),
+          _MonthSummary(month: shift.focusedDay.value),
           const SizedBox(height: 8),
           _PayPeriods(),
         ],

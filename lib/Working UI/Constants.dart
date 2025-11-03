@@ -194,33 +194,33 @@ class ProjectColors {
 //   );
 // }
 //
-// Widget circularButton({
-//   double? btnRadius = .05,
-//   double? iconRadius = .05,
-//   VoidCallback? callback,
-//   bool? invertColor = false,
-//   String? image = '',
-// }) {
-//   return GestureDetector(
-//     onTap: callback,
-//     child: Container(
-//       height: height * btnRadius!,
-//       width: height * btnRadius,
-//       decoration: BoxDecoration(
-//         shape: BoxShape.circle,
-//         color: invertColor! ? ProjectColors.whiteColor : ProjectColors.blackColor,
-//       ),
-//       alignment: Alignment.center,
-//       child: Image.asset(
-//         image!,
-//         height: height * (iconRadius! - .02),
-//         width: height * (iconRadius - .02),
-//         color: invertColor ? ProjectColors.blackColor : ProjectColors.whiteColor,
-//         fit: BoxFit.cover,
-//       ),
-//     ),
-//   );
-// }
+Widget circularButton({
+  double? btnRadius = .05,
+  double? iconRadius = .05,
+  VoidCallback? callback,
+  bool? invertColor = false,
+  String? image = '',
+}) {
+  return GestureDetector(
+    onTap: callback,
+    child: Container(
+      height: height * btnRadius!,
+      width: height * btnRadius,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: invertColor! ? ProjectColors.whiteColor : ProjectColors.blackColor,
+      ),
+      alignment: Alignment.center,
+      child: Image.asset(
+        image!,
+        height: height * (iconRadius! - .02),
+        width: height * (iconRadius - .02),
+        color: invertColor ? ProjectColors.blackColor : ProjectColors.whiteColor,
+        fit: BoxFit.cover,
+      ),
+    ),
+  );
+}
 //
 // Widget squareButton({
 //   String? title = "",
@@ -289,105 +289,105 @@ class ProjectColors {
 //   );
 // }
 //
-// Widget normalButton({
-//   String? title = "",
-//   bool? needIcon = false,
-//   bool? needIconText = false,
-//   bool? invertColors = false,
-//   VoidCallback? callback,
-//   double? cHeight = .048,
-//   double? fSize = .018,
-//   String? image = "",
-//   double? paddingWidth = .05,
-//   double? cWidth = 1.0,
-//   bool? loading = false,
-//   Color? bColor = ProjectColors.whiteColor,
-//   // ButtonState buttonState = ButtonState.init,
-// }) {
-//   bColor = bColor != ProjectColors.whiteColor
-//       ? bColor
-//       : invertColors! == false
-//       ? ProjectColors.blackColor
-//       : ProjectColors.whiteColor;
-//   return GestureDetector(
-//     onTap: callback,
-//     child: Container(
-//       height: height * cHeight!,
-//       width: width * cWidth!,
-//       // padding: EdgeInsets.symmetric(horizontal: width * paddingWidth!),
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(height * .04),
-//         color: bColor,
-//       ),
-//       // alignment: Alignment.center,
-//       child: loading == true
-//           ? Row(
-//         mainAxisSize: MainAxisSize.min,
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         crossAxisAlignment: CrossAxisAlignment.center,
-//         children: [
-//           loader(
-//             invertColor: !invertColors!,
-//           ),
-//         ],
-//       )
-//           : needIcon == true
-//           ? Row(
-//         mainAxisSize: MainAxisSize.min,
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         crossAxisAlignment: CrossAxisAlignment.center,
-//         children: [
-//           Image.asset(
-//             'assets/arrow.png',
-//             fit: BoxFit.contain,
-//             height: height * .025,
-//             width: height * .025,
-//             color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
-//           ),
-//         ],
-//       )
-//           : needIconText == true
-//           ? Row(
-//         mainAxisSize: MainAxisSize.min,
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         crossAxisAlignment: CrossAxisAlignment.center,
-//         children: [
-//           Image.asset(
-//             image!,
-//             fit: BoxFit.contain,
-//             height: height * .025,
-//             width: height * .025,
-//             color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
-//           ),
-//           Padding(
-//             padding: EdgeInsets.only(left: width * .03),
-//             child: textWidget(
-//               text: title!,
-//               fontFamily: "poppins",
-//               color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
-//               fontSize: fSize!,
-//               fontWeight: FontWeight.w600,
-//             ),
-//           ),
-//         ],
-//       )
-//           : Row(
-//         mainAxisSize: MainAxisSize.min,
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         crossAxisAlignment: CrossAxisAlignment.center,
-//         children: [
-//           textWidget(
-//             text: title!,
-//             fontFamily: "poppins",
-//             color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
-//             fontSize: fSize!,
-//             fontWeight: FontWeight.w600,
-//           ),
-//         ],
-//       ),
-//     ),
-//   );
-// }
+Widget normalButton({
+  String? title = "",
+  bool? needIcon = false,
+  bool? needIconText = false,
+  bool? invertColors = false,
+  VoidCallback? callback,
+  double? cHeight = .048,
+  double? fSize = .018,
+  String? image = "",
+  double? paddingWidth = .05,
+  double? cWidth = 1.0,
+  bool? loading = false,
+  Color? bColor = ProjectColors.whiteColor,
+  // ButtonState buttonState = ButtonState.init,
+}) {
+  bColor = bColor != ProjectColors.whiteColor
+      ? bColor
+      : invertColors! == false
+      ? ProjectColors.blackColor
+      : ProjectColors.whiteColor;
+  return GestureDetector(
+    onTap: callback,
+    child: Container(
+      height: height * cHeight!,
+      width: width * cWidth!,
+      // padding: EdgeInsets.symmetric(horizontal: width * paddingWidth!),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(height * .04),
+        color: bColor,
+      ),
+      // alignment: Alignment.center,
+      child: loading == true
+          ? Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // loader(
+          //   invertColor: !invertColors!,
+          // ),
+        ],
+      )
+          : needIcon == true
+          ? Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/arrow.png',
+            fit: BoxFit.contain,
+            height: height * .025,
+            width: height * .025,
+            color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
+          ),
+        ],
+      )
+          : needIconText == true
+          ? Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Image.asset(
+            image!,
+            fit: BoxFit.contain,
+            height: height * .025,
+            width: height * .025,
+            color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: width * .03),
+            child: textWidget(
+              text: title!,
+              fontFamily: "poppins",
+              color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
+              fontSize: fSize!,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      )
+          : Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          textWidget(
+            text: title!,
+            fontFamily: "poppins",
+            color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
+            fontSize: fSize!,
+            fontWeight: FontWeight.w600,
+          ),
+        ],
+      ),
+    ),
+  );
+}
 //
 // Widget animatedButton({
 //   double? cWidth = .25,
