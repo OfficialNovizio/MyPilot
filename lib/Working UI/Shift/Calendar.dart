@@ -4,6 +4,7 @@ import 'package:emptyproject/Working%20UI/Shift/Shift%20Getx.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../../screens/analytic_screen.dart';
 import '../../screens/salary_detailed_screen.dart';
 import '../app_controller.dart';
 import '../../utils/time_utils.dart';
@@ -117,7 +118,6 @@ class _CalendarState extends State<Calendar> {
           ),
           SizedBox(height: height * .02),
           _MonthSummary(month: shift.focusedDay.value),
-          const SizedBox(height: 8),
           _PayPeriods(),
         ],
       ),
@@ -200,7 +200,10 @@ class _PayPeriods extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final j in c.jobs) _JobPeriods(jid: j.id),
+        for (final j in c.jobs) Padding(
+          padding: EdgeInsets.only(top: height * .01),
+          child: _JobPeriods(jid: j.id),
+        ),
       ],
     );
   }
@@ -216,32 +219,34 @@ class _JobPeriods extends StatelessWidget {
     final j = c.jobs.firstWhere((x) => x.id == jid);
     final series = c.periodsAround(j, back: 0, forward: 2);
     final next = c.nextDeposit(j);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return CustomCard(
+      color: ProjectColors.whiteColor,
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: EdgeInsets.all(height * .01),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             CircleAvatar(backgroundColor: c.jobColor(j.colorHex), radius: 6),
-            const SizedBox(width: 8),
-            Text(
-              "${j.name} — ${j.payFrequency == "biweekly" ? "Biweekly" : "Weekly"}",
-              style: const TextStyle(fontWeight: FontWeight.w700),
+            SizedBox(width: width * .01),
+            textWidget(
+              text: "${j.name} — ${j.payFrequency == "biweekly" ? "Biweekly" : "Weekly"}",
+              fontSize: .018,
+              fontWeight: FontWeight.bold,
             ),
-            const Spacer(),
-            if (next != null)
-              Text(
-                "Next deposit: ${monthDay(next)} "
-                "${next.hour.toString().padLeft(2, '0')}:"
-                "${next.minute.toString().padLeft(2, '0')}",
-              ),
           ]),
-          const SizedBox(height: 8),
+          SizedBox(height: height * .002),
+          if (next != null)
+            textWidget(
+              text: "Next deposit: ${monthDay(next)} "
+                  "${next.hour.toString().padLeft(2, '0')}:"
+                  "${next.minute.toString().padLeft(2, '0')}",
+              fontSize: .015,
+            ),
+          SizedBox(height: height * .01),
           Column(
             children: [
               for (final p in series)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding:  EdgeInsets.only(bottom: height * .001),
                   child: _PeriodRow(period: p),
                 ),
             ],

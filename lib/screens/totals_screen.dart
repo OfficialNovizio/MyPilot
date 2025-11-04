@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../Working UI/app_controller.dart';
 import '../utils/ics_export.dart';
+import 'analytic_screen.dart';
 
 class TotalsScreen extends StatelessWidget {
   const TotalsScreen({super.key});
@@ -22,7 +23,7 @@ class TotalsScreen extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           children: [
             for (final j in c.jobs)
-              Card(
+              CustomCard(
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -43,7 +44,7 @@ class TotalsScreen extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 8),
-            Card(
+            CustomCard(
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

@@ -4,7 +4,7 @@ import 'package:emptyproject/Working%20UI/Constants.dart';
 import 'package:emptyproject/Working%20UI/Controllers.dart';
 import 'package:emptyproject/screens/analytic_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart' hide Card;
+import 'package:flutter/material.dart' hide CustomCard;
 import 'package:get/get.dart';
 
 class ProjectionTab extends StatelessWidget {
@@ -17,7 +17,8 @@ class ProjectionTab extends StatelessWidget {
       final jobs = app.jobs.where((j) => shift.jobs.contains(j.id)).toList();
 
       // Header controls (scope + per job hours pickers)
-      final header = Card(
+      final header = CustomCard(
+        color: ProjectColors.whiteColor,
         title: 'Projection controls',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +75,8 @@ class ProjectionTab extends StatelessWidget {
           SizedBox(height: height * .02),
           header,
           SizedBox(height: height * .01),
-          Card(
+          CustomCard(
+            color: ProjectColors.whiteColor,
             title: 'Combined — ${periodLabel(shift.projScope.value)}',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

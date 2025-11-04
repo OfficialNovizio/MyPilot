@@ -27,7 +27,6 @@ class DashboardState extends GetxController {
   final depositLookBack = 3.obs;
   final depositLookForward = 3.obs;
 
-
   // Projection tab
   final projHours = <String, double>{}.obs; // jobId -> hours (per "period" below)
   final projScope = 'weekly'.obs; // weekly | biweekly | monthly
@@ -90,27 +89,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 /*                                OVERVIEW TAB                                */
 /* -------------------------------------------------------------------------- */
 
-
-
-
 /* -------------------------------------------------------------------------- */
 /*                               DEPOSITS TAB                                 */
 /* -------------------------------------------------------------------------- */
-
-
 
 /* -------------------------------------------------------------------------- */
 /*                               COMPARE TAB                                  */
 /* -------------------------------------------------------------------------- */
 
-
-
-
 /* -------------------------------------------------------------------------- */
 /*                              PROJECTION TAB                                */
 /* -------------------------------------------------------------------------- */
-
-
 
 class HoursPickerRow extends StatelessWidget {
   final Job job;
@@ -136,30 +125,32 @@ class HoursPickerRow extends StatelessWidget {
               builder: (_) {
                 int index = values.indexWhere((x) => x == h);
                 if (index < 0) index = 20;
-                return Container(
-                  color: Theme.of(context).colorScheme.surface,
-                  height: 250,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 8),
-                      const Text('Select hours', style: TextStyle(fontWeight: FontWeight.w700)),
-                      Expanded(
-                        child: CupertinoPicker(
-                          scrollController: FixedExtentScrollController(initialItem: index),
-                          itemExtent: 36,
-                          onSelectedItemChanged: (i) {},
-                          children: values.map((v) => Center(child: Text('${v.toStringAsFixed(0)} h'))).toList(),
+                return Scaffold(
+                  body: Container(
+                    color: Theme.of(context).colorScheme.surface,
+                    height: height * .5,
+                    child: Column(
+                      children: [
+                        SizedBox(height: 8),
+                        const Text('Select hours', style: TextStyle(fontWeight: FontWeight.w700)),
+                        Expanded(
+                          child: CupertinoPicker(
+                            scrollController: FixedExtentScrollController(initialItem: index),
+                            itemExtent: 36,
+                            onSelectedItemChanged: (i) {},
+                            children: values.map((v) => Center(child: Text('${v.toStringAsFixed(0)} h'))).toList(),
+                          ),
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          final ctrl = PrimaryScrollController.of(context) as FixedExtentScrollController?;
-                          final i = (ctrl?.selectedItem ?? index);
-                          Navigator.pop(context, values[i]);
-                        },
-                        child: const Text('Done'),
-                      ),
-                    ],
+                        TextButton(
+                          onPressed: () {
+                            final ctrl = PrimaryScrollController.of(context) as FixedExtentScrollController?;
+                            final i = (ctrl?.selectedItem ?? index);
+                            Navigator.pop(context, values[i]);
+                          },
+                          child: const Text('Done'),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -205,7 +196,8 @@ Est estimateForHours(AppController c, Job j, String scope, double hours) {
 
 Widget jobEstCard(Job j, Est est) {
   final c = Get.find<AppController>();
-  return Card(
+  return CustomCard(
+    color: ProjectColors.whiteColor,
     title: j.name,
     leading: CircleAvatar(radius: 6, backgroundColor: c.jobColor(j.colorHex)),
     child: Column(
@@ -230,18 +222,19 @@ Widget jobEstCard(Job j, Est est) {
 /*                                SHARED WIDGETS                               */
 /* -------------------------------------------------------------------------- */
 
-class Card extends StatelessWidget {
+class CustomCard extends StatelessWidget {
   final String? title;
+  final Color? color;
   final Widget child;
   final Widget? leading;
   final Widget? trailing;
-  const Card({this.title, required this.child, this.leading, this.trailing});
+  const CustomCard({this.title, required this.child, this.leading, this.trailing, this.color = ProjectColors.greenColor});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: ProjectColors.greenColor,
+        color: color!,
         borderRadius: BorderRadius.circular(30),
       ),
       margin: EdgeInsets.symmetric(horizontal: width * .02),
@@ -342,13 +335,13 @@ Widget seg<T>({required T value, required Map<T, String> items, required ValueCh
     children: items.entries.map((e) {
       final sel = e.key == value;
       return ChoiceChip(
-        label: textWidget(text: e.value, fontSize: .015, color: ProjectColors.whiteColor),
+        label: textWidget(text: e.value, fontSize: .015, color: ProjectColors.pureBlackColor),
         selected: sel,
-        backgroundColor: ProjectColors.pureBlackColor.withOpacity(0.6),
+        backgroundColor: ProjectColors.whiteColor,
         shadowColor: Colors.transparent,
         avatarBorder: Border.all(color: Colors.transparent),
-        disabledColor: ProjectColors.pureBlackColor.withOpacity(0.6),
-        selectedColor: ProjectColors.pureBlackColor,
+        disabledColor: ProjectColors.pureBlackColor,
+        selectedColor: ProjectColors.greenColor,
         onSelected: (_) => onChanged(e.key),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       );

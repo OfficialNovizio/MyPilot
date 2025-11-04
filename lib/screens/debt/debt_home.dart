@@ -7,6 +7,7 @@ import '../../controllers/debt_controller.dart';
 import '../../models/debt.dart';
 import '../../utils/money.dart';
 import 'dart:math';
+import '../analytic_screen.dart';
 
 class DebtHome extends StatelessWidget {
   const DebtHome({super.key});
@@ -22,7 +23,7 @@ class DebtHome extends StatelessWidget {
       return ListView(
         padding: const EdgeInsets.all(12),
         children: [
-          Card(
+          CustomCard(
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
@@ -71,7 +72,7 @@ class _DonutByDebt extends StatelessWidget {
           radius: 54,
         ));
       }
-      return Card(
+      return CustomCard(
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
@@ -112,7 +113,7 @@ class _BalanceProjection extends StatelessWidget {
         points = [const FlSpot(0,0)];
       }
       final maxY = points.map((e)=>e.y).fold<double>(0,(m,v)=>v>m?v:m)*(1.1);
-      return Card(
+      return CustomCard(
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
@@ -160,7 +161,7 @@ class DebtListScreen extends StatelessWidget {
     return Obx(() => ListView(
       padding: const EdgeInsets.all(12),
       children: [
-        for (final d in c.debts) Card(
+        for (final d in c.debts) CustomCard(
           child: ListTile(
             title: Text(d.name),
             subtitle: Text('${d.type.name.toUpperCase()} • APR ${d.apr.toStringAsFixed(2)}% • Due ${d.dueDay}'),
@@ -274,7 +275,7 @@ class PlanScreen extends StatelessWidget {
       return ListView(
         padding: const EdgeInsets.all(12),
         children: [
-          Card(
+          CustomCard(
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -327,7 +328,7 @@ class _PlanTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (rows.isEmpty) return const SizedBox();
-    return Card(
+    return CustomCard(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
@@ -361,7 +362,7 @@ class DebtSettingsScreen extends StatelessWidget {
     return Obx(() => ListView(
       padding: const EdgeInsets.all(12),
       children: [
-        Card(child: Padding(
+        CustomCard(child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text('Budget helper', style: TextStyle(fontWeight: FontWeight.w700)),

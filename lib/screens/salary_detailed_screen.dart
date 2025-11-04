@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../Working UI/app_controller.dart';
 import '../models/tax_config.dart';
+import 'analytic_screen.dart';
 
 class SalaryDetailsScreen extends StatelessWidget {
   final DateTime month;
@@ -27,7 +28,7 @@ class SalaryDetailsScreen extends StatelessWidget {
               rows: perJob[j.id] ?? const {'gross': 0, 'incomeTax': 0, 'cpp': 0, 'ei': 0, 'other': 0, 'fixed': 0, 'net': 0},
               onEdit: () => _editTaxes(c, j.id, month: m),
             ),
-          Card(
+          CustomCard(
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Row(children: [
@@ -163,8 +164,7 @@ class _JobNetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return CustomCard(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

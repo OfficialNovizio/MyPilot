@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../Working UI/app_controller.dart';
 import '../models/shift.dart';
 import '../utils/time_utils.dart';
+import 'analytic_screen.dart';
 import 'shift_form.dart';
 
 class WeekScreen extends StatelessWidget {
@@ -42,9 +43,7 @@ class _DayCard extends StatelessWidget {
     final day = c.weekDays[index];
     final dateStr = ymd(day);
     final items = c.shiftsOn(dateStr);
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.only(bottom: 12),
+    return CustomCard(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [

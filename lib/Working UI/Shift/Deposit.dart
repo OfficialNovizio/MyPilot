@@ -5,7 +5,7 @@ import 'package:emptyproject/Working%20UI/Controllers.dart';
 import 'package:emptyproject/models/job.dart';
 import 'package:emptyproject/screens/analytic_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart' hide Card;
+import 'package:flutter/material.dart' hide CustomCard;
 import 'package:get/get.dart';
 
 class DepositsTab extends StatelessWidget {
@@ -40,7 +40,8 @@ class DepositsTab extends StatelessWidget {
       return Column(
         children: [
           SizedBox(height: height * .02),
-          Card(
+          CustomCard(
+            color: ProjectColors.whiteColor,
             title: 'Filters',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,29 +71,33 @@ class DepositsTab extends StatelessWidget {
                     ),
                 ]),
                 SizedBox(height: height * .01),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(children: [
-                    textWidget(text: 'Show:', fontSize: .015, fontWeight: FontWeight.bold),
-                    SizedBox(width: width * .02),
+                textWidget(text: 'Show:', fontSize: .015, fontWeight: FontWeight.bold),
+                SizedBox(height: height * .01),
+                Wrap(
+                  children: [
                     seg<int>(
                       value: shift.depositLookBack!.value,
                       items: const {2: '2 back', 3: '3 back', 4: '4 back'},
                       onChanged: (v) => shift.depositLookBack!.value = v,
                     ),
-                    SizedBox(width: width * .02),
+                  ],
+                ),
+                SizedBox(height: height * .002),
+                Wrap(
+                  children: [
                     seg<int>(
                       value: shift.depositLookForward!.value,
                       items: const {2: '2 next', 3: '3 next', 4: '4 next'},
                       onChanged: (v) => shift.depositLookForward!.value = v,
                     ),
-                  ]),
+                  ],
                 ),
               ],
             ),
           ),
           SizedBox(height: height * .01),
-          Card(
+          CustomCard(
+            color: ProjectColors.whiteColor,
             title: 'Upcoming & Recent Deposits',
             child: AspectRatio(
               aspectRatio: 16 / 7,
@@ -160,7 +165,7 @@ class JobDepositRow extends StatelessWidget {
     final periods = app.periodsAround(job, back: 0, forward: 2);
     return Padding(
       padding: EdgeInsets.only(top: height * .01),
-      child: Card(
+      child: CustomCard(
         title: job.name,
         leading: CircleAvatar(radius: 6, backgroundColor: app.jobColor(job.colorHex)),
         child: SingleChildScrollView(

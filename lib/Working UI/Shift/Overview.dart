@@ -4,7 +4,7 @@ import 'package:emptyproject/models/job.dart';
 import 'package:emptyproject/models/shift.dart';
 import 'package:emptyproject/screens/analytic_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart' hide Card;
+import 'package:flutter/material.dart' hide CustomCard;
 import 'package:get/get.dart';
 
 class OverviewTab extends StatelessWidget {
@@ -75,48 +75,45 @@ class CompareTab extends StatelessWidget {
 
       final colors = jobs.map((j) => app.jobColor(j.colorHex)).toList();
 
-      return Column(
-        children: [
-          Card(
-            title: 'Compare (${periodLabel(shift.period!.value)}) — ${metricTitle(shift.metric!.value)}',
-            child: SizedBox(
-              height: 240,
-              child: BarChart(
-                BarChartData(
-                  gridData: FlGridData(show: true, horizontalInterval: 20),
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 36)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 32,
-                      getTitlesWidget: (v, _) {
-                        final i = v.toInt();
-                        if (i < 0 || i >= labels.length) return const SizedBox.shrink();
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(labels[i], style: const TextStyle(fontSize: 10)),
-                        );
-                      },
-                    )),
-                  ),
-                  borderData: FlBorderData(show: false),
-                  barGroups: List.generate(labels.length, (i) {
-                    final rods = <BarChartRodData>[];
-                    for (int j = 0; j < jobs.length; j++) {
-                      final jid = jobs[j].id;
-                      final y = i < (series[jid]?.length ?? 0) ? series[jid]![i] : 0.0;
-                      rods.add(BarChartRodData(toY: y, color: colors[j], width: 10));
-                    }
-                    return BarChartGroupData(x: i, barRods: rods, barsSpace: 6);
-                  }),
-                ),
+      return CustomCard(
+        title: 'Compare (${periodLabel(shift.period!.value)}) — ${metricTitle(shift.metric!.value)}',
+        color: ProjectColors.whiteColor,
+        child: SizedBox(
+          height: 240,
+          child: BarChart(
+            BarChartData(
+              gridData: FlGridData(show: true, horizontalInterval: 20),
+              titlesData: FlTitlesData(
+                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 36)),
+                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 32,
+                  getTitlesWidget: (v, _) {
+                    final i = v.toInt();
+                    if (i < 0 || i >= labels.length) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(labels[i], style: const TextStyle(fontSize: 10)),
+                    );
+                  },
+                )),
               ),
+              borderData: FlBorderData(show: false),
+              barGroups: List.generate(labels.length, (i) {
+                final rods = <BarChartRodData>[];
+                for (int j = 0; j < jobs.length; j++) {
+                  final jid = jobs[j].id;
+                  final y = i < (series[jid]?.length ?? 0) ? series[jid]![i] : 0.0;
+                  rods.add(BarChartRodData(toY: y, color: colors[j], width: 10));
+                }
+                return BarChartGroupData(x: i, barRods: rods, barsSpace: 6);
+              }),
             ),
           ),
-        ],
+        ),
       );
     });
   }
@@ -130,7 +127,7 @@ class OverviewControls extends StatelessWidget {
           selected: sel,
           onSelected: (_) => onTap(),
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          backgroundColor: ProjectColors.greenColor.withOpacity(0.6),
+          backgroundColor: ProjectColors.whiteColor,
           selectedColor: ProjectColors.greenColor,
           avatarBorder: Border.all(color: Colors.transparent),
         );
@@ -221,7 +218,7 @@ class CompareMiniCard extends StatelessWidget {
     final up = diff >= 0;
     final color = up ? const Color(0xFF013415) : const Color(0xFFEF4444);
 
-    return Card(
+    return CustomCard(
       title: 'Compare — ${metricTitle(metric)}',
       trailing: Container(
         padding: EdgeInsets.symmetric(horizontal: height * .01, vertical: height * .01),
@@ -295,7 +292,8 @@ class PayComposition extends StatelessWidget {
       Slice('Post-exp %', post, const Color(0xFF7C3AED)),
     ].where((s) => s.value > 0.01).toList();
 
-    return Card(
+    return CustomCard(
+      color: ProjectColors.whiteColor,
       title: 'Pay Composition (this ${periodLabel(period)})',
       child: Column(
         children: [
@@ -346,7 +344,8 @@ class InsightsCard extends StatelessWidget {
       'Projection tab estimates next period with custom hours per job.',
     ];
     if (jobs.isEmpty) tips.insert(0, 'No jobs selected.');
-    return Card(
+    return CustomCard(
+      color: ProjectColors.whiteColor,
       title: 'Insights',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
