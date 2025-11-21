@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,16 +20,16 @@ Future<void> exportCurrentWeekAsIcs(BuildContext context) async {
   for (final s in c.shifts) {
     final d = DateTime.parse('${s.date}T00:00:00');
     if (d.isBefore(start.subtract(const Duration(days: 1))) || d.isAfter(end.add(const Duration(days: 1)))) continue;
-    final sh = int.parse(s.start.substring(0, 2));
-    final sm = int.parse(s.start.substring(3, 5));
-    final eh = int.parse(s.end.substring(0, 2));
-    final em = int.parse(s.end.substring(3, 5));
+    final sh = int.parse(s.start!.substring(0, 2));
+    final sm = int.parse(s.start!.substring(3, 5));
+    final eh = int.parse(s.end!.substring(0, 2));
+    final em = int.parse(s.end!.substring(3, 5));
     final localStart = DateTime(d.year, d.month, d.day, sh, sm);
     var localEnd = DateTime(d.year, d.month, d.day, eh, em);
     if (eh * 60 + em < sh * 60 + sm) localEnd = localEnd.add(const Duration(days: 1));
     final desc = 'Unpaid break: ${s.breakMin} min\\nNotes: ${s.notes!.replaceAll('\n', ' ')}';
-    final jobName = Get.find<AppController>().jobs.firstWhereOrNull((j) => j.id == s.jobId)?.name ?? 'Shift';
-    buf.write('BEGIN:VEVENT\nUID:${s.id}@twojob\nDTSTAMP:${_z(DateTime.now())}\nSUMMARY:$jobName\nDESCRIPTION:$desc\nDTSTART:${_z(localStart)}\nDTEND:${_z(localEnd)}\nEND:VEVENT\n');
+    // final jobName = Get.find<AppController>().jobs.firstWhereOrNull((j) => j.id == s.jobId)?.name ?? 'Shift';
+    // buf.write('BEGIN:VEVENT\nUID:${s.id}@twojob\nDTSTAMP:${_z(DateTime.now())}\nSUMMARY:$jobName\nDESCRIPTION:$desc\nDTSTART:${_z(localStart)}\nDTEND:${_z(localEnd)}\nEND:VEVENT\n');
   }
   buf.write('END:VCALENDAR');
 

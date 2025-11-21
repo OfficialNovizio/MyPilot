@@ -1,34 +1,65 @@
 // import 'package:another_flushbar/flushbar.dart';
 // import 'package:cached_network_image/cached_network_image.dart';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
-// import 'package:shimmer/shimmer.dart';
-// import '../Login Data/Login Elements.dart';
-//
 double height = Get.height;
 double width = Get.width;
-// final internetError = showSnackBar("Error", 'Please check your connectivity');
-// final serverError = 'Unable to connect, Please try again';
-// String? returnPolicy = "https://novizio.virtualittechnology.com/returnPolicy.html";
-// String? privacyPolicy = "https://novizio.virtualittechnology.com/privacy.html";
-// const animationCurve = Curves.easeInOut;
-// const animationDuration = Duration(milliseconds: 500);
-// const animationTransition = Transition.fadeIn;
 final navigatorKey = GlobalKey<NavigatorState>();
+String checkTimeline(TimeOfDay t) => t.hour < 12 ? 'AM' : 'PM';
+String monthName(DateTime d) => DateFormat.MMMM().format(d);
+String monthDate(DateTime d) => DateFormat.d().format(d);
+String toHmAm(String input, {bool onlyMinutes = false}) {
+  DateTime dt;
+  final hasAmPm = RegExp(r'\bAM\b|\bPM\b', caseSensitive: false).hasMatch(input);
+  if (hasAmPm) {
+    dt = DateFormat('yyyy-MM-dd h:mm a').parse(input);
+  } else {
+    final normalized = input.contains('T') ? input : input.replaceFirst(' ', 'T');
+    dt = DateTime.parse(normalized);
+  }
+  return DateFormat(onlyMinutes ? 'mm' : 'hh:mm a').format(dt);
+}
+String diffHoursMinutes(String startStr, String endStr) {
+  // inline parser: supports "2025-11-15 04:00 PM" and "2025-11-15 16:00:00.000"
+  DateTime parseFlexible(String s) {
+    final hasAmPm = RegExp(r'\bAM\b|\bPM\b', caseSensitive: false).hasMatch(s);
+    if (hasAmPm) {
+      // accept both "4:00 PM" and "04:00 PM"
+      return DateFormat('yyyy-MM-dd h:mm a').parse(s);
+    } else {
+      final norm = s.contains('T') ? s : s.replaceFirst(' ', 'T');
+      return DateTime.parse(norm);
+    }
+  }
 
-//
-// void showSnackBar(String? title, String? subtitle, {Duration duration = const Duration(seconds: 2)}) {
-//   Flushbar(
-//     flushbarPosition: FlushbarPosition.TOP,
-//     title: title,
-//     message: subtitle,
-//     backgroundColor: title!.contains("Error") || title.contains("Oops") ? ProjectColors.errorColor : ProjectColors.greenColor,
-//     duration: duration,
-//     borderRadius: BorderRadius.circular(20),
-//     maxWidth: width * 0.9,
-//   ).show(navigatorKey.currentContext!);
-// }
+  final start = parseFlexible(startStr);
+  var end = parseFlexible(endStr);
+
+  // cross-midnight: roll end to next day if earlier than start
+  if (end.isBefore(start)) {
+    end = DateTime(end.year, end.month, end.day + 1, end.hour, end.minute);
+  }
+
+  final mins = end.difference(start).inMinutes;
+  final h = mins ~/ 60;
+  final m = mins % 60;
+  return '${h}h ${m.toString().padLeft(2, '0')}m';
+}
+
+void showSnackBar(String? title, String? subtitle, {Duration duration = const Duration(seconds: 2)}) {
+  Flushbar(
+    flushbarPosition: FlushbarPosition.TOP,
+    title: title,
+    message: subtitle,
+    backgroundColor: title!.contains("Error") || title.contains("Oops") ? ProjectColors.errorColor : ProjectColors.greenColor,
+    duration: duration,
+    borderRadius: BorderRadius.circular(20),
+    maxWidth: width * 0.9,
+  ).show(navigatorKey.currentContext!);
+}
 
 class ProjectColors {
   static const blackColor = Color(0xff494846);
@@ -221,6 +252,7 @@ Widget circularButton({
     ),
   );
 }
+
 //
 // Widget squareButton({
 //   String? title = "",
@@ -296,7 +328,7 @@ Widget normalButton({
   bool? invertColors = false,
   VoidCallback? callback,
   double? cHeight = .048,
-  double? fSize = .018,
+  double? fSize = .02,
   String? image = "",
   double? paddingWidth = .05,
   double? cWidth = 1.0,
@@ -307,8 +339,8 @@ Widget normalButton({
   bColor = bColor != ProjectColors.whiteColor
       ? bColor
       : invertColors! == false
-      ? ProjectColors.blackColor
-      : ProjectColors.whiteColor;
+          ? ProjectColors.pureBlackColor
+          : ProjectColors.whiteColor;
   return GestureDetector(
     onTap: callback,
     child: Container(
@@ -322,72 +354,73 @@ Widget normalButton({
       // alignment: Alignment.center,
       child: loading == true
           ? Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // loader(
-          //   invertColor: !invertColors!,
-          // ),
-        ],
-      )
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // loader(
+                //   invertColor: !invertColors!,
+                // ),
+              ],
+            )
           : needIcon == true
-          ? Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/arrow.png',
-            fit: BoxFit.contain,
-            height: height * .025,
-            width: height * .025,
-            color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
-          ),
-        ],
-      )
-          : needIconText == true
-          ? Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Image.asset(
-            image!,
-            fit: BoxFit.contain,
-            height: height * .025,
-            width: height * .025,
-            color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: width * .03),
-            child: textWidget(
-              text: title!,
-              fontFamily: "poppins",
-              color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
-              fontSize: fSize!,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      )
-          : Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          textWidget(
-            text: title!,
-            fontFamily: "poppins",
-            color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
-            fontSize: fSize!,
-            fontWeight: FontWeight.w600,
-          ),
-        ],
-      ),
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/arrow.png',
+                      fit: BoxFit.contain,
+                      height: height * .025,
+                      width: height * .025,
+                      color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
+                    ),
+                  ],
+                )
+              : needIconText == true
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          image!,
+                          fit: BoxFit.contain,
+                          height: height * .025,
+                          width: height * .025,
+                          color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: width * .03),
+                          child: textWidget(
+                            text: title!,
+                            fontFamily: "poppins",
+                            color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.blackColor,
+                            fontSize: fSize!,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        textWidget(
+                          text: title!,
+                          fontFamily: "poppins",
+                          color: invertColors == false ? ProjectColors.whiteColor : ProjectColors.pureBlackColor,
+                          fontSize: fSize!,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ],
+                    ),
     ),
   );
 }
+
 //
 // Widget animatedButton({
 //   double? cWidth = .25,

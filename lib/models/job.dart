@@ -1,53 +1,150 @@
+// class Job {
+//   int? status;
+//   String? message;
+//   List<JobData>? data;
+//
+//   Job({this.status, this.message, this.data});
+//
+//   Job.fromJson(Map<String, dynamic> json) {
+//     status = json['status'];
+//     message = json['message'];
+//     if (json['data'] != null) {
+//       data = <JobData>[];
+//       json['data'].forEach((v) {
+//         data!.add(JobData.fromJson(v));
+//       });
+//     }
+//   }
+//
+//   Map<String, dynamic> toJson() {
+//     final Map<String, dynamic> data = <String, dynamic>{};
+//     data['status'] = status;
+//     data['message'] = message;
+//     if (this.data != null) {
+//       data['data'] = this.data!.map((v) => v.toJson()).toList();
+//     }
+//     return data;
+//   }
+// }
+//
+// class JobData {
+//   int? id;
+//   String? jobName;
+//   String? wageHr;
+//   String? jobColor;
+//   String? lastPayChequeDate;
+//   String? payFrequency;
+//   String? weekStart;
+//   String? statPay;
+//
+//   JobData({
+//     this.id,
+//     this.jobName,
+//     this.wageHr,
+//     this.jobColor,
+//     this.lastPayChequeDate,
+//     this.payFrequency,
+//     this.weekStart,
+//     this.statPay,
+//   });
+//   JobData.fromJson(Map<String, dynamic> json) {
+//     id = json['id'];
+//     jobName = json['Job name'];
+//     wageHr = json['Wage/Hr'];
+//     jobColor = json['Job color'];
+//     lastPayChequeDate = json['Last pay cheque date'];
+//     payFrequency = json['Pay frequency'];
+//     weekStart = json['Week start'];
+//     statPay = json['Stat pay'];
+//   }
+//
+//   Map<String, dynamic> toJson() {
+//     final Map<String, dynamic> data = <String, dynamic>{};
+//     data['id'] = id;
+//     data['Job name'] = jobName;
+//     data['Wage/Hr'] = wageHr;
+//     data['Job color'] = jobColor;
+//     data['Last pay cheque date'] = lastPayChequeDate;
+//     data['Pay frequency'] = payFrequency;
+//     data['Week start'] = weekStart;
+//     data['Stat pay'] = statPay;
+//     return data;
+//   }
+// }
+
 class Job {
-  String id;
-  String name;
-  String colorHex;
-  double wage;
-  String payFrequency; // 'weekly' | 'biweekly'
-  DateTime? lastPaychequeIso; // 'YYYY-MM-DD HH:mm'
-  int weekStartDOW; // 1..7 (Mon..Sun)
+  int? status;
+  String? message;
+  List<JobData>? data;
 
-  double statMultiplier;
-  List<String> statDays;
+  Job({this.status, this.message, this.data});
 
-  Job({
-    required this.id,
-    required this.name,
-    required this.colorHex,
-    required this.wage,
-    required this.payFrequency,
-    required this.lastPaychequeIso,
-    required this.weekStartDOW,
-    required this.statMultiplier,
-    required this.statDays,
-  });
+  Job.fromJson(Map<String, dynamic>? json) {
+    status = json?['status'];
+    message = json?['message'];
 
-  factory Job.fromJson(Map<String, dynamic> j) {
-    final pf = (j['payFrequency'] as String?) ?? 'weekly';
-    final dowRaw = j['weekStartDOW'] is int ? j['weekStartDOW'] as int : 1;
-    final dow = (dowRaw >= 1 && dowRaw <= 7) ? dowRaw : 1;
-    return Job(
-      id: j['id'],
-      name: j['name'] ?? 'Job',
-      colorHex: (j['colorHex'] as String?) ?? '#16a34a',
-      wage: (j['wage'] ?? 0).toDouble(),
-      payFrequency: (pf == 'biweekly') ? 'biweekly' : 'weekly',
-      lastPaychequeIso: j['lastPaychequeIso'] ?? DateTime.now(),
-      weekStartDOW: dow,
-      statMultiplier: (j['statMultiplier'] ?? 1.5).toDouble(),
-      statDays: (j['statDays'] as List?)?.map((e) => e.toString()).toList() ?? <String>[],
-    );
+    final list = json?['data'] as List?;
+    if (list != null) {
+      data = <JobData>[];
+      for (final v in list) {
+        data!.add(JobData.fromJson(v is Map<String, dynamic> ? v : null));
+      }
+    }
   }
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'colorHex': colorHex,
-        'wage': wage,
-        'payFrequency': payFrequency,
-        'lastPaychequeIso': lastPaychequeIso,
-        'weekStartDOW': weekStartDOW,
-        'statMultiplier': statMultiplier,
-        'statDays': statDays,
-      };
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
+    if (this.data != null) {
+      data['data'] = this.data!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class JobData {
+  int? id;
+  String? jobName;
+  String? wageHr;
+  String? jobColor;
+  String? lastPayChequeDate;
+  String? payFrequency;
+  String? weekStart;
+  String? statPay;
+
+  JobData({
+    this.id,
+    this.jobName,
+    this.wageHr,
+    this.jobColor,
+    this.lastPayChequeDate,
+    this.payFrequency,
+    this.weekStart,
+    this.statPay,
+  });
+
+  JobData.fromJson(Map<String, dynamic>? json) {
+    id = json?['id'];
+    jobName = json?['Job name'];
+    wageHr = json?['Wage/Hr'];
+    jobColor = json?['Job color'];
+    lastPayChequeDate = json?['Last pay cheque date'];
+    payFrequency = json?['Pay frequency'];
+    weekStart = json?['Week start'];
+    statPay = json?['Stat pay'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['Job name'] = jobName;
+    data['Wage/Hr'] = wageHr;
+    data['Job color'] = jobColor;
+    data['Last pay cheque date'] = lastPayChequeDate;
+    data['Pay frequency'] = payFrequency;
+    data['Week start'] = weekStart;
+    data['Stat pay'] = statPay;
+    return data;
+  }
 }

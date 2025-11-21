@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -28,17 +27,17 @@ class TotalsScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(12.0),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Row(children: [
-                      Container(width: 10, height: 10, decoration: BoxDecoration(color: c.jobColor(j.colorHex), shape: BoxShape.circle)),
+                      // Container(width: 10, height: 10, decoration: BoxDecoration(color: c.jobColor(j.colorHex!), shape: BoxShape.circle)),
                       const SizedBox(width: 8),
-                      Text(j.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      // Text(j.name!, style: const TextStyle(fontWeight: FontWeight.w700)),
                       const Spacer(),
                       Text('@ \${fmt.currencySymbol}\${j.wage.toStringAsFixed(2)}/hr', style: const TextStyle(color: Colors.grey)),
                     ]),
                     const SizedBox(height: 8),
                     Row(children: [
-                      _MiniStat(title: 'Hours', value: (perJob[j.id]!['hours'] ?? 0.0).toStringAsFixed(2)),
-                      _MiniStat(title: 'Overtime', value: (perJob[j.id]!['overtime'] ?? 0.0).toStringAsFixed(2)),
-                      _MiniStat(title: 'Est. Pay', value: fmt.format(perJob[j.id]!['pay'] ?? 0.0)),
+                      // _MiniStat(title: 'Hours', value: (perJob[j.id]!['hours'] ?? 0.0).toStringAsFixed(2)),
+                      // _MiniStat(title: 'Overtime', value: (perJob[j.id]!['overtime'] ?? 0.0).toStringAsFixed(2)),
+                      // _MiniStat(title: 'Est. Pay', value: fmt.format(perJob[j.id]!['pay'] ?? 0.0)),
                     ]),
                   ]),
                 ),
@@ -78,7 +77,8 @@ class _MiniStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    return Expanded(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(title, style: const TextStyle(color: Colors.grey)),
       const SizedBox(height: 4),
       Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),

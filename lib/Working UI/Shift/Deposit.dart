@@ -17,22 +17,22 @@ class DepositsTab extends StatelessWidget {
     // final a = Get.find<DashboardState>();
 
     return Obx(() {
-      shift.initJobs(app.jobs.map((e) => e.id));
-      final selected = app.jobs.where((j) => shift.jobs.contains(j.id)).toList();
+      // shift.initJobs(app.jobs.map((e) => e.id!));
+      // final selected = app.jobs.where((j) => shift.jobs.contains(j.id)).toList();
 
       // Build timeline points (sorted by date)
       final points = <DepositPoint>[];
       void addJob(Job j) {
         final ps = app.periodsAround(j, back: shift.depositLookBack!.value, forward: shift.depositLookForward!.value);
-        for (final p in ps) {
-          final net = app.estimateNetForPeriod(j, p);
-          points.add(DepositPoint(p.deposit, net, j.id));
-        }
+        // for (final p in ps) {
+        //   final net = app.estimateNetForPeriod(j, p);
+        //   points.add(DepositPoint(p.deposit, net, j.id!));
+        // }
       }
 
-      for (final j in selected) {
-        addJob(j);
-      }
+      // for (final j in selected) {
+      //   addJob(j);
+      // }
       points.sort((a, b) => a.d.compareTo(b.d));
 
       final maxY = max<double>(1, points.fold(0, (m, e) => e.net > m ? e.net : m));
@@ -47,28 +47,28 @@ class DepositsTab extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Wrap(spacing: 8, runSpacing: 8, children: [
-                  for (final j in app.jobs)
-                    FilterChip(
-                      label: textWidget(text: j.name, fontSize: .015),
-                      selected: shift.jobs.contains(j.id),
-                      onSelected: (_) {
-                        if (shift.jobs.contains(j.id)) {
-                          shift.jobs.remove(j.id);
-                        } else {
-                          shift.jobs.add(j.id);
-                        }
-                      },
-                    ),
-                  if (app.jobs.isNotEmpty)
-                    FilterChip(
-                      label: const Text('Both'),
-                      selected: shift.jobs.length == app.jobs.length,
-                      onSelected: (_) {
-                        shift.jobs
-                          ..clear()
-                          ..addAll(app.jobs.map((e) => e.id));
-                      },
-                    ),
+                  // for (final j in app.jobs)
+                  //   FilterChip(
+                  //     label: textWidget(text: j.name, fontSize: .015),
+                  //     selected: shift.jobs.contains(j.id),
+                  //     onSelected: (_) {
+                  //       if (shift.jobs.contains(j.id)) {
+                  //         shift.jobs.remove(j.id);
+                  //       } else {
+                  //         shift.jobs.add(j.id);
+                  //       }
+                  //     },
+                  //   ),
+                  // if (app.jobs.isNotEmpty)
+                  //   FilterChip(
+                  //     label: const Text('Both'),
+                  //     selected: shift.jobs.length == app.jobs.length,
+                  //     onSelected: (_) {
+                  //       shift.jobs
+                  //         ..clear()
+                  //         ..addAll(app.jobs.map((e) => e.id));
+                  //     },
+                  //   ),
                 ]),
                 SizedBox(height: height * .01),
                 textWidget(text: 'Show:', fontSize: .015, fontWeight: FontWeight.bold),
@@ -115,34 +115,34 @@ class DepositsTab extends StatelessWidget {
                   gridData: FlGridData(show: true),
                   borderData: FlBorderData(show: false),
                   lineBarsData: [
-                    LineChartBarData(
-                      isCurved: true,
-                      barWidth: 3,
-                      color: const Color(0xFFFFFFFF),
-                      spots: [
-                        for (int i = 0; i < points.length; i++) FlSpot(i.toDouble(), points[i].net),
-                      ],
-                      dotData: FlDotData(
-                        show: true,
-                        getDotPainter: (s, __, ___, ____) {
-                          final idx = s.x.toInt();
-                          final job = app.jobs.firstWhereOrNull((e) => e.id == points[idx].job);
-                          return FlDotCirclePainter(
-                            color: app.jobColor(job?.colorHex ?? '#16a34a'),
-                            radius: 4,
-                            strokeColor: Colors.white,
-                            strokeWidth: 1,
-                          );
-                        },
-                      ),
-                    ),
+                    // LineChartBarData(
+                    //   isCurved: true,
+                    //   barWidth: 3,
+                    //   color: const Color(0xFFFFFFFF),
+                    //   spots: [
+                    //     for (int i = 0; i < points.length; i++) FlSpot(i.toDouble(), points[i].net),
+                    //   ],
+                    //   dotData: FlDotData(
+                    //     show: true,
+                    //     getDotPainter: (s, __, ___, ____) {
+                    //       final idx = s.x.toInt();
+                    //       final job = app.jobs.firstWhereOrNull((e) => e.id == points[idx].job);
+                    //       return FlDotCirclePainter(
+                    //         color: app.jobColor(job?.colorHex ?? '#16a34a'),
+                    //         radius: 4,
+                    //         strokeColor: Colors.white,
+                    //         strokeWidth: 1,
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
             ),
           ),
           // Per-job upcoming cards
-          for (final j in selected) JobDepositRow(job: j),
+          // for (final j in selected) JobDepositRow(job: j),
         ],
       );
     });
@@ -165,46 +165,46 @@ class JobDepositRow extends StatelessWidget {
     final periods = app.periodsAround(job, back: 0, forward: 2);
     return Padding(
       padding: EdgeInsets.only(top: height * .01),
-      child: CustomCard(
-        title: job.name,
-        leading: CircleAvatar(radius: 6, backgroundColor: app.jobColor(job.colorHex)),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (final p in periods)
-                Container(
-                  margin: EdgeInsets.only(right: width * .01),
-                  padding: EdgeInsets.all(12),
-                  width: width * .35,
-                  decoration: BoxDecoration(
-                    color: Color(0xFF121315),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFF232427)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      textWidget(text: '${md(p.start)} → ${md(p.end)}', fontSize: .015, color: ProjectColors.whiteColor),
-                      SizedBox(height: height * .01),
-                      Row(children: [
-                        Icon(Icons.money, size: height * .02, color: Color(0xFF16A34A)),
-                        SizedBox(width: width * .02),
-                        textWidget(text: money(app.estimateNetForPeriod(job, p)), fontSize: .015, color: ProjectColors.whiteColor),
-                      ]),
-                      SizedBox(height: height * .01),
-                      Row(children: [
-                        Icon(Icons.savings_outlined, size: height * .02, color: ProjectColors.whiteColor),
-                        SizedBox(width: width * .02),
-                        textWidget(text: 'Deposit: ${md(p.deposit)}', fontSize: .012, color: ProjectColors.whiteColor),
-                      ]),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
+      // child: CustomCard(
+      //   title: job.name,
+      //   leading: CircleAvatar(radius: 6, backgroundColor: app.jobColor(job.colorHex!)),
+      //   child: SingleChildScrollView(
+      //     scrollDirection: Axis.horizontal,
+      //     child: Row(
+      //       children: [
+      //         for (final p in periods)
+      //           Container(
+      //             margin: EdgeInsets.only(right: width * .01),
+      //             padding: EdgeInsets.all(12),
+      //             width: width * .35,
+      //             decoration: BoxDecoration(
+      //               color: Color(0xFF121315),
+      //               borderRadius: BorderRadius.circular(14),
+      //               border: Border.all(color: const Color(0xFF232427)),
+      //             ),
+      //             child: Column(
+      //               crossAxisAlignment: CrossAxisAlignment.start,
+      //               children: [
+      //                 textWidget(text: '${md(p.start)} → ${md(p.end)}', fontSize: .015, color: ProjectColors.whiteColor),
+      //                 SizedBox(height: height * .01),
+      //                 Row(children: [
+      //                   Icon(Icons.money, size: height * .02, color: Color(0xFF16A34A)),
+      //                   SizedBox(width: width * .02),
+      //                   textWidget(text: money(app.estimateNetForPeriod(job, p)), fontSize: .015, color: ProjectColors.whiteColor),
+      //                 ]),
+      //                 SizedBox(height: height * .01),
+      //                 Row(children: [
+      //                   Icon(Icons.savings_outlined, size: height * .02, color: ProjectColors.whiteColor),
+      //                   SizedBox(width: width * .02),
+      //                   textWidget(text: 'Deposit: ${md(p.deposit)}', fontSize: .012, color: ProjectColors.whiteColor),
+      //                 ]),
+      //               ],
+      //             ),
+      //           ),
+      //       ],
+      //     ),
+      //   ),
+      // ),
     );
   }
 }

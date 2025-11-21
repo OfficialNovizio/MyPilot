@@ -11,6 +11,13 @@ class ShiftBody extends StatefulWidget {
 
 class _ShiftBodyState extends State<ShiftBody> {
   @override
+  void initState() {
+    account.loadSavedJobs();
+    shift.loadShifts();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Obx(
       () => ClipRRect(

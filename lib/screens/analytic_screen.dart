@@ -55,7 +55,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     // Ensure controllers exist
     final app = Get.find<AppController>();
     final a = Get.find<DashboardState>();
-    a.initJobs(app.jobs.map((e) => e.id));
+    // a.initJobs(app.jobs.map((e) => e.id!));
 
     return DefaultTabController(
       length: 4,
@@ -108,64 +108,137 @@ class HoursPickerRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final app = Get.find<AppController>();
-    final a = Get.find<DashboardState>();
-    final Color dot = app.jobColor(job.colorHex);
+    // final a = Get.find<DashboardState>();
+    // final Color dot = app.jobColor(job.colorHex!);
 
     return Obx(() {
-      final h = a.projHours[job.id] ?? 30.0;
+      // final h = a.projHours[job.id] ?? 30.0;
       return ListTile(
         contentPadding: EdgeInsets.zero,
-        leading: CircleAvatar(radius: 6, backgroundColor: dot),
-        title: textWidget(text: job.name, fontSize: .02, fontWeight: FontWeight.bold),
-        trailing: OutlinedButton(
-          onPressed: () async {
-            final values = List<double>.generate(81, (i) => (i + 10).toDouble()); // 10..90
-            final sel = await showCupertinoModalPopup<double>(
-              context: context,
-              builder: (_) {
-                int index = values.indexWhere((x) => x == h);
-                if (index < 0) index = 20;
-                return Scaffold(
-                  body: Container(
-                    color: Theme.of(context).colorScheme.surface,
-                    height: height * .5,
-                    child: Column(
-                      children: [
-                        SizedBox(height: 8),
-                        const Text('Select hours', style: TextStyle(fontWeight: FontWeight.w700)),
-                        Expanded(
-                          child: CupertinoPicker(
-                            scrollController: FixedExtentScrollController(initialItem: index),
-                            itemExtent: 36,
-                            onSelectedItemChanged: (i) {},
-                            children: values.map((v) => Center(child: Text('${v.toStringAsFixed(0)} h'))).toList(),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            final ctrl = PrimaryScrollController.of(context) as FixedExtentScrollController?;
-                            final i = (ctrl?.selectedItem ?? index);
-                            Navigator.pop(context, values[i]);
-                          },
-                          child: const Text('Done'),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-            if (sel != null) a.projHours[job.id] = sel;
-          },
-          child: textWidget(
-            text: '${h.toStringAsFixed(0)} h',
-            fontSize: .015,
-            color: ProjectColors.pureBlackColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        // leading: CircleAvatar(radius: 6, backgroundColor: dot),
+        // title: textWidget(text: job.name, fontSize: .02, fontWeight: FontWeight.bold),
+        // trailing: OutlinedButton(
+        //   onPressed: () async {
+        //     showCupertinoModalPopup(
+        //       context: context,
+        //       builder: (context) => Invoices(hour: h),
+        //     );
+        //     // final values = List<double>.generate(81, (i) => (i + 10).toDouble()); // 10..90
+        //     // final sel = await showCupertinoModalPopup<double>(
+        //     //   context: context,
+        //     //   builder: (_) {
+        //     //     int index = values.indexWhere((x) => x == h);
+        //     //     if (index < 0) index = 20;
+        //     //     return Scaffold(
+        //     //       body: Container(
+        //     //         color: Theme.of(context).colorScheme.surface,
+        //     //         height: height * .5,
+        //     //         child: Column(
+        //     //           children: [
+        //     //             SizedBox(height: 8),
+        //     //             const Text('Select hours', style: TextStyle(fontWeight: FontWeight.w700)),
+        //     //             Expanded(
+        //     //               child: CupertinoPicker(
+        //     //                 scrollController: FixedExtentScrollController(initialItem: index),
+        //     //                 itemExtent: 36,
+        //     //                 onSelectedItemChanged: (i) {},
+        //     //                 children: values.map((v) => Center(child: Text('${v.toStringAsFixed(0)} h'))).toList(),
+        //     //               ),
+        //     //             ),
+        //     //             TextButton(
+        //     //               onPressed: () {
+        //     //                 final ctrl = PrimaryScrollController.of(context) as FixedExtentScrollController?;
+        //     //                 final i = (ctrl?.selectedItem ?? index);
+        //     //                 Navigator.pop(context, values[i]);
+        //     //               },
+        //     //               child: const Text('Done'),
+        //     //             ),
+        //     //           ],
+        //     //         ),
+        //     //       ),
+        //     //     );
+        //     //   },
+        //     // );
+        //     // if (sel != null) a.projHours[job.id] = sel;
+        //   },
+        //   // child: textWidget(
+        //   //   text: '${h.toStringAsFixed(0)} h',
+        //   //   fontSize: .015,
+        //   //   color: ProjectColors.pureBlackColor,
+        //   //   fontWeight: FontWeight.bold,
+        //   // ),
+        // ),
       );
     });
+  }
+}
+
+class Invoices extends StatelessWidget {
+  final double? hour;
+
+  Invoices({this.hour});
+
+  @override
+  Widget build(BuildContext context) {
+    final values = List<double>.generate(81, (i) => (i + 10).toDouble());
+    int index = values.indexWhere((x) => x == hour);
+    if (index < 0) index = 20;
+    return Padding(
+      padding: EdgeInsets.only(top: height * .5),
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+        child: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            transitionBetweenRoutes: false,
+            middle: textWidget(
+              text: "Select Hours",
+              fontSize: .025,
+              fontWeight: FontWeight.w600,
+              textAlign: TextAlign.center,
+            ),
+            backgroundColor: Colors.white,
+            leading: Padding(
+              padding: EdgeInsets.only(top: height * .01),
+              child: GestureDetector(
+                onTap: () {
+                  Get.back();
+                },
+                child: textWidget(
+                  text: "close",
+                  fontSize: .02,
+                  fontWeight: FontWeight.w500,
+                  color: ProjectColors.pureBlackColor,
+                ),
+              ),
+            ),
+          ),
+          child: Container(
+            color: Theme.of(context).colorScheme.surface,
+            height: height * .5,
+            child: Column(
+              children: [
+                Expanded(
+                  child: CupertinoPicker(
+                    scrollController: FixedExtentScrollController(initialItem: index),
+                    itemExtent: 36,
+                    onSelectedItemChanged: (i) {},
+                    children: values.map((v) => Center(child: Text('${v.toStringAsFixed(0)} h'))).toList(),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final ctrl = PrimaryScrollController.of(context) as FixedExtentScrollController?;
+                    final i = (ctrl?.selectedItem ?? index);
+                    Navigator.pop(context, values[i]);
+                  },
+                  child: const Text('Done'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -181,25 +254,27 @@ Est estimateForHours(AppController c, Job j, String scope, double hours) {
 
   final overtime = max(0, hours - thr);
   final regular = hours - overtime;
-  final gross = regular * j.wage + overtime * j.wage * 1.5;
+  // final gross = regular * j.wage! + overtime * j.wage! * 1.5;
 
-  final t = c.taxFor(j.id);
-  final income = gross * (t.incomeTaxPct / 100);
-  final cpp = gross * (t.cppPct / 100);
-  final ei = gross * (t.eiPct / 100);
-  final other = gross * (t.otherPct / 100);
-  final post = (gross - (income + cpp + ei + other)).clamp(0, double.infinity) * (t.postTaxExpensePct / 100);
-
-  final net = (gross - income - cpp - ei - other - post).clamp(0, double.infinity).toDouble();
-  return Est(gross, net, income, cpp, ei, other, post);
+  // final t = c.taxFor(j.id!);
+  // final income = gross * (t.incomeTaxPct / 100);
+  // final cpp = gross * (t.cppPct / 100);
+  // final ei = gross * (t.eiPct / 100);
+  // final other = gross * (t.otherPct / 100);
+  // final post = (gross - (income + cpp + ei + other)).clamp(0, double.infinity) * (t.postTaxExpensePct / 100);
+  //
+  // final net = (gross - income - cpp - ei - other - post).clamp(0, double.infinity).toDouble();
+  // return Est(gross, net, income, cpp, ei, other, post);
+  return null!;
 }
 
 Widget jobEstCard(Job j, Est est) {
   final c = Get.find<AppController>();
   return CustomCard(
     color: ProjectColors.whiteColor,
-    title: j.name,
-    leading: CircleAvatar(radius: 6, backgroundColor: c.jobColor(j.colorHex)),
+    // title: j.name,
+    leading: Container(),
+    // leading: CircleAvatar(radius: 6, backgroundColor: c.jobColor(j.colorHex!)),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -228,7 +303,7 @@ class CustomCard extends StatelessWidget {
   final Widget child;
   final Widget? leading;
   final Widget? trailing;
-  const CustomCard({this.title, required this.child, this.leading, this.trailing, this.color = ProjectColors.greenColor});
+  const CustomCard({this.title = '', required this.child, this.leading, this.trailing, this.color = ProjectColors.greenColor});
 
   @override
   Widget build(BuildContext context) {

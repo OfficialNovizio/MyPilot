@@ -1,3 +1,4 @@
+import 'package:emptyproject/models/job.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../Working UI/app_controller.dart';
@@ -18,31 +19,31 @@ class SalaryDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text('Net Salary — ${m.month}/${m.year}')),
-      body: ListView(
-        padding: const EdgeInsets.all(12),
-        children: [
-          for (final j in c.jobs)
-            _JobNetCard(
-              title: j.name,
-              color: c.jobColor(j.colorHex),
-              rows: perJob[j.id] ?? const {'gross': 0, 'incomeTax': 0, 'cpp': 0, 'ei': 0, 'other': 0, 'fixed': 0, 'net': 0},
-              onEdit: () => _editTaxes(c, j.id, month: m),
-            ),
-          CustomCard(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(children: [
-                const Text('Combined (All Jobs)', style: TextStyle(fontWeight: FontWeight.w700)),
-                const Spacer(),
-                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                  Text('Gross: \$${(combined['gross'] ?? 0).toStringAsFixed(2)}'),
-                  Text('Net:   \$${(combined['net'] ?? 0).toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w700)),
-                ]),
-              ]),
-            ),
-          ),
-        ],
-      ),
+      // body: ListView(
+      //   padding: const EdgeInsets.all(12),
+      //   children: [
+      //     for (final j in c.jobs)
+      //       _JobNetCard(
+      //         title: j.name!,
+      //         color: c.jobColor(j.colorHex!),
+      //         rows: perJob[j.id] ?? const {'gross': 0, 'incomeTax': 0, 'cpp': 0, 'ei': 0, 'other': 0, 'fixed': 0, 'net': 0},
+      //         onEdit: () => _editTaxes(c, j.id!, month: m),
+      //       ),
+      //     CustomCard(
+      //       child: Padding(
+      //         padding: const EdgeInsets.all(12),
+      //         child: Row(children: [
+      //           const Text('Combined (All Jobs)', style: TextStyle(fontWeight: FontWeight.w700)),
+      //           const Spacer(),
+      //           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+      //             Text('Gross: \$${(combined['gross'] ?? 0).toStringAsFixed(2)}'),
+      //             Text('Net:   \$${(combined['net'] ?? 0).toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w700)),
+      //           ]),
+      //         ]),
+      //       ),
+      //     ),
+      //   ],
+      // ),
     );
   }
 
@@ -56,8 +57,9 @@ class SalaryDetailsScreen extends StatelessWidget {
     final fixedCtl = TextEditingController(text: cfg.fixedMonthly.toStringAsFixed(2));
     final perChequeCtl = TextEditingController(text: cfg.fixedPerCheque.toStringAsFixed(2));
 
-    final j = c.jobs.firstWhere((x) => x.id == jobId);
-    final depositYmds = c.depositYmdsForMonth(j, DateTime(month.year, month.month, 1));
+    final j = Job();
+    // final j = c.jobs.firstWhere((x) => x.id == jobId);
+    final depositYmds = c.depositYmdsForMonth(Job(), DateTime(month.year, month.month, 1));
 
     // controllers for one-offs (this month)
     final oneOffCtrls = <String, TextEditingController>{

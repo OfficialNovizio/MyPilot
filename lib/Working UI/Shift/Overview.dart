@@ -12,27 +12,22 @@ class OverviewTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      shift.initJobs(app.jobs.map((e) => e.id));
-      final selectedJobs = app.jobs.where((j) => shift.jobs.contains(j.id)).toList();
+    return Column(
+      children: [
+        SizedBox(height: height * .05),
+        OverviewControls(),
+        SizedBox(height: height * .02),
+        // CompareMiniCard(period: shift.period!.value, metric: shift.metric!.value, jobs: selectedJobs),
 
-      return Column(
-        children: [
-          SizedBox(height: height * .05),
-          OverviewControls(),
-          SizedBox(height: height * .02),
-          CompareMiniCard(period: shift.period!.value, metric: shift.metric!.value, jobs: selectedJobs),
-
-          SizedBox(height: height * .01),
-          CompareTab(),
-          SizedBox(height: height * .01),
-          // Stable donut
-          PayComposition(period: shift.period!.value, jobs: selectedJobs),
-          SizedBox(height: height * .01),
-          InsightsCard(period: shift.period!.value, jobs: selectedJobs),
-        ],
-      );
-    });
+        SizedBox(height: height * .01),
+        CompareTab(),
+        SizedBox(height: height * .01),
+        // Stable donut
+        // PayComposition(period: shift.period!.value, jobs: selectedJobs),
+        SizedBox(height: height * .01),
+        // InsightsCard(period: shift.period!.value, jobs: selectedJobs),
+      ],
+    );
   }
 }
 
@@ -42,8 +37,8 @@ class CompareTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      shift.initJobs(app.jobs.map((e) => e.id));
-      final jobs = app.jobs.where((j) => shift.jobs.contains(j.id)).toList();
+      // shift.initJobs(app.jobs.map((e) => e.id!));
+      // final jobs = app.jobs.where((j) => shift.jobs.contains(j.id)).toList();
 
       final labels = <String>[];
       final series = <String, List<double>>{}; // jobId -> points
@@ -53,27 +48,27 @@ class CompareTab extends StatelessWidget {
           final m = DateTime(DateTime.now().year, DateTime.now().month - i, 1);
           labels.add('${m.month}/${(m.year % 100).toString().padLeft(2, '0')}');
         }
-        for (final j in jobs) {
-          series[j.id] = [];
-          for (int i = 7; i >= 0; i--) {
-            final m = DateTime(DateTime.now().year, DateTime.now().month - i, 1);
-            final sum = app.monthNetSummary(m)['perJob'][j.id] as Map;
-            series[j.id]!.add(pickMetric(sum, shift.metric!.value));
-          }
-        }
+        // for (final j in jobs) {
+        //   series[j.id!] = [];
+        //   for (int i = 7; i >= 0; i--) {
+        //     final m = DateTime(DateTime.now().year, DateTime.now().month - i, 1);
+        //     final sum = app.monthNetSummary(m)['perJob'][j.id] as Map;
+        //     series[j.id]!.add(pickMetric(sum, shift.metric!.value));
+        //   }
+        // }
       } else {
-        for (final j in jobs) {
-          final ps = app.periodsAround(j, back: 8, forward: 0).reversed.toList();
-          series[j.id] = ps.map((p) => metricFromPeriod(app, j, p, shift.metric!.value)).toList();
-          if (labels.length < ps.length) {
-            labels
-              ..clear()
-              ..addAll(ps.map((p) => md(p.deposit)));
-          }
-        }
+        // for (final j in jobs) {
+        //   final ps = app.periodsAround(j, back: 8, forward: 0).reversed.toList();
+        //   series[j.id!] = ps.map((p) => metricFromPeriod(app, j, p, shift.metric!.value)).toList();
+        //   if (labels.length < ps.length) {
+        //     labels
+        //       ..clear()
+        //       ..addAll(ps.map((p) => md(p.deposit)));
+        //   }
+        // }
       }
 
-      final colors = jobs.map((j) => app.jobColor(j.colorHex)).toList();
+      // final colors = jobs.map((j) => app.jobColor(j.colorHex!)).toList();
 
       return CustomCard(
         title: 'Compare (${periodLabel(shift.period!.value)}) — ${metricTitle(shift.metric!.value)}',
@@ -104,11 +99,11 @@ class CompareTab extends StatelessWidget {
               borderData: FlBorderData(show: false),
               barGroups: List.generate(labels.length, (i) {
                 final rods = <BarChartRodData>[];
-                for (int j = 0; j < jobs.length; j++) {
-                  final jid = jobs[j].id;
-                  final y = i < (series[jid]?.length ?? 0) ? series[jid]![i] : 0.0;
-                  rods.add(BarChartRodData(toY: y, color: colors[j], width: 10));
-                }
+                // for (int j = 0; j < jobs.length; j++) {
+                //   final jid = jobs[j].id;
+                //   final y = i < (series[jid]?.length ?? 0) ? series[jid]![i] : 0.0;
+                //   rods.add(BarChartRodData(toY: y, color: colors[j], width: 10));
+                // }
                 return BarChartGroupData(x: i, barRods: rods, barsSpace: 6);
               }),
             ),
@@ -154,33 +149,33 @@ class OverviewControls extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final j in app.jobs)
-                  FilterChip(
-                    label: textWidget(text: j.name, fontSize: .015),
-                    selectedColor: ProjectColors.greenColor,
-                    backgroundColor: ProjectColors.greenColor.withOpacity(0.6),
-                    selected: shift.jobs.contains(j.id),
-                    onSelected: (_) {
-                      if (shift.jobs.contains(j.id)) {
-                        shift.jobs.remove(j.id);
-                      } else {
-                        shift.jobs.add(j.id);
-                      }
-                    },
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                if (app.jobs.isNotEmpty)
-                  FilterChip(
-                    label: textWidget(text: 'Both', fontSize: .015),
-                    selectedColor: ProjectColors.greenColor,
-                    backgroundColor: ProjectColors.greenColor.withOpacity(0.6),
-                    selected: shift.jobs.length == app.jobs.length,
-                    onSelected: (_) {
-                      shift.jobs
-                        ..clear()
-                        ..addAll(app.jobs.map((e) => e.id));
-                    },
-                  ),
+                // for (final j in app.jobs)
+                // FilterChip(
+                //   label: textWidget(text: j.name, fontSize: .015),
+                //   selectedColor: ProjectColors.greenColor,
+                //   backgroundColor: ProjectColors.greenColor.withOpacity(0.6),
+                //   selected: shift.jobs.contains(j.id),
+                //   onSelected: (_) {
+                //     if (shift.jobs.contains(j.id)) {
+                //       shift.jobs.remove(j.id);
+                //     } else {
+                //       shift.jobs.add(j.id);
+                //     }
+                //   },
+                //   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                // ),
+                // if (app.jobs.isNotEmpty)
+                // FilterChip(
+                //   label: textWidget(text: 'Both', fontSize: .015),
+                //   selectedColor: ProjectColors.greenColor,
+                //   backgroundColor: ProjectColors.greenColor.withOpacity(0.6),
+                //   selected: shift.jobs.length == app.jobs.length,
+                //   onSelected: (_) {
+                //     shift.jobs
+                //       ..clear()
+                //       ..addAll(app.jobs.map((e) => e.id));
+                //   },
+                // ),
               ],
             ),
           ],
@@ -203,8 +198,8 @@ class CompareMiniCard extends StatelessWidget {
         final now = DateTime.now();
         final thisM = app.monthNetSummary(DateTime(now.year, now.month, 1));
         final prevM = app.monthNetSummary(DateTime(now.year, now.month - 1, 1));
-        current += pickMetric(thisM['perJob'][j.id] as Map, metric);
-        base += pickMetric(prevM['perJob'][j.id] as Map, metric);
+        // current += pickMetric(thisM['perJob'][j.id] as Map, metric);
+        // base += pickMetric(prevM['perJob'][j.id] as Map, metric);
       } else {
         // use pay periods
         final nowPs = app.periodsAround(j, back: 0, forward: 0);
@@ -258,30 +253,30 @@ class PayComposition extends StatelessWidget {
   Widget build(BuildContext context) {
     double gross = 0, net = 0, income = 0, cpp = 0, ei = 0, other = 0, post = 0;
 
-    for (final j in jobs) {
-      if (period == 'monthly') {
-        final m = app.monthNetSummary(DateTime(DateTime.now().year, DateTime.now().month, 1));
-        final row = (m['perJob'][j.id] as Map).map((k, v) => MapEntry(k.toString(), (v as num).toDouble()));
-        gross += row['gross'] ?? row['pay'] ?? 0;
-        net += row['net'] ?? row['pay'] ?? 0;
-        income += row['incomeTax'] ?? 0;
-        cpp += row['cpp'] ?? 0;
-        ei += row['ei'] ?? 0;
-        other += row['other'] ?? 0;
-        post += row['fixed'] ?? 0;
-      } else {
-        final p = app.periodsAround(j, back: 0, forward: 0).firstOrNull;
-        if (p == null) continue;
-        gross += p.pay;
-        net += app.estimateNetForPeriod(j, p);
-        final t = app.taxFor(j.id);
-        income += p.pay * (t.incomeTaxPct / 100);
-        cpp += p.pay * (t.cppPct / 100);
-        ei += p.pay * (t.eiPct / 100);
-        other += p.pay * (t.otherPct / 100);
-        post += (p.pay - (income + cpp + ei + other)).clamp(0, double.infinity) * (t.postTaxExpensePct / 100);
-      }
-    }
+    // for (final j in jobs) {
+    //   if (period == 'monthly') {
+    //     final m = app.monthNetSummary(DateTime(DateTime.now().year, DateTime.now().month, 1));
+    //     // final row = (m['perJob'][j.id] as Map).map((k, v) => MapEntry(k.toString(), (v as num).toDouble()));
+    //     gross += row['gross'] ?? row['pay'] ?? 0;
+    //     net += row['net'] ?? row['pay'] ?? 0;
+    //     income += row['incomeTax'] ?? 0;
+    //     cpp += row['cpp'] ?? 0;
+    //     ei += row['ei'] ?? 0;
+    //     other += row['other'] ?? 0;
+    //     post += row['fixed'] ?? 0;
+    //   } else {
+    //     final p = app.periodsAround(j, back: 0, forward: 0).firstOrNull;
+    //     if (p == null) continue;
+    //     gross += p.pay;
+    //     net += app.estimateNetForPeriod(j, p);
+    //     final t = app.taxFor(j.id!);
+    //     income += p.pay * (t.incomeTaxPct / 100);
+    //     cpp += p.pay * (t.cppPct / 100);
+    //     ei += p.pay * (t.eiPct / 100);
+    //     other += p.pay * (t.otherPct / 100);
+    //     post += (p.pay - (income + cpp + ei + other)).clamp(0, double.infinity) * (t.postTaxExpensePct / 100);
+    //   }
+    // }
 
     final slices = [
       Slice('Net', net, const Color(0xFF035D24)),

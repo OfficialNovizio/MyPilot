@@ -23,26 +23,26 @@ class PayPeriod {
 
 class AppController extends GetxController {
   final jobs = <Job>[
-    Job(
-        id: 'starbucks',
-        name: 'Starbucks',
-        colorHex: '#16a34a',
-        wage: 0,
-        payFrequency: 'weekly',
-        lastPaychequeIso: DateTime.now(),
-        weekStartDOW: 4,
-        statMultiplier: 1.5,
-        statDays: []),
-    Job(
-        id: 'superstore',
-        name: 'Superstore',
-        colorHex: '#2563eb',
-        wage: 16,
-        payFrequency: 'weekly',
-        lastPaychequeIso: DateTime.now(),
-        weekStartDOW: 7,
-        statMultiplier: 1.5,
-        statDays: []),
+    // Job(
+    //     id: 'starbucks',
+    //     name: 'Starbucks',
+    //     colorHex: '#16a34a',
+    //     wage: 0,
+    //     payFrequency: 'weekly',
+    //     lastPaychequeIso: DateTime.now(),
+    //     weekStartDOW: 4,
+    //     statMultiplier: 1.5,
+    //     statDays: []),
+    // Job(
+    //     id: 'superstore',
+    //     name: 'Superstore',
+    //     colorHex: '#2563eb',
+    //     wage: 16,
+    //     payFrequency: 'weekly',
+    //     lastPaychequeIso: DateTime.now(),
+    //     weekStartDOW: 7,
+    //     statMultiplier: 1.5,
+    //     statDays: []),
   ].obs;
 
   RxList colorChoices = ['#16a34a', '#2563eb', '#e11d48', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#14b8a6', '#ef4444'].obs;
@@ -107,54 +107,55 @@ class AppController extends GetxController {
 
   /// Uses your existing monthSummary() gross output and applies per-job taxes.
   Map<String, dynamic> monthNetSummary(DateTime month) {
-    final gross = monthSummary(month); // your existing, stat-aware
-    final perJobNet = <String, Map<String, double>>{};
-    double totalGross = 0.0, totalNet = 0.0;
-
-    for (final j in jobs) {
-      final g = ((gross[j.id]?['pay'] ?? 0) as num).toDouble();
-      final t = taxFor(j.id);
-
-      final income = g * (t.incomeTaxPct / 100.0);
-      final cpp = g * (t.cppPct / 100.0);
-      final ei = g * (t.eiPct / 100.0);
-      final other = g * (t.otherPct / 100.0);
-
-      final deposits = depositYmdsForMonth(j, DateTime(month.year, month.month, 1));
-      final chequeCount = deposits.length.toDouble();
-      final fixedMonthly = t.fixedMonthly.toDouble();
-      final fixedPerChequeTotal = t.fixedPerCheque.toDouble() * chequeCount;
-
-      double oneOffTotal = 0.0;
-      for (final y in deposits) {
-        oneOffTotal += (t.oneOffByDepositYmd[y] ?? 0.0);
-      }
-
-      final fixedTotal = fixedMonthly + fixedPerChequeTotal + oneOffTotal;
-      final net = (g - (income + cpp + ei + other + fixedTotal)).clamp(0.0, double.infinity).toDouble();
-
-      perJobNet[j.id] = {
-        'gross': g,
-        'incomeTax': income,
-        'cpp': cpp,
-        'ei': ei,
-        'other': other,
-        'fixedMonthly': fixedMonthly,
-        'fixedPerChequeTotal': fixedPerChequeTotal,
-        'oneOffTotal': oneOffTotal,
-        'fixed': fixedTotal,
-        'depositCount': chequeCount,
-        'net': net,
-      };
-
-      totalGross += g;
-      totalNet += net;
-    }
-
-    return {
-      'perJob': perJobNet,
-      'combined': {'gross': totalGross, 'net': totalNet}
-    };
+    // final gross = monthSummary(month); // your existing, stat-aware
+    // final perJobNet = <String, Map<String, double>>{};
+    // double totalGross = 0.0, totalNet = 0.0;
+    //
+    // for (final j in jobs) {
+    //   final g = ((gross[j.id]?['pay'] ?? 0) as num).toDouble();
+    //   final t = taxFor(j.id!);
+    //
+    //   final income = g * (t.incomeTaxPct / 100.0);
+    //   final cpp = g * (t.cppPct / 100.0);
+    //   final ei = g * (t.eiPct / 100.0);
+    //   final other = g * (t.otherPct / 100.0);
+    //
+    //   final deposits = depositYmdsForMonth(j, DateTime(month.year, month.month, 1));
+    //   final chequeCount = deposits.length.toDouble();
+    //   final fixedMonthly = t.fixedMonthly.toDouble();
+    //   final fixedPerChequeTotal = t.fixedPerCheque.toDouble() * chequeCount;
+    //
+    //   double oneOffTotal = 0.0;
+    //   for (final y in deposits) {
+    //     oneOffTotal += (t.oneOffByDepositYmd[y] ?? 0.0);
+    //   }
+    //
+    //   final fixedTotal = fixedMonthly + fixedPerChequeTotal + oneOffTotal;
+    //   final net = (g - (income + cpp + ei + other + fixedTotal)).clamp(0.0, double.infinity).toDouble();
+    //
+    //   perJobNet[j.id!] = {
+    //     'gross': g,
+    //     'incomeTax': income,
+    //     'cpp': cpp,
+    //     'ei': ei,
+    //     'other': other,
+    //     'fixedMonthly': fixedMonthly,
+    //     'fixedPerChequeTotal': fixedPerChequeTotal,
+    //     'oneOffTotal': oneOffTotal,
+    //     'fixed': fixedTotal,
+    //     'depositCount': chequeCount,
+    //     'net': net,
+    //   };
+    //
+    //   totalGross += g;
+    //   totalNet += net;
+    // }
+    //
+    // return {
+    //   'perJob': perJobNet,
+    //   'combined': {'gross': totalGross, 'net': totalNet}
+    // };
+    return null!;
   }
 
   Color jobColor(String hex) {
@@ -188,7 +189,7 @@ class AppController extends GetxController {
 
   void addJob(Job j) => jobs.add(j);
   void removeJob(String id) {
-    jobs.removeWhere((e) => e.id == id);
+    // jobs.removeWhere((e) => e.id == id);
     shifts.removeWhere((e) => e.jobId == id);
   }
 
@@ -202,12 +203,12 @@ class AppController extends GetxController {
     final end = atMidnight(addDays(currentWeekStart.value, 7)).subtract(const Duration(seconds: 1));
     final perJob = <String, Map<String, double>>{};
     for (final j in jobs) {
-      perJob[j.id] = {'hours': 0.0, 'overtime': 0.0, 'pay': 0.0};
+      // perJob[j.id!] = {'hours': 0.0, 'overtime': 0.0, 'pay': 0.0};
     }
     for (final s in shifts) {
       final d = DateTime.parse('${s.date}T00:00:00');
       if (!d.isBefore(start) && !d.isAfter(end)) {
-        final int mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24 * 60);
+        final int mins = 0;
         final double h = mins / 60.0;
         perJob[s.jobId]!['hours'] = (perJob[s.jobId]!['hours'] ?? 0.0) + h;
       }
@@ -216,16 +217,16 @@ class AppController extends GetxController {
     final double thr = settings.value.overtimeThresholdWeekly.toDouble();
     double totalHours = 0.0, totalPay = 0.0, totalOT = 0.0;
     for (final j in jobs) {
-      final t = perJob[j.id]!;
-      final weekly = (t['hours'] ?? 0.0);
-      final over = overtimeOn ? ((weekly - thr).clamp(0.0, double.infinity) as double) : 0.0;
-      final reg = weekly - over;
-      final pay = reg * j.wage + over * j.wage * 1.5;
-      t['overtime'] = over;
-      t['pay'] = pay;
-      totalHours += weekly;
-      totalPay += pay;
-      totalOT += over;
+      // final t = perJob[j.id]!;
+      // final weekly = (t['hours'] ?? 0.0);
+      // final over = overtimeOn ? ((weekly - thr).clamp(0.0, double.infinity) as double) : 0.0;
+      // final reg = weekly - over;
+      // // final pay = reg * j.wage! + over * j.wage! * 1.5;
+      // t['overtime'] = over;
+      // t['pay'] = pay;
+      // totalHours += weekly;
+      // totalPay += pay;
+      // totalOT += over;
     }
     return {
       'perJob': perJob,
@@ -233,7 +234,7 @@ class AppController extends GetxController {
     };
   }
 
-  int _lenDays(Job j) => j.payFrequency == 'biweekly' ? 14 : 7;
+  // int _lenDays(Job j) => j.payFrequency == 'biweekly' ? 14 : 7;
 
   DateTime? parseIso(String? iso) {
     if (iso == null || iso.trim().isEmpty) return null;
@@ -255,116 +256,120 @@ class AppController extends GetxController {
   }
 
   PayPeriod computePeriod(Job j, DateTime anchorStart) {
-    final len = _lenDays(j);
-    final start = DateTime(anchorStart.year, anchorStart.month, anchorStart.day, 0, 0);
-    final end = start.add(Duration(days: len)).subtract(const Duration(minutes: 1));
-    final deposit = start.add(Duration(days: len));
-    double hours = 0.0;
-    double statHours = 0.0;
-    for (final s in shifts.where((x) => x.jobId == j.id)) {
-      final d = DateTime.parse('${s.date}T00:00:00');
-      if (!d.isBefore(start) && !d.isAfter(end)) {
-        final int mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24 * 60);
-        final double h = mins / 60.0;
-        hours += h;
-        if (j.statDays.contains(s.date)) statHours += h;
-      }
-    }
-    final bool overtimeOn = settings.value.overtimeEnabled;
-    final double weeklyThr = settings.value.overtimeThresholdWeekly.toDouble();
-    final double thrForPeriod = (len / 7.0).ceil() * weeklyThr;
-    final double over = overtimeOn ? ((hours - thrForPeriod).clamp(0.0, double.infinity) as double) : 0.0;
+    // final len = _lenDays(j);
+    // final start = DateTime(anchorStart.year, anchorStart.month, anchorStart.day, 0, 0);
+    // final end = start.add(Duration(days: len)).subtract(const Duration(minutes: 1));
+    // final deposit = start.add(Duration(days: len));
+    // double hours = 0.0;
+    // double statHours = 0.0;
+    // for (final s in shifts.where((x) => x.jobId == j.id)) {
+    //   final d = DateTime.parse('${s.date}T00:00:00');
+    //   if (!d.isBefore(start) && !d.isAfter(end)) {
+    //     final int mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24 * 60);
+    //     final double h = mins / 60.0;
+    //     hours += h;
+    //     if (j.statDays!.contains(s.date)) statHours += h;
+    //   }
+    // }
+    // final bool overtimeOn = settings.value.overtimeEnabled;
+    // final double weeklyThr = settings.value.overtimeThresholdWeekly.toDouble();
+    // final double thrForPeriod = (len / 7.0).ceil() * weeklyThr;
+    // final double over = overtimeOn ? ((hours - thrForPeriod).clamp(0.0, double.infinity) as double) : 0.0;
+    //
+    // final double rateOT = 1.5;
+    // final double rateStat = j.statMultiplier!;
+    // final double bestStatRate = rateStat >= rateOT ? rateStat : rateOT;
+    //
+    // final double nonStatHours = (hours - statHours).clamp(0.0, hours);
+    // double nonStatOver = over.clamp(0.0, nonStatHours);
+    // double statOverRemainder = (over - nonStatOver).clamp(0.0, statHours);
+    //
+    // final double nonStatReg = nonStatHours - nonStatOver;
+    // final double statReg = statHours - statOverRemainder;
+    //
+    // final double pay = nonStatReg * j.wage! + nonStatOver * j.wage! * rateOT + statReg * j.wage! * rateStat + statOverRemainder * j.wage! * bestStatRate;
 
-    final double rateOT = 1.5;
-    final double rateStat = j.statMultiplier;
-    final double bestStatRate = rateStat >= rateOT ? rateStat : rateOT;
-
-    final double nonStatHours = (hours - statHours).clamp(0.0, hours);
-    double nonStatOver = over.clamp(0.0, nonStatHours);
-    double statOverRemainder = (over - nonStatOver).clamp(0.0, statHours);
-
-    final double nonStatReg = nonStatHours - nonStatOver;
-    final double statReg = statHours - statOverRemainder;
-
-    final double pay = nonStatReg * j.wage + nonStatOver * j.wage * rateOT + statReg * j.wage * rateStat + statOverRemainder * j.wage * bestStatRate;
-
-    return PayPeriod(start: start, end: end, deposit: deposit, hours: hours, overtime: over, pay: pay);
+    // return PayPeriod(start: 'start', end: end, deposit: deposit, hours: hours, overtime: over, pay: pay);
+    return null!;
   }
 
   List<PayPeriod> periodsAround(Job j, {int back = 0, int forward = 2}) {
-    final base = j.lastPaychequeIso ?? DateTime.now();
-    final len = _lenDays(j);
-    final now = DateTime.now();
-    int n = ((now.difference(base).inDays) / len).floor();
-    final firstStart = base.add(Duration(days: n * len));
-    final out = <PayPeriod>[];
-    for (int i = -back; i <= forward; i++) {
-      final s = firstStart.add(Duration(days: i * len));
-      out.add(computePeriod(j, s));
-    }
-    return out;
+    // final base = j.lastPaychequeIso ?? DateTime.now();
+    // final len = _lenDays(j);
+    // final now = DateTime.now();
+    // int n = ((now.difference(base).inDays) / len).floor();
+    // final firstStart = base.add(Duration(days: n * len));
+    // final out = <PayPeriod>[];
+    // for (int i = -back; i <= forward; i++) {
+    //   final s = firstStart.add(Duration(days: i * len));
+    //   out.add(computePeriod(j, s));
+    // }
+    // return out;
+    return null!;
   }
 
   DateTime? nextDeposit(Job j) {
-    final base = j.lastPaychequeIso;
-    if (base == null) return null;
-    final len = _lenDays(j);
-    final now = DateTime.now();
-    int n = ((now.difference(base).inDays) / len).ceil();
-    return base.add(Duration(days: n * len));
+    // final base = j.lastPaychequeIso;
+    // if (base == null) return null;
+    // final len = _lenDays(j);
+    // final now = DateTime.now();
+    // int n = ((now.difference(base).inDays) / len).ceil();
+    // return base.add(Duration(days: n * len));
   }
 
   Map<String, Map<String, double>> monthSummary(DateTime month) {
     // month range [start, end)
-    final start = DateTime(month.year, month.month, 1);
-    final end = DateTime(month.year, month.month + 1, 1);
+    // final start = DateTime(month.year, month.month, 1);
+    // final end = DateTime(month.year, month.month + 1, 1);
+    //
+    // // init per-job buckets
+    // final perJob = <String, Map<String, double>>{
+    //   for (final j in jobs) j.id!: {'hours': 0.0, 'pay': 0.0}
+    // };
+    //
+    // for (final s in shifts) {
+    //   // shift date is stored as 'YYYY-MM-DD'
+    //   final sd = DateTime.parse(s.date);
+    //   if (sd.isBefore(start) || !sd.isBefore(end)) continue;
+    //
+    //   final job = jobs.firstWhereOrNull((j) => j.id == s.jobId);
+    //   if (job == null) continue;
+    //
+    //   final mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24 * 60);
+    //   final hours = (mins / 60.0).toDouble();
+    //
+    //   // --- STAT logic (this is the bit you asked about) ---
+    //   final isStat = (s.isStat == true) || job.statDays!.contains(s.date);
+    //   final hourly = (job.wage! * (isStat ? job.statMultiplier : 1.0)!).toDouble();
+    //   // ----------------------------------------------------
+    //
+    //   perJob[job.id]!['hours'] = (perJob[job.id]!['hours'] ?? 0) + hours;
+    //   perJob[job.id]!['pay'] = (perJob[job.id]!['pay'] ?? 0) + (hours * hourly);
+    // }
 
-    // init per-job buckets
-    final perJob = <String, Map<String, double>>{
-      for (final j in jobs) j.id: {'hours': 0.0, 'pay': 0.0}
-    };
-
-    for (final s in shifts) {
-      // shift date is stored as 'YYYY-MM-DD'
-      final sd = DateTime.parse(s.date);
-      if (sd.isBefore(start) || !sd.isBefore(end)) continue;
-
-      final job = jobs.firstWhereOrNull((j) => j.id == s.jobId);
-      if (job == null) continue;
-
-      final mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24 * 60);
-      final hours = (mins / 60.0).toDouble();
-
-      // --- STAT logic (this is the bit you asked about) ---
-      final isStat = (s.isStat == true) || job.statDays.contains(s.date);
-      final hourly = (job.wage * (isStat ? job.statMultiplier : 1.0)).toDouble();
-      // ----------------------------------------------------
-
-      perJob[job.id]!['hours'] = (perJob[job.id]!['hours'] ?? 0) + hours;
-      perJob[job.id]!['pay'] = (perJob[job.id]!['pay'] ?? 0) + (hours * hourly);
-    }
-
-    return perJob;
+    // return perJob;
+    return null!;
   }
 
   // Returns deposit dates (YYYY-MM-DD) for this job that fall in the given month.
   List<String> depositYmdsForMonth(Job j, DateTime month) {
-    final base = j.lastPaychequeIso; // your existing parse
-    if (base == null) return [];
-
-    final stepDays = j.payFrequency == 'biweekly' ? 14 : 7;
-    final from = DateTime(month.year, month.month, 1);
-    final to = DateTime(month.year, month.month + 1, 1);
-
-    var d = base;
-    while (d.isBefore(from)) d = d.add(Duration(days: stepDays));
-
-    final out = <String>[];
-    while (d.isBefore(to)) {
-      out.add(ymd(d)); // your existing ymd(DateTime) -> "YYYY-MM-DD"
-      d = d.add(Duration(days: stepDays));
-    }
-    return out;
+    // final base = j.lastPaychequeIso; // your existing parse
+    // if (base == null) return [];
+    //
+    // final stepDays = j.payFrequency == 'biweekly' ? 14 : 7;
+    // final from = DateTime(month.year, month.month, 1);
+    // final to = DateTime(month.year, month.month + 1, 1);
+    //
+    // var d = base;
+    // while (d.isBefore(from)) d = d.add(Duration(days: stepDays));
+    //
+    // final out = <String>[];
+    // while (d.isBefore(to)) {
+    //   out.add(ymd(d)); // your existing ymd(DateTime) -> "YYYY-MM-DD"
+    //   d = d.add(Duration(days: stepDays));
+    // }
+    // return out;
+    return null!;
   }
 
   // ---------- Payroll-week helpers ----------
@@ -379,17 +384,18 @@ class AppController extends GetxController {
 
 // Sum hours in the current payroll week for a job
   double hoursInCurrentPayrollWeek(Job j, {DateTime? now}) {
-    now ??= DateTime.now();
-    final start = startOfWeekDow(now, j.weekStartDOW);
-    final end = start.add(Duration(days: _lenDays(j))); // [start, end)
-    double hours = 0.0;
-    for (final s in shifts.where((x) => x.jobId == j.id)) {
-      final d = DateTime.parse('${s.date}T00:00:00');
-      if (d.isBefore(start) || !d.isBefore(end)) continue;
-      final mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24 * 60);
-      hours += mins / 60.0;
-    }
-    return hours;
+    // now ??= DateTime.now();
+    // final start = startOfWeekDow(now, j.weekStartDOW!);
+    // final end = start.add(Duration(days: _lenDays(j))); // [start, end)
+    // double hours = 0.0;
+    // for (final s in shifts.where((x) => x.jobId == j.id)) {
+    //   final d = DateTime.parse('${s.date}T00:00:00');
+    //   if (d.isBefore(start) || !d.isBefore(end)) continue;
+    //   final mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24 * 60);
+    //   hours += mins / 60.0;
+    // }
+    // return hours;
+    return null!;
   }
 
 // ---------- Period-level net estimate ----------
@@ -414,59 +420,60 @@ class AppController extends GetxController {
 
   // Build a combined deposit timeline (last N deposits)
   List<DepositPoint> recentDeposits({int count = 8}) {
-    final now = DateTime.now();
-
-    List<PayPeriod> nextPeriods(Job j, int back) {
-      final base = j.lastPaychequeIso ?? now;
-      final step = _lenDays(j);
-      // walk backwards from the first upcoming period start
-      int n = ((now.difference(base).inDays) / step).floor();
-      final first = base.add(Duration(days: n * step));
-      final out = <PayPeriod>[];
-      for (int i = 0; i < back; i++) {
-        final s = first.subtract(Duration(days: i * step));
-        out.add(computePeriod(j, s));
-      }
-      return out;
-    }
-
-    final sb = jobs.firstWhereOrNull((j) => j.id == 'starbucks');
-    final ss = jobs.firstWhereOrNull((j) => j.id == 'superstore');
-
-    final map = <String, DepositPoint>{}; // ymd -> point
-
-    void addJob(Job? j) {
-      if (j == null) return;
-      for (final p in nextPeriods(j, count * 2)) {
-        final y = ymd(p.deposit);
-        final net = estimateNetForPeriod(j, p);
-        final existing = map[y];
-        if (existing == null) {
-          map[y] = DepositPoint(
-            p.deposit,
-            j.id == 'starbucks' ? net : 0.0,
-            j.id == 'superstore' ? net : 0.0,
-          );
-        } else {
-          if (j.id == 'starbucks') {
-            map[y] = existing.copyWith(starbucks: net);
-          } else if (j.id == 'superstore') {
-            map[y] = existing.copyWith(superstore: net);
-          }
-        }
-      }
-    }
-
-    addJob(sb);
-    addJob(ss);
-
-    final list = map.values.toList()..sort((a, b) => a.date.compareTo(b.date));
-    return list.length > count ? list.sublist(list.length - count) : list;
+    // final now = DateTime.now();
+    //
+    // List<PayPeriod> nextPeriods(Job j, int back) {
+    //   final base = j.lastPaychequeIso ?? now;
+    //   final step = _lenDays(j);
+    //   // walk backwards from the first upcoming period start
+    //   int n = ((now.difference(base).inDays) / step).floor();
+    //   final first = base.add(Duration(days: n * step));
+    //   final out = <PayPeriod>[];
+    //   for (int i = 0; i < back; i++) {
+    //     final s = first.subtract(Duration(days: i * step));
+    //     out.add(computePeriod(j, s));
+    //   }
+    //   return out;
+    // }
+    //
+    // final sb = jobs.firstWhereOrNull((j) => j.id == 'starbucks');
+    // final ss = jobs.firstWhereOrNull((j) => j.id == 'superstore');
+    //
+    // final map = <String, DepositPoint>{}; // ymd -> point
+    //
+    // void addJob(Job? j) {
+    //   if (j == null) return;
+    //   for (final p in nextPeriods(j, count * 2)) {
+    //     final y = ymd(p.deposit);
+    //     final net = estimateNetForPeriod(j, p);
+    //     final existing = map[y];
+    //     if (existing == null) {
+    //       map[y] = DepositPoint(
+    //         p.deposit,
+    //         j.id == 'starbucks' ? net : 0.0,
+    //         j.id == 'superstore' ? net : 0.0,
+    //       );
+    //     } else {
+    //       if (j.id == 'starbucks') {
+    //         map[y] = existing.copyWith(starbucks: net);
+    //       } else if (j.id == 'superstore') {
+    //         map[y] = existing.copyWith(superstore: net);
+    //       }
+    //     }
+    //   }
+    // }
+    //
+    // addJob(sb);
+    // addJob(ss);
+    //
+    // final list = map.values.toList()..sort((a, b) => a.date.compareTo(b.date));
+    // return list.length > count ? list.sublist(list.length - count) : list;
+    return null!;
   }
   // ===== Add near your other helpers in AppController =====
 
 // Length of a pay period for a job (public access for UI)
-  int lenDays(Job j) => j.payFrequency == 'biweekly' ? 14 : 7;
+//   int lenDays(Job j) => j.payFrequency == 'biweekly' ? 14 : 7;
 
 // Current payroll period containing "now"
   PeriodStat currentPayrollPeriod(Job j) {
@@ -517,37 +524,38 @@ class AppController extends GetxController {
 
 // Convert PayPeriod -> stats with deductions using your TaxConfig
   PeriodStat toPeriodStat(Job j, PayPeriod p) {
-    final t = taxFor(j.id);
-    final gross = p.pay;
-
-    final income = gross * (t.incomeTaxPct / 100.0);
-    final cpp = gross * (t.cppPct / 100.0);
-    final ei = gross * (t.eiPct / 100.0);
-    final other = gross * (t.otherPct / 100.0);
-    final preNet = (gross - (income + cpp + ei + other)).clamp(0, double.infinity).toDouble();
-
-    // post-tax expense %, if your TaxConfig has it; else 0
-    final post = preNet * ((t.postTaxExpensePct ?? 0) / 100.0);
-    final net = (preNet - post).clamp(0, double.infinity).toDouble();
-
-    // simple estimate of stat uplift (what portion came from stat multiplier vs base)
-    final statUplift =
-        max(0.0, (j.statMultiplier - 1.0)) * (p.hours == 0 ? 0 : (p.pay / j.statMultiplier - (p.pay - (j.statMultiplier - 1) * j.wage * (p.hours))));
-
-    return PeriodStat(
-      start: p.start,
-      end: p.end,
-      gross: gross,
-      net: net,
-      hours: p.hours,
-      ot: p.overtime,
-      income: income,
-      cpp: cpp,
-      ei: ei,
-      other: other,
-      post: post,
-      statUplift: statUplift,
-    );
+    // final t = taxFor(j.id!);
+    // final gross = p.pay;
+    //
+    // final income = gross * (t.incomeTaxPct / 100.0);
+    // final cpp = gross * (t.cppPct / 100.0);
+    // final ei = gross * (t.eiPct / 100.0);
+    // final other = gross * (t.otherPct / 100.0);
+    // final preNet = (gross - (income + cpp + ei + other)).clamp(0, double.infinity).toDouble();
+    //
+    // // post-tax expense %, if your TaxConfig has it; else 0
+    // final post = preNet * ((t.postTaxExpensePct ?? 0) / 100.0);
+    // final net = (preNet - post).clamp(0, double.infinity).toDouble();
+    //
+    // // simple estimate of stat uplift (what portion came from stat multiplier vs base)
+    // final statUplift = max(0.0, (j.statMultiplier! - 1.0)) *
+    //     (p.hours == 0 ? 0 : (p.pay / j.statMultiplier! - (p.pay - (j.statMultiplier! - 1) * j.wage! * (p.hours))));
+    //
+    // return PeriodStat(
+    //   start: p.start,
+    //   end: p.end,
+    //   gross: gross,
+    //   net: net,
+    //   hours: p.hours,
+    //   ot: p.overtime,
+    //   income: income,
+    //   cpp: cpp,
+    //   ei: ei,
+    //   other: other,
+    //   post: post,
+    //   statUplift: statUplift,
+    // );
+    return null!;
   }
 
 // Public helper used by the timeline card
@@ -555,43 +563,44 @@ class AppController extends GetxController {
 
 // ---- Monthly bucket (used by compare + composition when Monthly selected) ----
   MonthBucket monthBucket(DateTime month, Job j) {
-    // use your existing monthSummary() + monthNetSummary() if you prefer;
-    // here we aggregate from actual shifts in that month for the job.
-    final start = DateTime(month.year, month.month, 1);
-    final end = DateTime(month.year, month.month + 1, 1);
-
-    double hours = 0, statHours = 0, gross = 0;
-    for (final s in shifts.where((x) => x.jobId == j.id)) {
-      final sd = DateTime.parse(s.date);
-      if (sd.isBefore(start) || !sd.isBefore(end)) continue;
-      final mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24 * 60);
-      final h = mins / 60.0;
-      hours += h;
-      final isStat = j.statDays.contains(s.date) || (s.isStat == true);
-      final rate = j.wage * (isStat ? j.statMultiplier : 1.0);
-      if (isStat) statHours += h;
-      gross += rate * h;
-    }
-
-    // deductions
-    final t = taxFor(j.id);
-    final income = gross * (t.incomeTaxPct / 100.0);
-    final cpp = gross * (t.cppPct / 100.0);
-    final ei = gross * (t.eiPct / 100.0);
-    final other = gross * (t.otherPct / 100.0);
-    final preNet = (gross - (income + cpp + ei + other)).clamp(0, double.infinity).toDouble();
-    final post = preNet * ((t.postTaxExpensePct ?? 0) / 100.0);
-    final net = (preNet - post).clamp(0, double.infinity).toDouble();
-
-    // rough OT sum in the month: sum weekly across monthStart-aligned weeks
-    // (kept light for UI — your existing OT logic in weeklyTotals can be reused if preferred)
-    final ot = 0.0;
-
-    // stat uplift (approx)
-    final statUplift = (j.statMultiplier - 1.0) * j.wage * statHours;
-
-    return MonthBucket(
-        gross: gross, net: net, hours: hours, ot: ot, income: income, cpp: cpp, ei: ei, other: other, post: post, statUplift: statUplift);
+    // // use your existing monthSummary() + monthNetSummary() if you prefer;
+    // // here we aggregate from actual shifts in that month for the job.
+    // final start = DateTime(month.year, month.month, 1);
+    // final end = DateTime(month.year, month.month + 1, 1);
+    //
+    // double hours = 0, statHours = 0, gross = 0;
+    // for (final s in shifts.where((x) => x.jobId == j.id)) {
+    //   final sd = DateTime.parse(s.date);
+    //   if (sd.isBefore(start) || !sd.isBefore(end)) continue;
+    //   final mins = (minutesBetween(s.start, s.end) - s.breakMin).clamp(0, 24 * 60);
+    //   final h = mins / 60.0;
+    //   hours += h;
+    //   final isStat = j.statDays!.contains(s.date) || (s.isStat == true);
+    //   final rate = j.wage! * (isStat ? j.statMultiplier : 1.0)!;
+    //   if (isStat) statHours += h;
+    //   gross += rate * h;
+    // }
+    //
+    // // deductions
+    // final t = taxFor(j.id!);
+    // final income = gross * (t.incomeTaxPct / 100.0);
+    // final cpp = gross * (t.cppPct / 100.0);
+    // final ei = gross * (t.eiPct / 100.0);
+    // final other = gross * (t.otherPct / 100.0);
+    // final preNet = (gross - (income + cpp + ei + other)).clamp(0, double.infinity).toDouble();
+    // final post = preNet * ((t.postTaxExpensePct ?? 0) / 100.0);
+    // final net = (preNet - post).clamp(0, double.infinity).toDouble();
+    //
+    // // rough OT sum in the month: sum weekly across monthStart-aligned weeks
+    // // (kept light for UI — your existing OT logic in weeklyTotals can be reused if preferred)
+    // final ot = 0.0;
+    //
+    // // stat uplift (approx)
+    // final statUplift = (j.statMultiplier! - 1.0) * j.wage! * statHours;
+    //
+    // return MonthBucket(
+    //     gross: gross, net: net, hours: hours, ot: ot, income: income, cpp: cpp, ei: ei, other: other, post: post, statUplift: statUplift);
+    return null!;
   }
 
 // Average of last N months (for CompareKind.avg monthly baseline)

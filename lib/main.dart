@@ -1,3 +1,4 @@
+import 'package:emptyproject/Working%20UI/Constants.dart';
 import 'package:emptyproject/screens/analytic_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -48,6 +49,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Two-Job Shift Planner',
       debugShowCheckedModeBanner: false,
       initialBinding: BindingsBuilder(() {
