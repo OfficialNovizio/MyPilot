@@ -301,7 +301,7 @@ class _CreateNewJobState extends State<CreateNewJob> {
                                   child: SizedBox(
                                     width: width,
                                     child: DropdownButtonFormField<int>(
-                                      initialValue: 1,
+                                      value: 1,
                                       decoration: InputDecoration(
                                         labelText: 'Pay frequency',
                                         labelStyle: TextStyle(fontSize: height * .018, color: ProjectColors.blackColor.withOpacity(.7)),
@@ -330,7 +330,7 @@ class _CreateNewJobState extends State<CreateNewJob> {
                                         child: SizedBox(
                                           width: width,
                                           child: DropdownButtonFormField<int>(
-                                            initialValue: 1,
+                                            value: 1,
                                             decoration: InputDecoration(
                                               labelText: 'Week starts',
                                               labelStyle: TextStyle(fontSize: height * .018, color: ProjectColors.blackColor.withOpacity(.7)),
