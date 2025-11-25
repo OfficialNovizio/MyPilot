@@ -22,6 +22,7 @@ String toHmAm(String input, {bool onlyMinutes = false}) {
   }
   return DateFormat(onlyMinutes ? 'mm' : 'hh:mm a').format(dt);
 }
+
 String diffHoursMinutes(String startStr, String endStr) {
   // inline parser: supports "2025-11-15 04:00 PM" and "2025-11-15 16:00:00.000"
   DateTime parseFlexible(String s) {

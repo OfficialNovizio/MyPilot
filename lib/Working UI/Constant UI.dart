@@ -6,6 +6,28 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+
+class DarkCard extends StatelessWidget {
+  final Widget child;
+  const DarkCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: width * .02,
+        vertical: height * .018,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xff101010),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: child,
+    );
+  }
+}
+
 class Popup extends StatelessWidget {
   final Widget? body;
   final String? title;

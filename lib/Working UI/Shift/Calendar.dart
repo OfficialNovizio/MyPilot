@@ -163,12 +163,13 @@ class _CalendarState extends State<Calendar> {
 
           const _MonthSummary(),
           const _WeeklyBreakdownByJob(), // ✅ NEW SECTION
-          const _PayPeriods(),
+          // const _PayPeriods(),
         ],
       );
     });
   }
 }
+
 // =========================
 // 1) NEW MONTH SUMMARY UI
 // =========================
@@ -182,7 +183,7 @@ class _MonthSummary extends StatelessWidget {
       if (stats == null || stats.isEmpty) return const SizedBox.shrink();
 
       final income = shift.combinedPay!.value;
-      final hours  = shift.combinedHours!.value;
+      final hours = shift.combinedHours!.value;
 
       return GestureDetector(
         onTap: () => Get.to(() => SalaryDetailsScreen(month: DateTime.now())),
@@ -210,7 +211,6 @@ class _MonthSummary extends StatelessWidget {
                 color: ProjectColors.pureBlackColor,
               ),
               SizedBox(height: height * .012),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -261,7 +261,6 @@ class _MonthSummary extends StatelessWidget {
   }
 }
 
-
 // =========================================
 // 2) NEW WEEKLY BREAKDOWN UI (like image)
 // =========================================
@@ -285,83 +284,79 @@ class _WeeklyBreakdownByJobState extends State<_WeeklyBreakdownByJob> {
         return const SizedBox.shrink();
       }
 
-      return Padding(
-        padding: EdgeInsets.only(top: height * .02),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section header row
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: height * .04),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: width * .04),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                textWidget(
+                  text: "By Job — Weekly Breakdown",
+                  fontSize: .02,
+                  fontWeight: FontWeight.bold,
+                  color: ProjectColors.whiteColor,
+                ),
+
+                // Card / Chart toggle
+                Row(
+                  children: [
+                    _ToggleTab(
+                      label: "Card",
+                      active: viewMode == 1,
+                      onTap: () => setState(() => viewMode = 0),
+                    ),
+                    SizedBox(width: width * .03),
+                    _ToggleTab(
+                      label: "Chart",
+                      active: viewMode == 1,
+                      onTap: () => setState(() => viewMode = 1),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: height * .012),
+
+          // Body
+          if (viewMode == 0)
+            Column(
+              children: [
+                for (final entry in weeklyMap.entries)
+                  _WeeklyJobCard(
+                    jobId: entry.key,
+                    weeks: entry.value,
+                    overview: monthStats[entry.key]!,
+                  ),
+              ],
+            )
+          else
+            // Chart mode placeholder (you can plug recharts/fl_chart later)
             Padding(
               padding: EdgeInsets.symmetric(horizontal: width * .04),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  textWidget(
-                    text: "By Job — Weekly Breakdown",
-                    fontSize: .02,
-                    fontWeight: FontWeight.bold,
-                    color: ProjectColors.pureBlackColor,
-                  ),
-
-                  // Card / Chart toggle
-                  Row(
-                    children: [
-                      _ToggleTab(
-                        label: "Card",
-                        active: viewMode == 0,
-                        onTap: () => setState(() => viewMode = 0),
-                      ),
-                      SizedBox(width: width * .03),
-                      _ToggleTab(
-                        label: "Chart",
-                        active: viewMode == 1,
-                        onTap: () => setState(() => viewMode = 1),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: height * .012),
-
-            // Body
-            if (viewMode == 0)
-              Column(
-                children: [
-                  for (final entry in weeklyMap.entries)
-                    _WeeklyJobCard(
-                      jobId: entry.key,
-                      weeks: entry.value,
-                      overview: monthStats[entry.key]!,
-                    ),
-                ],
-              )
-            else
-            // Chart mode placeholder (you can plug recharts/fl_chart later)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: width * .04),
-                child: Container(
-                  height: height * .18,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: textWidget(
-                    text: "Chart view coming next",
-                    fontSize: .016,
-                    color: ProjectColors.pureBlackColor.withOpacity(.6),
-                  ),
+              child: Container(
+                height: height * .18,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: textWidget(
+                  text: "Chart view coming next",
+                  fontSize: .016,
+                  color: ProjectColors.pureBlackColor.withOpacity(.6),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       );
     });
   }
 }
-
 
 // Small underline tab (Card/Chart)
 class _ToggleTab extends StatelessWidget {
@@ -385,20 +380,19 @@ class _ToggleTab extends StatelessWidget {
             text: label,
             fontSize: .017,
             fontWeight: active ? FontWeight.bold : FontWeight.w500,
-            color: ProjectColors.pureBlackColor.withOpacity(active ? 1 : .6),
+            color: ProjectColors.whiteColor.withOpacity(active ? 1 : .6),
           ),
           SizedBox(height: 2),
           Container(
             height: 2,
             width: label.length * 7.0,
-            color: active ? ProjectColors.pureBlackColor : Colors.transparent,
+            color: active ? ProjectColors.whiteColor : Colors.transparent,
           ),
         ],
       ),
     );
   }
 }
-
 
 // Per-job weekly card
 class _WeeklyJobCard extends StatelessWidget {
@@ -415,27 +409,16 @@ class _WeeklyJobCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dotColor = Color(int.parse(overview.totals.colorHex ?? "0xff999999"));
-    final monthNameTxt = DateFormat('MMM').format(DateTime.now()); // "Nov"
+    final monthNameTxt = DateFormat('MMMM').format(DateTime.now()); // "Nov"
     final monthPay = (overview.totals.pay ?? 0).toStringAsFixed(0);
     final monthHours = (overview.totals.hours ?? 0).toStringAsFixed(0);
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: width * .04, vertical: height * .008),
       padding: EdgeInsets.all(height * .016),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.04),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
       child: Column(
         children: [
-          // Top row: dot + job name | month total right
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -458,7 +441,6 @@ class _WeeklyJobCard extends StatelessWidget {
                   ),
                 ],
               ),
-
               textWidget(
                 text: "$monthNameTxt total: \$$monthPay • $monthHours h",
                 fontSize: .016,
@@ -468,30 +450,18 @@ class _WeeklyJobCard extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: height * .012),
-
-          // Column headers
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _HeaderCell("Week"),
-              _HeaderCell("Income"),
-              _HeaderCell("Hours"),
-            ],
-          ),
-
           SizedBox(height: height * .006),
 
           // Weekly rows
           for (final w in weeks)
             Padding(
-              padding: EdgeInsets.symmetric(vertical: height * .004),
+              padding: EdgeInsets.symmetric(vertical: height * .004,horizontal: width * .04),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _BodyCell("Week ${w.weekIndex}"),
-                  _BodyCell("\$${w.pay.toStringAsFixed(0)}"),
-                  _BodyCell("${w.hours.toStringAsFixed(0)} h"),
+                  _BodyCell("Week ${w.weekIndex}","\$${w.pay.toStringAsFixed(0)}"),
+                  _BodyCell("Income","\$${w.pay.toStringAsFixed(0)}"),
+                  _BodyCell("Hours","\$${w.hours.toStringAsFixed(0)}"),
                 ],
               ),
             ),
@@ -523,20 +493,17 @@ class _HeaderCell extends StatelessWidget {
 
 class _BodyCell extends StatelessWidget {
   final String text;
-  const _BodyCell(this.text);
+  final String title;
+  const _BodyCell(this.text,this.title);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: width * .26,
-      child: Text(
-        text,
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: height * .016,
-          color: ProjectColors.pureBlackColor,
-        ),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+     children: [
+       textWidget(text: text,fontSize: .018,color: ProjectColors.blackColor.withOpacity(0.9)),
+       textWidget(text: title,fontSize: .015),
+     ],
     );
   }
 }
