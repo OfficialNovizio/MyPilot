@@ -6,6 +6,8 @@ import 'package:emptyproject/screens/totals_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../Priotizer/Priotizer Screen.dart';
+
 enum ScreenEnums {
   shifts,
   debts,
@@ -49,7 +51,7 @@ class DashboardController extends GetxController {
         break;
       case ScreenEnums.prioritizer:
         activeIcon!.value = 'Prioritizer';
-        currentScreen!.value = TotalsScreen();
+        currentScreen!.value = PrioritizerBody();
         break;
       case ScreenEnums.account:
         activeIcon!.value = 'Account';
