@@ -670,34 +670,37 @@ class _PrioritizerScreenState extends State<PrioritizerScreen> {
   }
 
   Widget _atRiskCard(Task task) {
-    return DarkCard(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onLongPress: () => _showTaskActions(task),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  textWidget(
-                    text: task.title,
-                    fontSize: 0.018,
-                    fontWeight: FontWeight.w600,
-                    color: ProjectColors.whiteColor,
-                  ),
-                  SizedBox(height: height * 0.004),
-                  textWidget(
-                    text:
-                        '${task.softDeadlineText ?? ''}${task.softDeadlineText != null && task.hardDeadlineText != null ? '  •  ' : ''}${task.hardDeadlineText ?? ''}',
-                    fontSize: 0.015,
-                    color: ProjectColors.whiteColor.withOpacity(0.7),
-                  ),
-                ],
+    return Padding(
+      padding: EdgeInsets.only(top: height * .01),
+      child: DarkCard(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onLongPress: () => _showTaskActions(task),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    textWidget(
+                      text: task.title,
+                      fontSize: 0.018,
+                      fontWeight: FontWeight.w600,
+                      color: ProjectColors.whiteColor,
+                    ),
+                    SizedBox(height: height * 0.004),
+                    textWidget(
+                      text:
+                          '${task.softDeadlineText ?? ''}${task.softDeadlineText != null && task.hardDeadlineText != null ? '  •  ' : ''}${task.hardDeadlineText ?? ''}',
+                      fontSize: 0.015,
+                      color: ProjectColors.whiteColor.withOpacity(0.7),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            _priorityChip(task.priority),
-          ],
+              _priorityChip(task.priority),
+            ],
+          ),
         ),
       ),
     );
