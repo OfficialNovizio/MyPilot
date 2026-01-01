@@ -40,17 +40,17 @@ class _ShiftBodyState extends State<ShiftBody> {
                             shift.activeShift!.refresh();
                           },
                           child: Container(
-                            height: height * .02,
-                            width: width * .18,
                             decoration: BoxDecoration(
                               color: f['Title'] == shift.activeShift!.value ? ProjectColors.greenColor : Colors.transparent,
                               borderRadius: BorderRadius.circular(20),
                             ),
+                            padding: EdgeInsets.symmetric(horizontal: width * .02, vertical: height * .001),
                             alignment: Alignment.center,
                             child: textWidget(
                               text: f['Title'],
-                              fontSize: .015,
-                              color: f['Title'] == shift.activeShift!.value ? Colors.black : Colors.white,
+                              fontSize: .018,
+                              color: f['Title'] == shift.activeShift!.value ? ProjectColors.blackColor : ProjectColors.whiteColor,
+                              fontWeight: f['Title'] == shift.activeShift!.value ? FontWeight.bold : FontWeight.w400,
                             ),
                           ),
                         ),

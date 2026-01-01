@@ -12,14 +12,15 @@ import 'package:emptyproject/models/job.dart';
 import 'package:emptyproject/models/shift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'Overview/Overview.dart';
 
-enum shiftEnums {
-  calendar,
-  overview,
-  deposits,
-  projections,
-}
+import '../../models/Debt Model.dart';
+import '../Dashboard/Dashboard.dart';
+import 'All Debts/All Debts.dart';
+import 'All Debts/Combined Data Dashboard.dart';
+import 'Debt Dashboard/Debt Dashboard.dart';
+import 'Expenses/Expenses.dart';
+
+enum debtEnums { dashboard, allDebts, expenses }
 
 class JobDot {
   final Color color;
@@ -43,9 +44,9 @@ class WeekStats {
   });
 }
 
-class ShiftController extends GetxController {
-  RxString? activeShift = "Calendar".obs;
-  Rx<Widget>? shiftScreen = Rx<Widget>(Calendar());
+class DebtController extends GetxController {
+  RxString? activeShift = "Dashboard".obs;
+  Rx<Widget>? shiftScreen = Rx<Widget>(DebtDashboardV1());
   Rx<DateTime>? selectedDay = DateTime.now().obs;
   RxString? period = 'weekly'.obs;
   RxString? metric = 'net'.obs;
@@ -54,6 +55,7 @@ class ShiftController extends GetxController {
   Rxn<MonthStats> monthStats = Rxn<MonthStats>();
   RxList<OverviewModel> combinedStats = RxList<OverviewModel>([]);
   Rx<ButtonState> state = Rx<ButtonState>(ButtonState.loading);
+  Rx<DebtSortingTypes> debtType = Rx<DebtSortingTypes>(DebtSortingTypes.snowBall);
 
   /// existing monthly combined stats (per job)
   Rxn<Map<int, CombinedOverview>>? combinedMonthStat = Rxn<Map<int, CombinedOverview>>();
@@ -323,33 +325,23 @@ class ShiftController extends GetxController {
   /// ======================= TABS ======================================
   /// ===================================================================
 
-  RxList<Map> shiftStats = RxList<Map>([
-    {"Route": shiftEnums.calendar, "Title": "Calendar"},
-    {"Route": shiftEnums.overview, "Title": "Overview"},
-    {"Route": shiftEnums.deposits, "Title": "Deposits"},
-    {"Route": shiftEnums.projections, "Title": "Projection"},
-  ]);
+  RxList<String> debtStats = ["Dashboard", "All Debts", "Expenses"].obs;
 
-  void changeShiftTabs(shiftEnums screen) {
+  void changeDebtTabs(String screen) {
     switch (screen) {
-      case shiftEnums.calendar:
-        activeShift!.value = 'Calendar';
-        shiftScreen!.value = Calendar();
+      case 'Dashboard':
+        activeShift!.value = 'Dashboard';
+        shiftScreen!.value = DebtDashboardV1();
         break;
 
-      case shiftEnums.overview:
-        activeShift!.value = 'Overview';
-        shiftScreen!.value = OverviewTab();
+      case 'All Debts':
+        activeShift!.value = 'All Debts';
+        shiftScreen!.value = AllDebts();
         break;
 
-      case shiftEnums.deposits:
-        activeShift!.value = 'Deposits';
-        shiftScreen!.value = DepositsTab();
-        break;
-
-      case shiftEnums.projections:
-        activeShift!.value = 'Projection';
-        shiftScreen!.value = ProjectionTab();
+      case 'Expenses':
+        activeShift!.value = 'Expenses';
+        shiftScreen!.value = ExpensesScreen();
         break;
     }
     activeShift!.refresh();

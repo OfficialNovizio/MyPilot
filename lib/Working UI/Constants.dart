@@ -4,6 +4,14 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+
+class Shifter {
+  dynamic route; // can be enum or String
+  String? title;
+
+  Shifter({this.route, this.title});
+}
 
 double height = Get.height;
 double width = Get.width;
@@ -62,8 +70,14 @@ void showSnackBar(String? title, String? subtitle, {Duration duration = const Du
   ).show(navigatorKey.currentContext!);
 }
 
+enum ButtonState {
+  init,
+  loading,
+  done,
+}
+
 class ProjectColors {
-  static const blackColor = Color(0xff494846);
+  static const blackColor = Color(0xff1f1f1f);
   static const pureBlackColor = Colors.black;
   static const errorColor = Color(0xffff3737);
   static const brownColor = Color(0xff9B866B);
@@ -76,7 +90,6 @@ class ProjectColors {
   static const backgroundColor = Color(0xffFCFBF4);
 }
 
-//
 // class Methods {
 //   static const loginUser = 'v1/user/login';
 //   static const logoutUser = 'v1/user/logout';
@@ -193,14 +206,15 @@ class ProjectColors {
 //   static const refunded = 3;
 // }
 //
-// Widget loader({invertColor = false}) {
-//   return Center(
-//     child: CircularProgressIndicator(
-//       color: !invertColor ? ProjectColors.blackColor : ProjectColors.whiteColor,
-//       strokeWidth: height * .002,
-//     ),
-//   );
-// }
+Widget loader({animationType = LoadingAnimationWidget.staggeredDotsWave, size = .04}) {
+  return Center(
+    child: animationType(
+      color: ProjectColors.whiteColor,
+      size: height * size,
+    ),
+  );
+}
+
 //
 // void popupLoader() {
 //   Get.dialog(
@@ -291,36 +305,37 @@ Widget circularButton({
 //   );
 // }
 //
-// Widget outLinedButton({
-//   String? title = "",
-//   VoidCallback? callback,
-//   double? cHeight = .035,
-//   double? fontSize = .018,
-//   double? cWidth = .8,
-//   bool? loading = false,
-//   Color? color = ProjectColors.pureBlackColor,
-// }) {
-//   return GestureDetector(
-//     onTap: callback,
-//     child: Container(
-//       height: height * cHeight!,
-//       width: width * cWidth!,
-//       decoration: BoxDecoration(
-//         color: Colors.transparent,
-//         border: Border.all(color: color!),
-//       ),
-//       alignment: Alignment.center,
-//       child: loading!
-//           ? loader(invertColor: true)
-//           : textWidget(
-//         text: title,
-//         fontSize: fontSize,
-//         fontFamily: 'bestlineSans',
-//         color: color,
-//       ),
-//     ),
-//   );
-// }
+Widget outLinedButton({
+  String? title = "",
+  VoidCallback? callback,
+  double? cHeight = .035,
+  double? fontSize = .018,
+  double? cWidth = .8,
+  bool? loading = false,
+  Color? color = ProjectColors.pureBlackColor,
+}) {
+  return GestureDetector(
+    onTap: callback,
+    child: Container(
+      height: height * cHeight!,
+      width: width * cWidth!,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border.all(color: color!),
+      ),
+      alignment: Alignment.center,
+      child: loading!
+          ? loader()
+          : textWidget(
+              text: title,
+              fontSize: fontSize,
+              fontFamily: 'bestlineSans',
+              color: color,
+            ),
+    ),
+  );
+}
+
 //
 Widget normalButton({
   String? title = "",
@@ -354,16 +369,7 @@ Widget normalButton({
       ),
       // alignment: Alignment.center,
       child: loading == true
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // loader(
-                //   invertColor: !invertColors!,
-                // ),
-              ],
-            )
+          ? loader(size: .03)
           : needIcon == true
               ? Row(
                   mainAxisSize: MainAxisSize.min,
@@ -532,7 +538,7 @@ Widget normalButton({
 //
 Widget textWidget({
   String? text,
-  double? fontSize,
+  double? fontSize = .015,
   Color? color = ProjectColors.pureBlackColor,
   FontWeight? fontWeight = FontWeight.w400,
   bool? needContainer = false,

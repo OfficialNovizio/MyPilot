@@ -18,15 +18,20 @@ class PayMarker {
 }
 
 class AccountController extends GetxController {
-  final daysShort = const [
-    'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'
-  ];
+  final daysShort = const ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   final payFrequency = const ["Weekly", "By Weekly", "Monthly"];
 
   final colorChoices = const [
-    '0xff16a34a','0xff2563eb','0xffe11d48','0xff0ea5e9',
-    '0xff10b981','0xfff59e0b','0xff8b5cf6','0xff14b8a6','0xffef4444'
+    '0xff16a34a',
+    '0xff2563eb',
+    '0xffe11d48',
+    '0xff0ea5e9',
+    '0xff10b981',
+    '0xfff59e0b',
+    '0xff8b5cf6',
+    '0xff14b8a6',
+    '0xffef4444'
   ];
 
   RxList<TextForm>? savedJobs = <TextForm>[].obs;
@@ -70,8 +75,7 @@ class AccountController extends GetxController {
     }
   }
 
-  DateTime _addDays(DateTime d, int n) =>
-      DateTime(d.year, d.month, d.day + n);
+  DateTime _addDays(DateTime d, int n) => DateTime(d.year, d.month, d.day + n);
 
   /// ---------------- PUBLIC METHODS ----------------
 
@@ -112,9 +116,7 @@ class AccountController extends GetxController {
       statPay: controllers![6].controller.text,
     );
 
-    job = listData.isEmpty
-        ? Job(status: 1, message: 'created data', data: [newItem])
-        : Job.fromJson(jsonDecode(listData));
+    job = listData.isEmpty ? Job(status: 1, message: 'created data', data: [newItem]) : Job.fromJson(jsonDecode(listData));
 
     Get.back();
 
@@ -143,14 +145,9 @@ class AccountController extends GetxController {
   }
 
   /// payday markers for calendar
-  Map<DateTime, List<PayMarker>> computePayMarkers({
-    required DateTime focusedDay,
-    int bufferDays = 14,
-  }) {
-    final start = _day(DateTime(focusedDay.year, focusedDay.month, 1)
-        .subtract(Duration(days: bufferDays)));
-    final end = _day(DateTime(focusedDay.year, focusedDay.month + 1, 0)
-        .add(Duration(days: bufferDays)));
+  Map<DateTime, List<PayMarker>> computePayMarkers({required DateTime focusedDay, int bufferDays = 14}) {
+    final start = _day(DateTime(focusedDay.year, focusedDay.month, 1).subtract(Duration(days: bufferDays)));
+    final end = _day(DateTime(focusedDay.year, focusedDay.month + 1, 0).add(Duration(days: bufferDays)));
 
     final out = <DateTime, List<PayMarker>>{};
 

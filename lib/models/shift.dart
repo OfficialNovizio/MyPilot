@@ -100,11 +100,15 @@ class ShiftMonth {
 class ShiftDay {
   String? date; // "YYYY-MM-DD" (keep String for simplicity)
   List<AllShifts>? data; // shifts for that day
+  double? totalDayIncome;
+  double? totalWorkingHour;
 
-  ShiftDay({this.date, this.data});
+  ShiftDay({this.date, this.data,this.totalDayIncome,this.totalWorkingHour});
 
   ShiftDay.fromJson(Map<String, dynamic>? json) {
     date = json?['date'];
+    totalDayIncome = json?['totalDayIncome'];
+    totalWorkingHour = json?['totalWorkingHour'];
     final list = json?['data'] as List?;
     if (list != null) {
       data = <AllShifts>[];
@@ -117,6 +121,8 @@ class ShiftDay {
   Map<String, dynamic> toJson() {
     final m = <String, dynamic>{};
     m['date'] = date;
+    m['totalDayIncome'] = totalDayIncome;
+    m['totalWorkingHour'] = totalWorkingHour;
     if (data != null) m['data'] = data!.map((e) => e.toJson()).toList();
     return m;
   }
@@ -132,6 +138,7 @@ class AllShifts {
   JobData? jobFrom; // nested object
   bool? isStat;
   String? totalHours;
+  double? income;
 
   AllShifts({
     this.id,
@@ -143,6 +150,7 @@ class AllShifts {
     this.jobFrom,
     this.isStat = false,
     this.totalHours,
+    this.income,
   });
 
   AllShifts.fromJson(Map<String, dynamic>? json) {
@@ -153,6 +161,7 @@ class AllShifts {
     breakMin = json?['breakMin'];
     notes = json?['notes'];
     totalHours = json?['totalHours'];
+    income = json?['income'];
 
     final jf = json?['jobFrom'];
     if (jf is Map<String, dynamic>) {
@@ -165,6 +174,7 @@ class AllShifts {
 
     isStat = json?['isStat'];
     totalHours = json?['totalHours'];
+    income = json?['income'];
   }
 
   Map<String, dynamic> toJson() {

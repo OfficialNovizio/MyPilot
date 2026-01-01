@@ -6,7 +6,9 @@ import 'package:emptyproject/screens/totals_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../Deposit/Debt Screen.dart';
 import '../Priotizer/Priotizer Screen.dart';
+import '../Shift/Projection/Demo Screen.dart';
 
 enum ScreenEnums {
   shifts,
@@ -40,14 +42,12 @@ class DashboardController extends GetxController {
   void changeCurrentScreen(ScreenEnums screen) {
     switch (screen) {
       case ScreenEnums.shifts:
-
         activeIcon!.value = 'Shifts';
         currentScreen!.value = ShiftBody();
-
         break;
       case ScreenEnums.debts:
         activeIcon!.value = 'Debts';
-        currentScreen!.value = AnalyticsScreen();
+        currentScreen!.value = DebtBody();
         break;
       case ScreenEnums.prioritizer:
         activeIcon!.value = 'Prioritizer';
@@ -56,7 +56,6 @@ class DashboardController extends GetxController {
       case ScreenEnums.account:
         activeIcon!.value = 'Account';
         currentScreen!.value = AccountScreen();
-
         break;
     }
     activeIcon!.refresh();

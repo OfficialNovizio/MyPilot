@@ -1,4 +1,5 @@
 import 'package:emptyproject/Working%20UI/Constants.dart';
+import 'package:emptyproject/Working%20UI/Shift/Projection/Projection.dart';
 import 'package:emptyproject/models/TextForm.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,10 +7,110 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import 'Controllers.dart';
+import 'Shift/Shift Getx.dart';
+
+class SegmentTabs extends StatelessWidget {
+  SegmentTabs({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    required this.items,
+    this.highlightValue,
+    this.padding,
+    this.bgOpacity = 0.05,
+    this.borderOpacity = 0.07,
+    this.thumbOpacity = 0.10,
+    this.cWidth = 1.0,
+  });
+
+  /// selected item label (must exist in items)
+  final String value;
+
+  /// callback gives selected label
+  final ValueChanged<String> onChanged;
+
+  /// labels for tabs
+  final List<String> items;
+
+  /// optional: which label should use green highlight when active
+  final String? highlightValue;
+
+  /// optional outer padding
+  final EdgeInsets? padding;
+
+  final double bgOpacity;
+  final double borderOpacity;
+  final double thumbOpacity;
+  final double? cWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    // Map each label to itself for Cupertino control
+    final Map<String, Widget> children = {
+      for (final label in items)
+        label: _SegItem(
+          text: label,
+          active: value == label,
+          highlight: highlightValue == label,
+        ),
+    };
+
+    return Container(
+      width: width * cWidth!,
+      decoration: BoxDecoration(
+        color: ProjectColors.whiteColor.withOpacity(bgOpacity),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: ProjectColors.whiteColor.withOpacity(borderOpacity)),
+      ),
+      child: CupertinoSlidingSegmentedControl<String>(
+        groupValue: value,
+        thumbColor: ProjectColors.greenColor.withOpacity(thumbOpacity),
+        backgroundColor: Colors.transparent,
+        padding: EdgeInsetsGeometry.symmetric(vertical: height * .001),
+        onValueChanged: (v) {
+          if (v != null) onChanged(v);
+        },
+        children: children,
+      ),
+    );
+  }
+}
+
+class _SegItem extends StatelessWidget {
+  const _SegItem({
+    required this.text,
+    required this.active,
+    this.highlight = false,
+  });
+
+  final String text;
+  final bool active;
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color activeColor = highlight ? ProjectColors.lightGreenColor : ProjectColors.whiteColor;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: height * 0.008),
+      child: Center(
+        child: textWidget(
+          text: text,
+          fontSize: 0.016,
+          fontWeight: FontWeight.w800,
+          color: active ? activeColor : ProjectColors.whiteColor.withOpacity(0.55),
+          fontFamily: "poppins",
+        ),
+      ),
+    );
+  }
+}
 
 class DarkCard extends StatelessWidget {
   final Widget child;
-  const DarkCard({required this.child});
+  final Color? color;
+  const DarkCard({required this.child, this.color = ProjectColors.blackColor});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +121,7 @@ class DarkCard extends StatelessWidget {
         vertical: height * .018,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xff101010),
+        color: color,
         borderRadius: BorderRadius.circular(20),
       ),
       child: child,
@@ -31,12 +132,14 @@ class DarkCard extends StatelessWidget {
 class Popup extends StatelessWidget {
   final Widget? body;
   final String? title;
-  Popup({this.body, this.title = ''});
+  final Color? color;
+  Popup({this.body, this.title = '', this.color = ProjectColors.whiteColor});
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
       child: CupertinoPageScaffold(
+        backgroundColor: color,
         navigationBar: CupertinoNavigationBar(
           transitionBetweenRoutes: false,
           middle: textWidget(
@@ -44,8 +147,9 @@ class Popup extends StatelessWidget {
             fontSize: .025,
             fontWeight: FontWeight.w600,
             textAlign: TextAlign.center,
+            color: color == ProjectColors.whiteColor ? ProjectColors.pureBlackColor : ProjectColors.whiteColor,
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: color,
           leading: Padding(
             padding: EdgeInsets.only(top: height * .01),
             child: GestureDetector(
@@ -56,6 +160,7 @@ class Popup extends StatelessWidget {
                 text: "close",
                 fontSize: .02,
                 fontWeight: FontWeight.w500,
+                color: color == ProjectColors.whiteColor ? ProjectColors.pureBlackColor : ProjectColors.whiteColor,
               ),
             ),
           ),
@@ -450,243 +555,194 @@ class _CupertinoTimePickerFieldState extends State<CupertinoTimePickerField> {
   }
 }
 
-class TimePicker extends StatefulWidget {
-  String? updatedValue;
-  TimePicker({this.updatedValue = ''});
-  @override
-  State<TimePicker> createState() => _TimePickerState();
-}
-
-class _TimePickerState extends State<TimePicker> {
-  @override
-  Widget build(BuildContext context) {
-    return Popup(
-      title: 'Select Date',
-      body: SizedBox(
-        height: height * .5,
-        child: Column(
-          children: [
-            SizedBox(
-              height: height * .4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.time,
-                use24hFormat: false,
-                minuteInterval: 1,
-                initialDateTime: DateTime.now(),
-                onDateTimeChanged: (dt) {
-                  widget.updatedValue = DateFormat('HH:mm').format(dt);
-                },
-              ),
-            ),
-            normalButton(
-              title: "Done",
-              cWidth: .4,
-              callback: () {},
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-Future<DateTime?> pickCupertinoDateTime(
-  BuildContext context, {
-  required DateTime baseDate, // date part you want to keep (e.g., selected day)
-  DateTime? initialTime, // if null, uses 09:00 on baseDate
-  int minuteInterval = 1,
-  bool? use24h = false,
-  bool minutesOnly = false,
-  int minuteStep = 1, // for minutesOnly (must divide 60)
-}) async {
-  // seed time
-  final seed = initialTime ?? DateTime(baseDate.year, baseDate.month, baseDate.day, 9, 0);
-
-  if (minutesOnly) {
-    // pick only minutes; keep hour from seed
-    final pickedMin = await _pickMinutesCupertino(
-      context,
-      initial: seed.minute,
-      step: minuteStep,
-    );
-    if (pickedMin == null) return null;
-    return DateTime(baseDate.year, baseDate.month, baseDate.day, seed.hour, pickedMin);
-  }
-
-  final use24 = use24h ?? MediaQuery.of(context).alwaysUse24HourFormat;
-  DateTime temp = seed;
-
-  final picked = await showCupertinoModalPopup<DateTime?>(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => Material(
-      color: Colors.white,
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Toolbar
-            Row(
-              children: [
-                CupertinoButton(
-                  onPressed: () => Get.back(),
-                  child: const Text('Cancel'),
-                ),
-                const Spacer(),
-                CupertinoButton(
-                  onPressed: () => Navigator.pop(
-                    context,
-                    DateTime(baseDate.year, baseDate.month, baseDate.day, temp.hour, temp.minute),
-                  ),
-                  child: const Text('Done', style: TextStyle(fontWeight: FontWeight.w600)),
-                ),
-              ],
-            ),
-            // Time wheel
-            SizedBox(
-              height: 216,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.time,
-                minuteInterval: minuteInterval,
-                use24hFormat: false,
-                initialDateTime: seed,
-                onDateTimeChanged: (dt) {
-                  temp = dt;
-                  print(dt);
-                },
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    ),
-  );
-
-  return picked; // DateTime? with your baseDate's Y-M-D and picked H:M
-}
-
-/// Optional: formatter if you need a display string (e.g., "2025-11-10 09:10 AM")
-String? formatDateTime(DateTime? dt, {String pattern = 'yyyy-MM-dd hh:mm a', String? locale}) {
-  if (dt == null) return null;
-  return DateFormat(pattern, locale).format(dt);
-}
-
-// ---------- minutes-only wheel ----------
-Future<int?> _pickMinutesCupertino(
-  BuildContext context, {
-  required int initial,
-  int step = 1,
-  String doneText = 'Done',
-  String cancelText = 'Cancel',
-}) async {
-  final s = (step <= 0 || 60 % step != 0) ? 1 : step;
-  final values = [for (int m = 0; m < 60; m += s) m];
-  int idx = (initial ~/ s).clamp(0, values.length - 1);
-  int tempIndex = idx;
-
-  return showCupertinoModalPopup<int>(
-    context: context,
-    builder: (_) => Material(
-      color: Colors.white,
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                CupertinoButton(
-                  onPressed: () => Navigator.pop(context, null),
-                  child: Text(cancelText),
-                ),
-                const Spacer(),
-                CupertinoButton(
-                  onPressed: () => Navigator.pop(context, values[tempIndex]),
-                  child: Text(doneText, style: const TextStyle(fontWeight: FontWeight.w600)),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 216,
-              child: CupertinoPicker(
-                itemExtent: 32,
-                scrollController: FixedExtentScrollController(initialItem: idx),
-                onSelectedItemChanged: (i) => tempIndex = i,
-                children: List.generate(values.length, (i) => Center(child: Text(values[i].toString().padLeft(2, '0')))),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-// -------- minutes-only picker (single wheel) --------
+// class TimePicker extends StatefulWidget {
+//   String? updatedValue;
+//   TimePicker({this.updatedValue = ''});
+//   @override
+//   State<TimePicker> createState() => _TimePickerState();
+// }
 //
-// Future<int?> _pickMinutesCupertino(
-//   BuildContext context, {
-//   required int initial,
-//   int step = 1, // must divide 60
-//   String doneText = 'Done',
-//   String cancelText = 'Cancel',
-// }) async {
-//   final s = (step <= 0 || 60 % step != 0) ? 1 : step;
-//   final values = [for (int m = 0; m < 60; m += s) m];
-//   int idx = (initial ~/ s).clamp(0, values.length - 1);
-//   int tempIndex = idx;
-//
-//   return showCupertinoModalPopup<int>(
-//     context: context,
-//     builder: (_) => Material(
-//       color: ProjectColors.whiteColor,
-//       child: SafeArea(
-//         top: false,
+// class _TimePickerState extends State<TimePicker> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Popup(
+//       title: 'Select Date',
+//       body: SizedBox(
+//         height: height * .5,
 //         child: Column(
-//           mainAxisSize: MainAxisSize.min,
 //           children: [
-//             Row(
-//               children: [
-//                 CupertinoButton(
-//                   onPressed: () => Navigator.pop(context, null),
-//                   child: textWidget(text: cancelText, fontSize: .018, color: ProjectColors.pureBlackColor),
-//                 ),
-//                 const Spacer(),
-//                 CupertinoButton(
-//                   onPressed: () => Navigator.pop(context, values[tempIndex]),
-//                   child: textWidget(text: doneText, fontSize: .018, color: ProjectColors.pureBlackColor),
-//                 ),
-//               ],
-//             ),
 //             SizedBox(
-//               height: height * .4, // keep your sizing scheme
-//               child: CupertinoPicker(
-//                 itemExtent: 32,
-//                 scrollController: FixedExtentScrollController(initialItem: idx),
-//                 onSelectedItemChanged: (i) => tempIndex = i,
-//                 children: List<Widget>.generate(
-//                   values.length,
-//                   (i) => Center(
-//                     child: textWidget(
-//                       text: values[i].toString().padLeft(2, '0'),
-//                       fontSize: .02,
-//                       color: ProjectColors.pureBlackColor,
-//                     ),
-//                   ),
-//                 ),
+//               height: height * .4,
+//               child:  CupertinoDatePicker(
+//                 mode: CupertinoDatePickerMode.time,
+//                 use24hFormat: false,
+//                 minuteInterval: 1,
+//                 initialDateTime: DateTime.now(),
+//                 onDateTimeChanged: (dt) {
+//                   widget.updatedValue = DateFormat('HH:mm').format(dt);
+//                 },
 //               ),
+//             ),
+//             normalButton(
+//               title: "Done",
+//               cWidth: .4,
+//               callback: () {},
 //             ),
 //           ],
 //         ),
 //       ),
-//     ),
-//   );
+//     );
+//   }
 // }
-//
-// // tiny local util
-// DateTime _toToday(TimeOfDay t) {
-//   final now = DateTime.now();
-//   return DateTime(now.year, now.month, now.day, t.hour, t.minute);
-// }
+class PickShiftTime extends StatelessWidget {
+  final int columnIndex;
+  const PickShiftTime({super.key, this.columnIndex = 0});
+
+  bool _isBreak(ShiftController shift) => shift.newShiftColumns![columnIndex].title == 'Unpaid break time';
+
+  DateTime _defaultSeed(ShiftController shift) {
+    final d = shift.selectedDay!.value;
+    return DateTime(d.year, d.month, d.day, 9, 0);
+  }
+
+  DateTime _parseOrDefault(ShiftController shift) {
+    final text = shift.newShiftColumns![columnIndex].controller.text.trim();
+    if (text.isEmpty) return _defaultSeed(shift);
+
+    final isBreak = _isBreak(shift);
+    final format = isBreak ? DateFormat('yyyy-MM-dd HH:mm:ss.SSS') : DateFormat('yyyy-MM-dd hh:mm a');
+
+    final dt = format.parse(text);
+    return DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute);
+  }
+
+  void _setText(ShiftController shift, DateTime dt) {
+    final isBreak = _isBreak(shift);
+    final format = isBreak ? DateFormat('yyyy-MM-dd HH:mm:ss.SSS') : DateFormat('yyyy-MM-dd hh:mm a');
+
+    shift.newShiftColumns![columnIndex].controller.text = format.format(dt);
+    shift.newShiftColumns!.refresh();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isBreak = _isBreak(shift);
+    final seed = _parseOrDefault(shift);
+
+    return SizedBox(
+      height: height * .5,
+      child: Popup(
+        title: 'Pick Shift Timing',
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: height * .35,
+              child: isBreak
+                  ? CupertinoPicker(
+                      itemExtent: 32,
+                      scrollController: FixedExtentScrollController(
+                        initialItem: seed.minute.clamp(0, 59),
+                      ),
+                      onSelectedItemChanged: (m) {
+                        // break stored as date with only minutes used
+                        final dt = DateTime(seed.year, seed.month, seed.day, 0, m);
+                        _setText(shift, dt);
+                      },
+                      children: List.generate(
+                        60,
+                        (m) => Center(child: Text(m.toString().padLeft(2, '0'))),
+                      ),
+                    )
+                  : CupertinoDatePicker(
+                      mode: CupertinoDatePickerMode.time,
+                      minuteInterval: 1,
+                      use24hFormat: false,
+                      initialDateTime: seed,
+                      onDateTimeChanged: (dt) {
+                        final updated = DateTime(seed.year, seed.month, seed.day, dt.hour, dt.minute);
+                        _setText(shift, updated);
+                      },
+                    ),
+            ),
+            SizedBox(height: height * .01),
+            normalButton(
+              title: 'Done',
+              cWidth: .4,
+              callback: Get.back,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AppDatePicker {
+  AppDatePicker._();
+
+  /// Returns picked DateTime or null if user cancels.
+  static Future<DateTime?> pickDate({
+    DateTime? initialDate,
+    DateTime? minDate,
+    DateTime? maxDate,
+    String title = "Pick date",
+    Color sheetColor = ProjectColors.blackColor,
+  }) async {
+    final now = DateTime.now();
+    final DateTime safeMin = minDate ?? now;
+    final DateTime safeMax = maxDate ?? DateTime(now.year + 5);
+
+    DateTime temp = initialDate ?? safeMin;
+    if (temp.isBefore(safeMin)) temp = safeMin;
+    if (temp.isAfter(safeMax)) temp = safeMax;
+
+    DateTime? result;
+
+    await showCupertinoModalPopup(
+      context: navigatorKey.currentContext!,
+      barrierColor: ProjectColors.blackColor.withOpacity(0.5),
+      builder: (ctx) {
+        return Popup(
+          color: ProjectColors.whiteColor,
+          title: title,
+          body: SizedBox(
+            height: height * .5,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: height * .4,
+                  child: CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.date,
+                    backgroundColor: ProjectColors.whiteColor,
+                    initialDateTime: temp,
+                    minimumDate: safeMin,
+                    maximumDate: safeMax,
+                    onDateTimeChanged: (val) => temp = val,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: height * .04),
+                  child: Center(
+                    child: normalButton(
+                      title: "Done",
+                      bColor: ProjectColors.greenColor,
+                      cWidth: .5,
+                      loading: false,
+                      invertColors: true,
+                      callback: () {
+                        result = temp;
+                        Get.back();
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    return result;
+  }
+}
