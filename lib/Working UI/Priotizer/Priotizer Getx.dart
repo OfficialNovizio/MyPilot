@@ -173,7 +173,7 @@ class ProitizerGetx extends GetxController {
     taskModel.value = data;
 
     if (data.data!.isEmpty) {
-      state.value == ButtonState.init;
+      state.value = ButtonState.init;
       state.refresh();
     } else {
       tasks.assignAll(data.data ?? <Task>[]);

@@ -34,6 +34,8 @@ class _DebtBodyState extends State<DebtBody> {
               child: Column(children: [
                 SizedBox(height: height * .02),
                 SegmentTabs(
+                  cWidth: .7,
+                  borderOpacity: 0,
                   value: debt.activeShift!.value,
                   highlightValue: debt.activeShift!.value,
                   padding: EdgeInsets.zero,

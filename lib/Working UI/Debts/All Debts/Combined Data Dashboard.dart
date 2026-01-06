@@ -5,6 +5,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:get/get.dart';
 
 import '../../Constants.dart';
+import '../Debt Dashboard/New Data 2.dart';
+import '../Debt Dashboard/New Data.dart';
+import '../Debt Dashboard/Payday Buffer.dart';
+import '../Debt Dashboard/Visa Cards.dart';
 
 // -------------------- SCREEN --------------------
 
@@ -19,10 +23,10 @@ class DebtDashboardV1 extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: height * 0.04),
-        _InsightCard(
+        InsightCard(
           title: "Payday buffer",
           leftMain: "\$430",
-          leftTag: const _Tag(text: "Safe", color: ProjectColors.greenColor),
+          leftTag: const Tag(text: "Safe", color: ProjectColors.greenColor),
           leftSub: "• -\$320 this month",
           rightWidget: _Ring(
             value: 0.78,
@@ -32,10 +36,12 @@ class DebtDashboardV1 extends StatelessWidget {
             centerBottom: "Safe",
             ringColor: ProjectColors.greenColor,
           ),
-          onTap: () {},
+          onTap: () async {
+            showCupertinoModalPopup(context: context, builder: (_) => NowToPaydayScreen());
+          },
         ),
         SizedBox(height: height * 0.01),
-        _InsightCard(
+        InsightCard(
           title: "Interest burn",
           leftMain: "\$92",
           leftSub: "(Visa \$65)",
@@ -47,7 +53,10 @@ class DebtDashboardV1 extends StatelessWidget {
             centerBottom: "High",
             ringColor: ProjectColors.yellowColor,
           ),
-          onTap: () {},
+          onTap: () {
+            showCupertinoModalPopup(context: context, builder: (_) => ComparisonCardsHomeScreen());
+            // showCupertinoModalPopup(context: context, builder: (_) => VisaCardInsights());
+          },
         ),
         SizedBox(height: height * 0.01),
         GestureDetector(
@@ -336,8 +345,8 @@ class _SegItem extends StatelessWidget {
   }
 }
 
-class _InsightCard extends StatelessWidget {
-  const _InsightCard({
+class InsightCard extends StatelessWidget {
+  const InsightCard({
     required this.title,
     required this.leftMain,
     this.leftTag,
@@ -358,6 +367,7 @@ class _InsightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: onTap,
       child: DarkCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -445,8 +455,8 @@ class _PlainCard extends StatelessWidget {
   }
 }
 
-class _Tag extends StatelessWidget {
-  const _Tag({required this.text, required this.color});
+class Tag extends StatelessWidget {
+  const Tag({required this.text, required this.color});
   final String text;
   final Color color;
 

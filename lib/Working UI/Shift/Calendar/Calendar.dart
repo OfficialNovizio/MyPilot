@@ -10,7 +10,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../models/Overview Model.dart';
-import '../../../screens/salary_detailed_screen.dart';
 import '../../Account/Account.dart';
 
 class Calendar extends StatefulWidget {
@@ -191,7 +190,7 @@ class _MonthSummary extends StatelessWidget {
       // final hours = shift.combinedHours!.value;
 
       return GestureDetector(
-        onTap: () => Get.to(() => SalaryDetailsScreen(month: DateTime.now())),
+        onTap: () {},
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: width * .01),
           padding: EdgeInsets.all(height * .018),

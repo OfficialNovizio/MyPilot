@@ -6,6 +6,9 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
+import '../models/Expense Model.dart';
+import 'Controllers.dart';
+
 class Shifter {
   dynamic route; // can be enum or String
   String? title;
@@ -19,6 +22,16 @@ final navigatorKey = GlobalKey<NavigatorState>();
 String checkTimeline(TimeOfDay t) => t.hour < 12 ? 'AM' : 'PM';
 String monthName(DateTime d) => DateFormat.MMMM().format(d);
 String monthDate(DateTime d) => DateFormat.d().format(d);
+String formatDate(DateTime d, {type = 'dd/MM/yyyy'}) => DateFormat(type).format(d);
+String formatCardNo(String s) {
+  final d = s.replaceAll(RegExp(r'[^0-9]'), '');
+  return List.generate((d.length / 4).ceil(), (i) {
+    final start = i * 4;
+    final end = (start + 4 > d.length) ? d.length : start + 4;
+    return d.substring(start, end);
+  }).join(' ');
+}
+
 String toHmAm(String input, {bool onlyMinutes = false}) {
   DateTime dt;
   final hasAmPm = RegExp(r'\bAM\b|\bPM\b', caseSensitive: false).hasMatch(input);
@@ -74,6 +87,31 @@ enum ButtonState {
   init,
   loading,
   done,
+}
+
+double? toDouble(String? v) {
+  if (v == null) return null;
+  final s = v.toString().trim();
+  if (s.isEmpty) return null;
+  return double.tryParse(s.replaceAll(',', ''));
+}
+
+double sumWhere(bool Function(ExpenseItem e) test) {
+  return expense.expenses // optional
+      .where(test)
+      .fold(0.0, (s, e) => s + e.amount);
+}
+
+String money(double v) {
+  final n = v.round();
+  final s = n.toString();
+  final buf = StringBuffer();
+  for (int i = 0; i < s.length; i++) {
+    final pos = s.length - i;
+    buf.write(s[i]);
+    if (pos > 1 && pos % 3 == 1) buf.write(',');
+  }
+  return '\$$buf';
 }
 
 class ProjectColors {
@@ -321,6 +359,7 @@ Widget outLinedButton({
       width: width * cWidth!,
       decoration: BoxDecoration(
         color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: color!),
       ),
       alignment: Alignment.center,

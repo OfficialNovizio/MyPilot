@@ -1,14 +1,9 @@
 import 'package:emptyproject/Working%20UI/Account/Account.dart';
-import 'package:emptyproject/Working%20UI/Controllers.dart';
 import 'package:emptyproject/Working%20UI/Shift/Shift%20Screen.dart';
-import 'package:emptyproject/screens/analytic_screen.dart';
-import 'package:emptyproject/screens/totals_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../Deposit/Debt Screen.dart';
+import '../Debts/Debt Screen.dart';
 import '../Priotizer/Priotizer Screen.dart';
-import '../Shift/Projection/Demo Screen.dart';
 
 enum ScreenEnums {
   shifts,

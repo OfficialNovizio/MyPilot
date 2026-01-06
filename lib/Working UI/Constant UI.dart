@@ -18,7 +18,7 @@ class SegmentTabs extends StatelessWidget {
     required this.items,
     this.highlightValue,
     this.padding,
-    this.bgOpacity = 0.05,
+    this.bgOpacity = 0.1,
     this.borderOpacity = 0.07,
     this.thumbOpacity = 0.10,
     this.cWidth = 1.0,
@@ -60,7 +60,7 @@ class SegmentTabs extends StatelessWidget {
       width: width * cWidth!,
       decoration: BoxDecoration(
         color: ProjectColors.whiteColor.withOpacity(bgOpacity),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(40),
         border: Border.all(color: ProjectColors.whiteColor.withOpacity(borderOpacity)),
       ),
       child: CupertinoSlidingSegmentedControl<String>(
@@ -116,10 +116,7 @@ class DarkCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: width * .02,
-        vertical: height * .018,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: width * .02, vertical: height * .018),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(20),
@@ -151,7 +148,7 @@ class Popup extends StatelessWidget {
           ),
           backgroundColor: color,
           leading: Padding(
-            padding: EdgeInsets.only(top: height * .01),
+            padding: EdgeInsets.only(top: height * .0),
             child: GestureDetector(
               onTap: () {
                 Get.back();
@@ -189,6 +186,7 @@ class MyFormField extends StatelessWidget {
   final bool? enable;
   final EdgeInsetsGeometry? padding;
   final String? Function(String?)? validator;
+  final bool? inverseColor;
 
   MyFormField({
     required this.form,
@@ -202,19 +200,13 @@ class MyFormField extends StatelessWidget {
     this.needBorder = false,
     this.enable = true,
     this.obscureText = false,
+    this.inverseColor = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: needCustomPadding == true
-          ? padding!
-          : EdgeInsets.fromLTRB(
-              width * .15,
-              height * .02,
-              width * .15,
-              0,
-            ),
+      padding: needCustomPadding == true ? padding! : EdgeInsets.fromLTRB(width * .15, height * .02, width * .15, 0),
       child: TextFormField(
         controller: form.controller,
         validator: validator,
@@ -227,17 +219,21 @@ class MyFormField extends StatelessWidget {
           labelStyle: TextStyle(
             fontFamily: "poppins",
             fontSize: height * .018,
-            color: form.controller.text.isEmpty ? ProjectColors.blackColor.withOpacity(0.7) : ProjectColors.blackColor,
+            color: inverseColor!
+                ? (form.controller.text.isEmpty ? ProjectColors.whiteColor.withOpacity(0.7) : ProjectColors.whiteColor)
+                : (form.controller.text.isEmpty ? ProjectColors.blackColor.withOpacity(0.7) : ProjectColors.blackColor),
           ),
           enabledBorder: UnderlineInputBorder(
             borderSide: BorderSide(
-              color: form.controller.text.isEmpty ? ProjectColors.blackColor.withOpacity(0.7) : ProjectColors.blackColor,
+              color: inverseColor!
+                  ? (form.controller.text.isEmpty ? ProjectColors.whiteColor.withOpacity(0.7) : ProjectColors.whiteColor)
+                  : (form.controller.text.isEmpty ? ProjectColors.blackColor.withOpacity(0.7) : ProjectColors.blackColor),
               width: 1,
             ),
           ),
-          focusedBorder: const UnderlineInputBorder(
+          focusedBorder: UnderlineInputBorder(
             borderSide: BorderSide(
-              color: ProjectColors.blackColor,
+              color: inverseColor! ? ProjectColors.whiteColor : ProjectColors.blackColor,
               width: 1,
             ),
           ),
@@ -253,7 +249,7 @@ class MyFormField extends StatelessWidget {
         style: TextStyle(
           fontFamily: "poppins",
           fontSize: height * .018,
-          color: ProjectColors.blackColor,
+          color: inverseColor! ? ProjectColors.whiteColor : ProjectColors.blackColor,
         ),
       ),
     );

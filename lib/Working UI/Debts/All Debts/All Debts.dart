@@ -1,11 +1,16 @@
 import 'package:emptyproject/Working%20UI/Constant%20UI.dart';
 import 'package:emptyproject/Working%20UI/Constants.dart';
 import 'package:emptyproject/Working%20UI/Shift/Projection/Projection.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../models/Debt Model.dart';
 import '../../Controllers.dart';
+import '../Debt Dashboard/Add New Debt.dart';
+import '../Debt Dashboard/New Data 2.dart';
+import '../Debt Dashboard/New Data.dart';
+import 'Combined Data Dashboard.dart';
 
 enum PayoffStrategy { snowball, avalanche, hybrid, manual }
 
@@ -18,33 +23,11 @@ class AllDebts extends StatefulWidget {
 
 class _AllDebtsState extends State<AllDebts> {
   PayoffStrategy _strategy = PayoffStrategy.snowball;
-
   // Mock data (replace with your models/state)
   final List<_DebtItem> _debts = const [
-    _DebtItem(
-      title: 'Car Loan',
-      typeLabel: 'Loan',
-      balance: 7500,
-      apr: 4.2,
-      minPayment: 300,
-      dueDay: 15,
-    ),
-    _DebtItem(
-      title: 'Visa',
-      typeLabel: 'Credit Card',
-      balance: 1200,
-      apr: 18.9,
-      minPayment: 30,
-      dueDay: 7,
-    ),
-    _DebtItem(
-      title: 'Personal Loan',
-      typeLabel: 'Friend / IOU',
-      balance: 2300,
-      apr: 0.0,
-      minPayment: 100,
-      dueDay: 20,
-    ),
+    _DebtItem(title: 'Car Loan', typeLabel: 'Loan', balance: 7500, apr: 4.2, minPayment: 300, dueDay: 15),
+    _DebtItem(title: 'Visa', typeLabel: 'Credit Card', balance: 1200, apr: 18.9, minPayment: 30, dueDay: 7),
+    _DebtItem(title: 'Personal Loan', typeLabel: 'Friend / IOU', balance: 2300, apr: 0.0, minPayment: 100, dueDay: 20),
   ];
 
   // Mock allocation for the pay period (replace with your strategy engine output)
@@ -63,6 +46,17 @@ class _AllDebtsState extends State<AllDebts> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: height * .04),
+        InsightCard(
+          title: "Payday buffer",
+          leftMain: "\$430",
+          leftTag: const Tag(text: "Safe", color: ProjectColors.greenColor),
+          leftSub: "• -\$320 this month",
+          rightWidget: Container(),
+          onTap: () async {
+            showCupertinoModalPopup(context: context, builder: (_) => NowToPaydayScreen());
+          },
+        ),
+        SizedBox(height: height * .01),
         DarkCard(
           color: ProjectColors.greenColor,
           child: Row(
@@ -72,7 +66,7 @@ class _AllDebtsState extends State<AllDebts> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  textWidget(text: "Total Debt", fontSize: .02,fontWeight: FontWeight.bold),
+                  textWidget(text: "Total Debt", fontSize: .02, fontWeight: FontWeight.bold),
                   SizedBox(height: height * .01),
                   textWidget(text: "\$11,000", fontSize: .04, fontWeight: FontWeight.bold),
                 ],
@@ -104,7 +98,13 @@ class _AllDebtsState extends State<AllDebts> {
         SizedBox(height: height * .01),
         DarkCard(
           child: InkWell(
-            onTap: () {},
+            onTap: () {
+              showCupertinoModalPopup(
+                  context: context,
+                  builder: (_) => AddDebtBottomSheet(
+                        onSave: () {},
+                      ));
+            },
             borderRadius: BorderRadius.circular(16),
             child: Row(
               children: [
