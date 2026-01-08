@@ -113,20 +113,34 @@ String money(double v) {
   }
   return '\$$buf';
 }
-
 class ProjectColors {
-  static const blackColor = Color(0xff1f1f1f);
+  static const blackColor = Color(0xff2A2A2A);
   static const pureBlackColor = Colors.black;
   static const errorColor = Color(0xffff3737);
-  static const brownColor = Color(0xff9B866B);
+  static const brownColor = Color(0xffefe5d7);
   static const greenColor = Color(0xFF26CB26);
   static const lightGreenColor = Color(0xff36ff16);
-  final lightBlackColor = const Color(0xff363635);
   static const yellowColor = Color(0xfffffb16);
   static const purpleColor = Color(0xff662d61);
   static const whiteColor = Colors.white;
   static const backgroundColor = Color(0xffFCFBF4);
+
+  // ✅ NEW (palette inspired by your screenshot)
+  static const loginTop = Color(0xFF0E1A2B); // deep navy
+  static const loginMid = Color(0xFF0A1220); // darker navy
+  static const loginBottom = Color(0xFF070A12); // near-black
+  static const loginAccentBlue = Color(0xFF3E5BFF); // button blue
+  static const glassFill = Color(0x1AFFFFFF); // white @ 10%
+  static const glassStroke = Color(0x26FFFFFF); // white @ 15%
+  static const hintWhite = Color(0x99FFFFFF); // white @ 60%
+  static const navyTop = Color(0xFF24344D);      // top glow
+  static const navyMid = Color(0xFF111722);      // mid
+  static const navyBottom = Color(0xFF07080A);   // bottom
+  static const accentBlue = Color(0xFF3F5F8E);
+  static const gridLine = Color(0x26FFFFFF);     // 15% white
+  static const softText = Color(0xB3FFFFFF);
 }
+
 
 // class Methods {
 //   static const loginUser = 'v1/user/login';

@@ -101,14 +101,14 @@ class OverviewInsightsController extends GetxController {
         final expectedPrev = DateTime(selectedMonth.value.year, selectedMonth.value.month - 1, 1);
         previous!.value = overViewShifts.firstWhereOrNull((x) => monthName(x.month!) == monthName(expectedPrev))!;
       }
+      recompute();
     } else {
-      settings!.value = InsightSettings(isNewUser: true);
+      // settings!.value = InsightSettings(isNewUser: true);
     }
     current!.refresh();
     previous!.refresh();
     settings!.refresh();
     // buildWeeklySortedRows();
-    recompute();
   }
 
   /// Call this when you update user settings (goal, safe limit, etc.)

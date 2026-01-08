@@ -5,7 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:get/get.dart';
 
 import '../../Constants.dart';
-import '../Debt Dashboard/New Data 2.dart';
+import '../Debt Dashboard/Debt Insights.dart';
 import '../Debt Dashboard/New Data.dart';
 import '../Debt Dashboard/Payday Buffer.dart';
 import '../Debt Dashboard/Visa Cards.dart';
@@ -17,7 +17,7 @@ class DebtDashboardV1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ctrl = Get.put(_DebtDashCtrl());
+    final ctrl = Get.put(DebtDashCtrl());
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +198,7 @@ class DebtDashboardV1 extends StatelessWidget {
 
 // -------------------- CONTROLLER --------------------
 
-class _DebtDashCtrl extends GetxController {
+class DebtDashCtrl extends GetxController {
 // 0=Debts, 1=Plan, 2=Insights
   final tab = 2.obs;
 

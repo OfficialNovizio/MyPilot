@@ -45,12 +45,13 @@ class WeekStats {
 }
 
 class DebtController extends GetxController {
-  RxString? activeShift = "Dashboard".obs;
-  Rx<Widget>? shiftScreen = Rx<Widget>(DebtDashboardV1());
+  RxString? activeShift = "Debts".obs;
+  Rx<Widget>? shiftScreen = Rx<Widget>(AllDebts());
   Rx<DateTime>? selectedDay = DateTime.now().obs;
   RxString? period = 'weekly'.obs;
   RxString? metric = 'net'.obs;
   RxString? baseline = 'last'.obs;
+  RxString? debtResolve = 'Safest'.obs;
   Rxn<JobData> selectedJob = Rxn<JobData>();
   Rxn<MonthStats> monthStats = Rxn<MonthStats>();
   RxList<OverviewModel> combinedStats = RxList<OverviewModel>([]);
@@ -325,17 +326,12 @@ class DebtController extends GetxController {
   /// ======================= TABS ======================================
   /// ===================================================================
 
-  RxList<String> debtStats = ["Dashboard", "All Debts", "Expenses"].obs;
+  RxList<String> debtStats = ["Debts", "Expenses"].obs;
 
   void changeDebtTabs(String screen) {
     switch (screen) {
-      case 'Dashboard':
-        activeShift!.value = 'Dashboard';
-        shiftScreen!.value = DebtDashboardV1();
-        break;
-
-      case 'All Debts':
-        activeShift!.value = 'All Debts';
+      case 'Debts':
+        activeShift!.value = 'Debts';
         shiftScreen!.value = AllDebts();
         break;
 

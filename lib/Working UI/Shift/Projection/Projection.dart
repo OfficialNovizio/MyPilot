@@ -30,39 +30,42 @@ class _ProjectionTabState extends State<ProjectionTab> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: width * .02, vertical: height * 0.03),
+      padding: EdgeInsets.symmetric(horizontal: width * .02),
       child: Obx(
-        () => Stack(
-          alignment: Alignment.topCenter,
+        () => Column(
           children: [
             // 1) Income planner
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IncomeProjectionCard(
-                  jobs: account.jobs!.map((f) => JobProjection(name: f.jobName!, hourlyRate: double.parse(f.wageHr!), hours: 10)).toList(),
-                  maxAvailableHours: 50,
-                  periodLabel: 'Week',
-                  safeGoalContribution: 150,
-                ),
-                SizedBox(height: height * .02),
-                GoalsSection(),
-              ],
+            account.jobs!.isEmpty
+                ? EmptyInsightsScreen(
+                    title: 'Create a job profile to unlock projections',
+                    subTitle: 'Add your job details to forecast monthly hours and income.',
+                    btnTitle: 'Create job profile',
+                    callback: () {},
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IncomeProjectionCard(
+                        jobs: account.jobs!.map((f) => JobProjection(name: f.jobName!, hourlyRate: double.parse(f.wageHr!), hours: 10)).toList(),
+                        maxAvailableHours: 50,
+                        periodLabel: 'Week',
+                        safeGoalContribution: 150,
+                      ),
+                    ],
+                  ),
+            SizedBox(height: height * .02),
+            AddContent(
+              title: 'Add a Goal',
+              subTitle: 'Choose a target and we’ll show how close you are each week.',
+              callback: () {
+                showCupertinoModalPopup(
+                  context: context,
+                  builder: (_) => const AddGoal(),
+                );
+              },
             ),
-            Padding(
-              padding: EdgeInsets.only(top: height * .78),
-              child: normalButton(
-                  title: 'SET A GOAL',
-                  bColor: ProjectColors.greenColor,
-                  cWidth: .5,
-                  invertColors: true,
-                  callback: () {
-                    showCupertinoModalPopup(
-                      context: context,
-                      builder: (_) => const AddGoal(),
-                    );
-                  }),
-            ),
+            SizedBox(height: height * .02),
+            Visibility(visible: !account.jobs!.isEmpty, child: GoalsSection()),
           ],
         ),
       ),

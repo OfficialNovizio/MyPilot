@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 import '../../../models/Debt Model.dart';
 import '../../Controllers.dart';
 import '../Debt Dashboard/Add New Debt.dart';
-import '../Debt Dashboard/New Data 2.dart';
+import '../Debt Dashboard/Debt Insights.dart';
 import '../Debt Dashboard/New Data.dart';
 import 'Combined Data Dashboard.dart';
 
@@ -47,13 +47,23 @@ class _AllDebtsState extends State<AllDebts> {
       children: [
         SizedBox(height: height * .04),
         InsightCard(
-          title: "Payday buffer",
-          leftMain: "\$430",
-          leftTag: const Tag(text: "Safe", color: ProjectColors.greenColor),
-          leftSub: "• -\$320 this month",
+          title: "Interest burn",
+          leftMain: "\$92",
+          leftSub: "(Visa \$65)",
           rightWidget: Container(),
-          onTap: () async {
-            showCupertinoModalPopup(context: context, builder: (_) => NowToPaydayScreen());
+          // rightWidget: _Ring(
+          //   value: 0.62,
+          //   size: height * 0.075,
+          //   stroke: 10,
+          //   centerTop: "\$92",
+          //   centerBottom: "High",
+          //   ringColor: ProjectColors.yellowColor,
+          // ),
+          onTap: () {
+            showCupertinoModalPopup(
+              context: context,
+              builder: (_) => ComparisonCardsHomeScreen(),
+            );
           },
         ),
         SizedBox(height: height * .01),
@@ -96,43 +106,17 @@ class _AllDebtsState extends State<AllDebts> {
           ),
         ),
         SizedBox(height: height * .01),
-        DarkCard(
-          child: InkWell(
-            onTap: () {
+        AddContent(
+            title: "Add a Debt",
+            subTitle: "Credit Card · Loan · BNPL · Other",
+            callback: () {
               showCupertinoModalPopup(
-                  context: context,
-                  builder: (_) => AddDebtBottomSheet(
-                        onSave: () {},
-                      ));
-            },
-            borderRadius: BorderRadius.circular(16),
-            child: Row(
-              children: [
-                Container(
-                  width: height * .05,
-                  height: height * .05,
-                  decoration: BoxDecoration(
-                    color: ProjectColors.whiteColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.add, color: ProjectColors.whiteColor),
+                context: context,
+                builder: (_) => AddDebtBottomSheet(
+                  onSave: () {},
                 ),
-                SizedBox(width: width * .02),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      textWidget(text: "Add a Debt", fontSize: .02, color: ProjectColors.whiteColor, fontWeight: FontWeight.bold),
-                      SizedBox(height: height * .005),
-                      textWidget(text: "Credit Card · Loan · BNPL · Other", color: ProjectColors.whiteColor),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right, color: ProjectColors.whiteColor),
-              ],
-            ),
-          ),
-        ),
+              );
+            }),
         SizedBox(height: height * .02),
         Padding(
           padding: EdgeInsets.only(left: width * .02),

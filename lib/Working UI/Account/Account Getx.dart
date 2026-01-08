@@ -36,6 +36,8 @@ class AccountController extends GetxController {
 
   RxList<TextForm>? savedJobs = <TextForm>[].obs;
   RxList<JobData>? jobs = <JobData>[].obs;
+  RxBool? showPayFrq = false.obs;
+  RxBool? showDays = false.obs;
 
   JobData? addNewJob;
 
@@ -46,7 +48,7 @@ class AccountController extends GetxController {
     TextForm(title: "Last pay cheque date", controller: TextEditingController(text: '')),
     TextForm(title: "Pay frequency", controller: TextEditingController(text: '')),
     TextForm(title: "Week start", controller: TextEditingController(text: '')),
-    TextForm(title: "Stat pay (Ex 1.2 from base pay)", controller: TextEditingController(text: '')),
+    TextForm(title: "Stat pay", controller: TextEditingController(text: '')),
   ]);
 
   final GlobalKey<FormState> controllerValidator = GlobalKey<FormState>();
@@ -82,11 +84,6 @@ class AccountController extends GetxController {
   void loadSavedJobs() async {
     final listData = await getLocalData('savedJobs') ?? '';
     jobs!.clear();
-
-    if (listData.isEmpty) {
-      jobs!.refresh();
-      return;
-    }
 
     final job = Job.fromJson(jsonDecode(listData));
     for (final files in job.data ?? const <JobData>[]) {

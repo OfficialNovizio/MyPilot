@@ -29,7 +29,7 @@ class _DepositsTabState extends State<DepositsTab> {
         children: [
           Center(
             child: Padding(
-              padding: EdgeInsets.only(top: height * .03, bottom: height * .02),
+              padding: EdgeInsets.only(top: height * .02, bottom: height * .02),
               child: MonthPill(
                 label: deposit.formatMonth(),
                 onPrev: deposit.goToPreviousMonth,
@@ -42,28 +42,39 @@ class _DepositsTabState extends State<DepositsTab> {
               ),
             ),
           ),
-          SizedBox(height: height * .018),
-          DepositInsightsScreen(vm: deposit.depositInsight!.value!, showAll: true),
+          shift.shifts!.isEmpty || shift.shifts!.firstWhere((m) => m.month == monthName(overview.selectedMonth.value)).dates!.length < 10
+              ? Padding(
+                  padding: EdgeInsets.only(top: height * .15),
+                  child: EmptyInsightsScreen(
+                    title: 'Start tracking to unlock insights',
+                    subTitle: 'We need about 10 shifts to show accurate hours, earnings, and monthly trends',
+                  ),
+                )
+              : Column(
+                  children: [
+                    DepositInsightsScreen(vm: deposit.depositInsight!.value!, showAll: true),
 
-          // _WeeklyDepositsCard(),
-          SizedBox(height: height * .018),
-          MonthlyKpiLineCard(
-            title: deposit.weekChart!.value!.title,
-            totalText: deposit.weekChart!.value!.totalText,
-            changeText: deposit.weekChart!.value!.changeText,
-            xLabels: deposit.weekChart!.value!.xLabels,
-            values: deposit.weekChart!.value!.values,
-            color: deposit.weekChart!.value!.color,
-          ),
-          SizedBox(height: height * .018),
-          MonthlyKpiBarCard(
-            title: deposit.sixMonthChart!.value!.title,
-            totalText: deposit.sixMonthChart!.value!.totalText,
-            changeText: deposit.sixMonthChart!.value!.changeText,
-            xLabels: deposit.sixMonthChart!.value!.xLabels,
-            values: deposit.sixMonthChart!.value!.values,
-            color: ProjectColors.greenColor,
-          ),
+                    // _WeeklyDepositsCard(),
+                    SizedBox(height: height * .018),
+                    MonthlyKpiLineCard(
+                      title: deposit.weekChart!.value!.title,
+                      totalText: deposit.weekChart!.value!.totalText,
+                      changeText: deposit.weekChart!.value!.changeText,
+                      xLabels: deposit.weekChart!.value!.xLabels,
+                      values: deposit.weekChart!.value!.values,
+                      color: deposit.weekChart!.value!.color,
+                    ),
+                    SizedBox(height: height * .018),
+                    MonthlyKpiBarCard(
+                      title: deposit.sixMonthChart!.value!.title,
+                      totalText: deposit.sixMonthChart!.value!.totalText,
+                      changeText: deposit.sixMonthChart!.value!.changeText,
+                      xLabels: deposit.sixMonthChart!.value!.xLabels,
+                      values: deposit.sixMonthChart!.value!.values,
+                      color: ProjectColors.greenColor,
+                    ),
+                  ],
+                ),
           SizedBox(height: height * .04),
         ],
       ),

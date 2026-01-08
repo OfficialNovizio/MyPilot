@@ -64,8 +64,6 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
     return SizedBox(
       height: height * .9,
       child: Popup(
@@ -81,11 +79,11 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  textWidget(text: 'Debt Type', fontSize: .0135, fontWeight: FontWeight.w600, color: Colors.black54),
+                  textWidget(text: 'Debt Type', fontSize: .0135, fontWeight: FontWeight.w600, color: ProjectColors.whiteColor),
                   SizedBox(height: height * .008),
                   _typeTabs(),
                   SizedBox(height: height * .016),
-                  textWidget(text: 'Details', fontSize: .0135, fontWeight: FontWeight.w600, color: Colors.black54),
+                  textWidget(text: 'Details', fontSize: .0135, fontWeight: FontWeight.w600, color: ProjectColors.whiteColor),
                   SizedBox(height: height * .01),
                   _label('Name'),
                   _input(
@@ -192,29 +190,19 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
           onTap: () => Navigator.pop(context),
           child: Padding(
             padding: EdgeInsets.all(width * .01),
-            child: Icon(Icons.arrow_back_ios_new_rounded, size: height * .022, color: Colors.black87),
+            child: Icon(Icons.arrow_back_ios_new_rounded, size: height * .022, color: ProjectColors.whiteColor),
           ),
         ),
         SizedBox(width: width * .02),
         Expanded(
-          child: textWidget(
-            text: 'Add a Debt',
-            fontSize: .022,
-            fontWeight: FontWeight.w800,
-            color: ProjectColors.pureBlackColor,
-          ),
+          child: textWidget(text: 'Add a Debt', fontSize: .022, fontWeight: FontWeight.w800, color: ProjectColors.whiteColor),
         ),
         InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () => Navigator.pop(context),
           child: Padding(
             padding: EdgeInsets.all(width * .01),
-            child: textWidget(
-              text: 'Close',
-              fontSize: .0145,
-              fontWeight: FontWeight.w700,
-              color: Colors.black54,
-            ),
+            child: textWidget(text: 'Close', fontSize: .0145, fontWeight: FontWeight.w700, color: ProjectColors.whiteColor),
           ),
         ),
       ],
@@ -233,15 +221,10 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
             decoration: BoxDecoration(
               color: active ? Colors.black.withOpacity(.06) : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.black.withOpacity(.08)),
+              border: Border.all(color: ProjectColors.whiteColor.withOpacity(.08)),
             ),
             child: Center(
-              child: textWidget(
-                text: label,
-                fontSize: .0135,
-                fontWeight: FontWeight.w700,
-                color: ProjectColors.pureBlackColor,
-              ),
+              child: textWidget(text: label, fontSize: .0135, fontWeight: FontWeight.w700, color: ProjectColors.whiteColor),
             ),
           ),
         ),
@@ -251,9 +234,9 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
     return Container(
       padding: EdgeInsets.all(width * .012),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ProjectColors.whiteColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black.withOpacity(.06)),
+        border: Border.all(color: ProjectColors.whiteColor.withOpacity(.06)),
       ),
       child: Row(
         children: [
@@ -271,7 +254,7 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
 
   Widget _label(String t) => Padding(
         padding: EdgeInsets.only(bottom: height * .006),
-        child: textWidget(text: t, fontSize: .013, fontWeight: FontWeight.w600, color: Colors.black54),
+        child: textWidget(text: t, fontSize: .013, fontWeight: FontWeight.w600, color: ProjectColors.whiteColor),
       );
 
   Widget _input({
@@ -282,9 +265,9 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ProjectColors.whiteColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black.withOpacity(.06)),
+        border: Border.all(color: ProjectColors.whiteColor.withOpacity(.06)),
       ),
       padding: EdgeInsets.symmetric(horizontal: width * .04, vertical: height * .002),
       child: TextFormField(
@@ -294,7 +277,7 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
         style: TextStyle(fontSize: height * .015, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.black26, fontSize: height * .014),
+          hintStyle: TextStyle(color: ProjectColors.whiteColor, fontSize: height * .014),
           border: InputBorder.none,
         ),
       ),
@@ -309,9 +292,9 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ProjectColors.whiteColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black.withOpacity(.06)),
+        border: Border.all(color: ProjectColors.whiteColor.withOpacity(.06)),
       ),
       padding: EdgeInsets.symmetric(horizontal: width * .04, vertical: height * .002),
       child: TextFormField(
@@ -322,7 +305,7 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
         decoration: InputDecoration(
           prefixText: isPercent ? '' : '',
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.black26, fontSize: height * .014),
+          hintStyle: TextStyle(color: ProjectColors.whiteColor, fontSize: height * .014),
           border: InputBorder.none,
         ),
       ),
@@ -333,9 +316,9 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
     final items = List<int>.generate(31, (i) => i + 1);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ProjectColors.whiteColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black.withOpacity(.06)),
+        border: Border.all(color: ProjectColors.whiteColor.withOpacity(.06)),
       ),
       padding: EdgeInsets.symmetric(horizontal: width * .04),
       child: DropdownButtonHideUnderline(
@@ -359,9 +342,9 @@ class _AddDebtBottomSheetState extends State<AddDebtBottomSheet> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: width * .04, vertical: height * .012),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ProjectColors.whiteColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black.withOpacity(.06)),
+        border: Border.all(color: ProjectColors.whiteColor.withOpacity(.06)),
       ),
       child: Row(
         children: [

@@ -55,12 +55,12 @@ class DepositsController extends GetxController {
         final expectedPrev = DateTime(selectedMonth.value.year, selectedMonth.value.month - 1, 1);
         previous!.value = depositData.firstWhereOrNull((x) => monthName(x.month!) == monthName(expectedPrev))!;
       }
+      weekChart!.value = buildWeeklyBreakdownCard();
+      sixMonthChart!.value = buildMonthlyTrendCard();
+      depositInsight!.value = computeDepositInsightsFromShifts();
     }
     current!.refresh();
     previous!.refresh();
-    weekChart!.value = buildWeeklyBreakdownCard();
-    sixMonthChart!.value = buildMonthlyTrendCard();
-    depositInsight!.value = computeDepositInsightsFromShifts();
     depositInsight!.refresh();
     sixMonthChart!.refresh();
     weekChart!.refresh();

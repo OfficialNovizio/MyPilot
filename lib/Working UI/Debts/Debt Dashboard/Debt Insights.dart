@@ -1,8 +1,26 @@
+import 'package:emptyproject/BaseScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../Constant UI.dart';
 import '../../Constants.dart';
+import '../../Controllers.dart';
+import '../All Debts/Combined Data Dashboard.dart';
+
+class _MiniLabel extends StatelessWidget {
+  const _MiniLabel(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return textWidget(
+      text: text,
+      fontSize: 0.014,
+      color: ProjectColors.pureBlackColor,
+      fontWeight: FontWeight.w600,
+    );
+  }
+}
 
 // ================== CONTROLLER ==================
 class DebtFreeHomeController extends GetxController {
@@ -32,82 +50,162 @@ class ComparisonCardsHomeScreen extends StatelessWidget {
   ComparisonCardsHomeScreen({super.key});
 
   final c = Get.put(DebtFreeHomeController());
+  final ctrl = Get.put(DebtDashCtrl());
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ProjectColors.backgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: width * .05),
+    return BaseScreen(
+      title: 'Debt Insights',
+      body: Obx(
+        () => SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: height * .012),
-              _TopBar(),
-              SizedBox(height: height * .012),
-
-              // Toggle + Priority
-              Obx(() => _ModeToggle(
-                    selectedIndex: c.modeIndex.value,
-                    onTap: (i) => c.modeIndex.value = i,
-                  )),
-              SizedBox(height: height * .012),
-              _PriorityBanner(
-                title: c.priorityTitle,
-                subtitle: c.prioritySubtitle,
+              SizedBox(height: height * .015),
+              segmentedToggle(
+                activeColor: ProjectColors.greenColor.withOpacity(0.2),
+                options: ['Safest', 'Fastest'],
+                selectedIndex: debt.debtResolve!.value == 'Safest' ? 0 : 1,
+                onChanged: (i, v) {
+                  debt.debtResolve!.value = v;
+                },
               ),
-              SizedBox(height: height * .014),
-
-              // Content scroll
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    children: [
-                      _MinimumCard(),
-                      SizedBox(height: height * .014),
-                      _IfUnchangedRow(),
-                      SizedBox(height: height * .014),
-                      _TopBurnerRow(),
-                      SizedBox(height: height * .02),
-                    ],
-                  ),
+              SizedBox(height: height * .012),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: width * .04, vertical: height * .014),
+                decoration: BoxDecoration(
+                  color: ProjectColors.brownColor, // soft warm banner like the ref
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: Colors.black.withOpacity(.05)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, size: height * .022, color: Colors.black54),
+                    SizedBox(width: width * .02),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          textWidget(
+                            text: c.priorityTitle,
+                            fontSize: .0155,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          SizedBox(height: height * .004),
+                          textWidget(
+                            text: c.prioritySubtitle,
+                            fontSize: .013,
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right_rounded, color: Colors.black54, size: height * .028),
+                  ],
                 ),
               ),
-
-              // Bottom nav
-              _BottomNav(),
+              SizedBox(height: height * .01),
+              DarkCard(
+                color: ProjectColors.greenColor,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    textWidget(
+                      text: "Payoff timeline",
+                      fontSize: 0.03,
+                      fontWeight: FontWeight.w800,
+                      color: ProjectColors.pureBlackColor,
+                    ),
+                    SizedBox(height: height * 0.01),
+                    Obx(
+                      () => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              textWidget(
+                                text: "Debt-free in:",
+                                fontSize: 0.016,
+                                color: ProjectColors.pureBlackColor.withOpacity(0.6),
+                              ),
+                              SizedBox(width: width * 0.02),
+                              textWidget(
+                                text: "${ctrl.monthsFromExtra(ctrl.extra.value)} months",
+                                fontSize: 0.018,
+                                fontWeight: FontWeight.w900,
+                                color: ProjectColors.pureBlackColor,
+                              ),
+                              const Spacer(),
+                              textWidget(
+                                text: "+\$${ctrl.extra.value.toInt()}",
+                                fontSize: 0.02,
+                                fontWeight: FontWeight.w800,
+                                color: ProjectColors.pureBlackColor,
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              textWidget(
+                                text: "Interest saved:",
+                                fontSize: 0.016,
+                                color: ProjectColors.pureBlackColor.withOpacity(0.6),
+                              ),
+                              SizedBox(width: width * 0.02),
+                              textWidget(
+                                text: "\$2,700",
+                                fontSize: 0.018,
+                                fontWeight: FontWeight.w900,
+                                color: ProjectColors.pureBlackColor,
+                              ),
+                            ],
+                          ),
+                          SliderTheme(
+                            data: SliderTheme.of(context).copyWith(
+                              trackHeight: 4,
+                              activeTrackColor: ProjectColors.pureBlackColor,
+                              inactiveTrackColor: ProjectColors.pureBlackColor.withOpacity(0.12),
+                              thumbColor: ProjectColors.pureBlackColor,
+                              overlayColor: ProjectColors.pureBlackColor.withOpacity(0.15),
+                            ),
+                            child: Slider(
+                              min: 0,
+                              max: 300,
+                              divisions: 6,
+                              value: ctrl.extra.value,
+                              onChanged: (v) => ctrl.extra.value = v,
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              _MiniLabel("\$0 extra"),
+                              _MiniLabel("+\$50"),
+                              _MiniLabel("+\$100"),
+                              _MiniLabel("+\$200"),
+                              _MiniLabel("+\$300"),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: height * .01),
+              _MinimumCard(),
+              SizedBox(height: height * .014),
+              _IfUnchangedRow(),
+              SizedBox(height: height * .014),
+              _TopBurnerRow(),
+              SizedBox(height: height * .02),
               SizedBox(height: height * .01),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-// ================== PIECES ==================
-class _TopBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: textWidget(
-            text: 'Debt-Free ASAP',
-            fontSize: .024,
-            fontWeight: FontWeight.w700,
-            color: ProjectColors.pureBlackColor,
-          ),
-        ),
-        _IconCircle(icon: Icons.notifications_none_rounded),
-        SizedBox(width: width * .02),
-        CircleAvatar(
-          radius: height * .02,
-          backgroundColor: Colors.black12,
-          child: Icon(Icons.person, color: Colors.black54, size: height * .022),
-        ),
-      ],
     );
   }
 }
@@ -182,62 +280,12 @@ class _ChipToggle extends StatelessWidget {
   }
 }
 
-class _PriorityBanner extends StatelessWidget {
-  final String title;
-  final String subtitle;
-
-  const _PriorityBanner({
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: width * .04, vertical: height * .014),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4E7E2), // soft warm banner like the ref
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.black.withOpacity(.05)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.warning_amber_rounded, size: height * .022, color: Colors.black54),
-          SizedBox(width: width * .02),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                textWidget(
-                  text: title,
-                  fontSize: .0155,
-                  fontWeight: FontWeight.w700,
-                ),
-                SizedBox(height: height * .004),
-                textWidget(
-                  text: subtitle,
-                  fontSize: .013,
-                  color: Colors.black54,
-                  fontWeight: FontWeight.w500,
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right_rounded, color: Colors.black54, size: height * .028),
-        ],
-      ),
-    );
-  }
-}
-
 class _MinimumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.find<DebtFreeHomeController>();
 
     return DarkCard(
-      color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -248,16 +296,17 @@ class _MinimumCard extends StatelessWidget {
                 child: textWidget(
                   text: 'Minimum',
                   fontSize: .018,
+                  color: ProjectColors.whiteColor,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               Container(
                 padding: EdgeInsets.all(width * .01),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(.04),
+                  color: ProjectColors.whiteColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.more_horiz, size: height * .02, color: Colors.black54),
+                child: Icon(Icons.more_horiz, size: height * .02, color: ProjectColors.blackColor),
               ),
             ],
           ),
@@ -283,13 +332,14 @@ class _MinimumCard extends StatelessWidget {
                       textWidget(
                         text: 'Pay ${c.minPay} minimum',
                         fontSize: .017,
+                        color: ProjectColors.whiteColor,
                         fontWeight: FontWeight.w800,
                       ),
                       SizedBox(height: height * .004),
                       textWidget(
                         text: 'Avoid late fee and credit mark',
                         fontSize: .0135,
-                        color: Colors.black54,
+                        color: ProjectColors.whiteColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ],
@@ -306,12 +356,12 @@ class _MinimumCard extends StatelessWidget {
             width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: width * .035, vertical: height * .013),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(.03),
+              color: ProjectColors.whiteColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               children: [
-                textWidget(text: c.payday, fontSize: .0145, fontWeight: FontWeight.w600, color: Colors.black87),
+                textWidget(text: c.payday, fontSize: .0145, fontWeight: FontWeight.w600, color: ProjectColors.pureBlackColor),
                 const Spacer(),
                 Icon(Icons.chevron_right_rounded, color: Colors.black54, size: height * .026),
               ],
@@ -325,9 +375,9 @@ class _MinimumCard extends StatelessWidget {
             width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: width * .035, vertical: height * .014),
             decoration: BoxDecoration(
-              color: ProjectColors.greenColor.withOpacity(.07),
+              color: ProjectColors.greenColor.withOpacity(.10),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.black.withOpacity(.04)),
+              border: Border.all(color: ProjectColors.greenColor.withOpacity(.20)),
             ),
             child: Row(
               children: [
@@ -340,13 +390,14 @@ class _MinimumCard extends StatelessWidget {
                       textWidget(
                         text: 'Pay ${c.extraPay} extra',
                         fontSize: .0165,
+                        color: ProjectColors.whiteColor,
                         fontWeight: FontWeight.w800,
                       ),
                       SizedBox(height: height * .004),
                       textWidget(
                         text: 'Speeds up payoff → 3 weeks',
                         fontSize: .0135,
-                        color: Colors.black54,
+                        color: ProjectColors.whiteColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ],
@@ -362,32 +413,28 @@ class _MinimumCard extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: width * .035, vertical: height * .014),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(.03),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.black.withOpacity(.04)),
-            ),
+
             child: Row(
               children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      textWidget(text: 'Debt-Free', fontSize: .014, fontWeight: FontWeight.w800),
+                      textWidget(text: 'Debt-Free', fontSize: .014, fontWeight: FontWeight.w800, color: ProjectColors.whiteColor),
                       SizedBox(height: height * .004),
-                      textWidget(text: c.debtFreeA, fontSize: .0165, fontWeight: FontWeight.w800),
+                      textWidget(text: c.debtFreeA, fontSize: .0165, fontWeight: FontWeight.w800, color: ProjectColors.whiteColor),
                     ],
                   ),
                 ),
-                Container(width: 1, height: height * .05, color: Colors.black.withOpacity(.08)),
+                Container(width: 1, height: height * .05, color: ProjectColors.whiteColor),
                 SizedBox(width: width * .03),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      textWidget(text: 'Debt-Free', fontSize: .014, fontWeight: FontWeight.w800),
+                      textWidget(text: 'Debt-Free', fontSize: .014, fontWeight: FontWeight.w800, color: ProjectColors.whiteColor),
                       SizedBox(height: height * .004),
-                      textWidget(text: c.debtFreeB, fontSize: .0165, fontWeight: FontWeight.w800),
+                      textWidget(text: c.debtFreeB, fontSize: .0165, fontWeight: FontWeight.w800, color: ProjectColors.whiteColor),
                     ],
                   ),
                 ),
@@ -404,6 +451,7 @@ class _MinimumCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: ProjectColors.greenColor.withOpacity(.10),
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: ProjectColors.greenColor.withOpacity(.20)),
             ),
             child: Row(
               children: [
@@ -414,7 +462,7 @@ class _MinimumCard extends StatelessWidget {
                     text: c.interestSaved,
                     fontSize: .0145,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black87,
+                    color: ProjectColors.whiteColor,
                   ),
                 ),
               ],

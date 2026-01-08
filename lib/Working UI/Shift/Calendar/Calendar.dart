@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../models/Overview Model.dart';
 import '../../Account/Account.dart';
+import '../../Account/Active Jobs.dart';
 
 class Calendar extends StatefulWidget {
   const Calendar({super.key});
@@ -32,6 +33,7 @@ class _CalendarState extends State<Calendar> {
           : Column(
               children: [
                 TableCalendar<PayMarker>(
+                  rowHeight: height * .042,
                   firstDay: DateTime(2020, 1, 1),
                   lastDay: DateTime(2035, 12, 31),
                   focusedDay: _focusedDay,
@@ -39,9 +41,7 @@ class _CalendarState extends State<Calendar> {
                   eventLoader: (day) => payMarkers[DateTime(day.year, day.month, day.day)] ?? const [],
                   onDaySelected: (selected, focused) {
                     _focusedDay = focused;
-
                     shift.selectedDay!.value = selected;
-
                     // for(var files in shift.shifts!){
                     //   print(files.month);
                     // }
@@ -165,9 +165,22 @@ class _CalendarState extends State<Calendar> {
                     },
                   ),
                 ),
-                SizedBox(height: height * .04),
-                _MonthSummary(),
-                _WeeklyBreakdownByJob(),
+                SizedBox(height: height * .02),
+                shift.shifts!.isEmpty || shift.shifts!.firstWhere((m) => m.month == monthName(overview.selectedMonth.value)).dates!.length < 10
+                    ? Padding(
+                        padding: EdgeInsets.only(top: height * 0),
+                        child: EmptyInsightsScreen(
+                          title: 'Start tracking to unlock insights',
+                          subTitle: 'Log a shift to see hours, earnings, and patterns this month.',
+                          showButton: false,
+                        ),
+                      )
+                    : Column(
+                        children: [
+                          _MonthSummary(),
+                          _WeeklyBreakdownByJob(),
+                        ],
+                      ),
               ],
             );
     });

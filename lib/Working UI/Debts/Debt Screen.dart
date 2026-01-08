@@ -23,32 +23,25 @@ class _DebtBodyState extends State<DebtBody> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => ClipRRect(
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
-        child: ColoredBox(
-          color: ProjectColors.pureBlackColor,
-          child: SizedBox(
-            width: width,
-            height: height,
-            child: SingleChildScrollView(
-              child: Column(children: [
-                SizedBox(height: height * .02),
-                SegmentTabs(
-                  cWidth: .7,
-                  borderOpacity: 0,
-                  value: debt.activeShift!.value,
-                  highlightValue: debt.activeShift!.value,
-                  padding: EdgeInsets.zero,
-                  onChanged: (value) {
-                    debt.changeDebtTabs(value);
-                    debt.activeShift!.value = value;
-                  },
-                  items: debt.debtStats,
-                ),
-                debt.shiftScreen!.value
-              ]),
+      () => SizedBox(
+        width: width,
+        height: height * .88,
+        child: SingleChildScrollView(
+          child: Column(children: [
+            SegmentTabs(
+              cWidth: .8,
+              borderOpacity: 0.1,
+              value: debt.activeShift!.value,
+              highlightValue: debt.activeShift!.value,
+              padding: EdgeInsets.zero,
+              onChanged: (value) {
+                debt.changeDebtTabs(value);
+                debt.activeShift!.value = value;
+              },
+              items: debt.debtStats,
             ),
-          ),
+            debt.shiftScreen!.value
+          ]),
         ),
       ),
     );

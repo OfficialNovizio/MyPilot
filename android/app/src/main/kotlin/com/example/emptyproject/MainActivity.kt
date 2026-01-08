@@ -1,4 +1,4 @@
-package com.shiftmanager
+package com.hourbour
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -24,7 +24,7 @@ class _OverviewTabState extends State<OverviewTab> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: width * .0),
+      padding: EdgeInsets.symmetric(horizontal: width * .02),
       child: Obx(
         () => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +32,7 @@ class _OverviewTabState extends State<OverviewTab> {
             // ============= TOP: MONTH PILL + RANGE TOGGLE ============
             Center(
               child: Padding(
-                padding: EdgeInsets.only(top: height * .03, bottom: height * .02),
+                padding: EdgeInsets.only(top: height * .02, bottom: height * .02),
                 child: MonthPill(
                   label: overview.formatMonth(),
                   onPrev: overview.goToPreviousMonth,
@@ -45,52 +45,63 @@ class _OverviewTabState extends State<OverviewTab> {
                 ),
               ),
             ),
+            shift.shifts!.isEmpty || shift.shifts!.firstWhere((m) => m.month == monthName(overview.selectedMonth.value)).dates!.length < 10
+                ? Padding(
+                    padding: EdgeInsets.only(top: height * .15),
+                    child: EmptyInsightsScreen(
+                      title: 'Start tracking to unlock insights',
+                      subTitle: 'We need about 10 shifts to show accurate hours, earnings, and monthly trends',
+                    ),
+                  )
+                : Column(
+                    children: [
+                      textWidget(
+                          text: "${DateFormat('MMMM').format(overview.selectedMonth.value)} - Overview",
+                          fontSize: .028,
+                          fontWeight: FontWeight.w700,
+                          color: ProjectColors.whiteColor),
 
-            // ============= OVERVIEW TITLE ============
-            textWidget(
-                text: "${DateFormat('MMMM').format(overview.selectedMonth.value)} - Overview",
-                fontSize: .028,
-                fontWeight: FontWeight.w700,
-                color: ProjectColors.whiteColor),
+                      SizedBox(height: height * .015),
 
-            SizedBox(height: height * .015),
+                      // ============= ESTIMATED INCOME CARD ============
+                      const _EstimatedIncomeCard(),
 
-            // ============= ESTIMATED INCOME CARD ============
-            const _EstimatedIncomeCard(),
+                      SizedBox(height: height * .025),
 
-            SizedBox(height: height * .025),
+                      // ============= INSIGHTS ============
+                      textWidget(
+                        text: "Insights",
+                        fontSize: .03,
+                        fontWeight: FontWeight.w600,
+                        color: ProjectColors.whiteColor,
+                      ),
+                      SizedBox(height: height * .01),
+                      _InsightsCard(),
 
-            // ============= INSIGHTS ============
-            textWidget(
-              text: "Insights",
-              fontSize: .03,
-              fontWeight: FontWeight.w600,
-              color: ProjectColors.whiteColor,
-            ),
-            SizedBox(height: height * .01),
-            _InsightsCard(),
+                      SizedBox(height: height * .025),
 
-            SizedBox(height: height * .025),
-
-            // ============= WEEKLY BREAKDOWN ============
-            textWidget(
-              text: "Weekly Breakdown",
-              fontSize: .03,
-              fontWeight: FontWeight.w600,
-              color: ProjectColors.whiteColor,
-            ),
-            SizedBox(height: height * .01),
-            Column(
-              children: [
-                ...overview.overViewShifts[0].jobs!.map(
-                  (t) => Padding(
-                    padding: EdgeInsets.symmetric(vertical: height * .006),
-                    child: WeeklyJobCard(overview: t),
+                      // ============= WEEKLY BREAKDOWN ============
+                      textWidget(
+                        text: "Weekly Breakdown",
+                        fontSize: .03,
+                        fontWeight: FontWeight.w600,
+                        color: ProjectColors.whiteColor,
+                      ),
+                      SizedBox(height: height * .01),
+                      Column(
+                        children: [
+                          ...overview.overViewShifts[0].jobs!.map(
+                            (t) => Padding(
+                              padding: EdgeInsets.symmetric(vertical: height * .006),
+                              child: WeeklyJobCard(overview: t),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const _UpcomingDepositsCard(),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            // const _UpcomingDepositsCard(),
+            // ============= OVERVIEW TITLE ============
 
             SizedBox(height: height * .025),
           ],
@@ -103,59 +114,6 @@ class _OverviewTabState extends State<OverviewTab> {
 // ===================================================================
 //                         TOP CONTROLS
 // ===================================================================
-
-class MonthPill extends StatelessWidget {
-  final String label;
-  final VoidCallback onPrev;
-  final VoidCallback onNext;
-  final bool canGoNext;
-
-  const MonthPill({
-    required this.label,
-    required this.onPrev,
-    required this.onNext,
-    required this.canGoNext,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: ProjectColors.pureBlackColor,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          GestureDetector(
-            onTap: onPrev,
-            child: Icon(
-              Icons.chevron_left,
-              size: height * .028,
-              color: ProjectColors.whiteColor,
-            ),
-          ),
-          SizedBox(width: width * .01),
-          textWidget(
-            text: label,
-            fontSize: .018,
-            fontWeight: FontWeight.w600,
-            color: ProjectColors.whiteColor,
-          ),
-          SizedBox(width: width * .01),
-          GestureDetector(
-            onTap: canGoNext ? onNext : null,
-            child: Icon(
-              Icons.chevron_right,
-              size: height * .028,
-              color: canGoNext ? ProjectColors.whiteColor : ProjectColors.whiteColor.withOpacity(.25),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _RangeToggle extends StatelessWidget {
   final int selected; // 1M or 3M

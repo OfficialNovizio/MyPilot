@@ -2,6 +2,7 @@ import 'package:emptyproject/Working%20UI/Controllers.dart';
 import 'package:emptyproject/Working%20UI/Cards%20and%20Account/Cards.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../models/Expense Model.dart';
@@ -42,13 +43,15 @@ class ExpensesGetxController extends GetxController {
   // Selections
   final RxString category = 'Groceries'.obs;
   final RxString account = 'Checking'.obs;
-  final RxString frequency = 'One-time'.obs;
+  final RxString frequency = ''.obs;
   final RxBool isEssential = true.obs;
 
   // Date
   final Rx<DateTime> date = DateTime.now().obs;
 
   final RxBool isRecurring = false.obs;
+  final RxBool showFrequencies = false.obs;
+  final RxBool showCategories = false.obs;
   final RxInt dueDay = 1.obs;
   final RxDouble? totalVariableExpense = 0.0.obs;
   final RxDouble? totalFixedExpense = 0.0.obs;
@@ -92,6 +95,51 @@ class ExpensesGetxController extends GetxController {
     "Other",
   ];
 
+  IconData categoryIcon(String? raw) {
+    final s = (raw ?? '').trim().toLowerCase();
+    // normalize some common variants
+    if (s.contains('internet') || s.contains('phone')) return CupertinoIcons.wifi;
+
+    switch (s) {
+      case 'housing':
+        return CupertinoIcons.house_fill;
+
+      case 'utilities':
+        return CupertinoIcons.bolt_fill;
+
+      case 'groceries':
+        return CupertinoIcons.cart_fill;
+
+      case 'transport':
+        return CupertinoIcons.car_fill;
+
+      case 'insurance':
+        return CupertinoIcons.shield_fill;
+
+      case 'subscriptions':
+        return CupertinoIcons.repeat;
+
+      case 'dining & coffee':
+      case 'dining and coffee':
+      case 'dining':
+      case 'coffee':
+        return MaterialIcons.food_bank;
+
+      case 'health':
+        return CupertinoIcons.heart_fill;
+
+      case 'shopping':
+        return CupertinoIcons.bag_fill;
+
+      case 'entertainment':
+        return CupertinoIcons.film_fill;
+
+      case 'other':
+      default:
+        return CupertinoIcons.square_grid_2x2_fill;
+    }
+  }
+
   final List<String> frequencies = const [
     "One-time",
     "Weekly",
@@ -129,7 +177,8 @@ class ExpensesGetxController extends GetxController {
     notesForm.controller.clear();
     category.value = 'Groceries';
     account.value = 'Checking';
-    frequency.value = 'One-time';
+    frequency.value = '';
+    showFrequencies.value = false;
     isEssential.value = true;
     date.value = DateTime.now();
     isRecurring.value = false;

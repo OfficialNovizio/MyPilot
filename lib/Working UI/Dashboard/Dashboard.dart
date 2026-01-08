@@ -10,12 +10,12 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(
       () => Scaffold(
-        backgroundColor: ProjectColors.blackColor,
+        backgroundColor: ProjectColors.pureBlackColor,
         body: SafeArea(child: home.currentScreen!.value),
         bottomNavigationBar: Container(
-          height: height * .07,
-          decoration: BoxDecoration(color: ProjectColors.blackColor),
-          padding: EdgeInsets.only(bottom: height * .01),
+          height: height * .065,
+          decoration: BoxDecoration(color: ProjectColors.pureBlackColor),
+          padding: EdgeInsets.only(bottom: height * .03),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -41,7 +41,7 @@ class DashboardScreen extends StatelessWidget {
                           child: Container(
                             color: ProjectColors.greenColor,
                             height: height * .001,
-                            width: width * .08,
+                            width: width * .12,
                           ),
                         ),
                       ],

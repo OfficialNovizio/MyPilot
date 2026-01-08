@@ -49,11 +49,11 @@ class Task {
     this.status = TaskStatus.pending,
   });
 
-  final String id;
-  final String title;
-  final String? description;
+  String id;
+  String title;
+  String? description;
   TaskSection section;
-  final DateTime hardDeadline;
+  DateTime hardDeadline;
   DateTime? softDeadline;
   TaskPriority priority;
   TaskStatus status;

@@ -1,8 +1,11 @@
 import 'package:emptyproject/Working%20UI/Constants.dart';
+import 'package:emptyproject/Working%20UI/Shared%20Preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'Working UI/Dashboard/Dashboard.dart';
+import 'Working UI/Login User/Login User.dart';
+import 'Working UI/Login User/Onboarding User.dart';
 
 // void main() => runApp(const MyApp());
 //
@@ -35,8 +38,29 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool? onBoardingCompleted = false;
+  @override
+  void initState() {
+    super.initState();
+    _loadOnboarding();
+  }
+
+  Future<void> _loadOnboarding() async {
+    final v = await getLocalData('Onboarding'); // whatever it returns
+    if (!mounted) return;
+
+    setState(() {
+      onBoardingCompleted = (v == 'Completed');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +68,8 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       title: 'Two-Job Shift Planner',
       debugShowCheckedModeBanner: false,
-      home: DashboardScreen(),
+      home: onBoardingCompleted! ? LoginScreen() : AppOnboardingScreen(),
+      // home: DashboardScreen(),
     );
   }
 }

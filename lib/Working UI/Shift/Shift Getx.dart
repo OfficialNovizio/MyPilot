@@ -323,31 +323,37 @@ class ShiftController extends GetxController {
   /// ======================= TABS ======================================
   /// ===================================================================
 
-  RxList<Map> shiftStats = RxList<Map>([
-    {"Route": shiftEnums.calendar, "Title": "Calendar"},
-    {"Route": shiftEnums.overview, "Title": "Overview"},
-    {"Route": shiftEnums.deposits, "Title": "Deposits"},
-    {"Route": shiftEnums.projections, "Title": "Projection"},
-  ]);
+  // RxList<Map> shiftStats = RxList<Map>([
+  //   {"Route": shiftEnums.calendar, "Title": "Calendar"},
+  //   {"Route": shiftEnums.overview, "Title": "Overview"},
+  //   {"Route": shiftEnums.deposits, "Title": "Deposits"},
+  //   {"Route": shiftEnums.projections, "Title": "Projection"},
+  // ]);
+  RxList<String> shiftTypes = [
+    "Calendar",
+    "Overview",
+    "Deposits",
+    "Projection",
+  ].obs;
 
-  void changeShiftTabs(shiftEnums screen) {
+  void changeShiftTabs(screen) {
     switch (screen) {
-      case shiftEnums.calendar:
+      case "Calendar":
         activeShift!.value = 'Calendar';
         shiftScreen!.value = Calendar();
         break;
 
-      case shiftEnums.overview:
+      case "Overview":
         activeShift!.value = 'Overview';
         shiftScreen!.value = OverviewTab();
         break;
 
-      case shiftEnums.deposits:
+      case "Deposits":
         activeShift!.value = 'Deposits';
         shiftScreen!.value = DepositsTab();
         break;
 
-      case shiftEnums.projections:
+      case "Projection":
         activeShift!.value = 'Projection';
         shiftScreen!.value = ProjectionTab();
         break;
