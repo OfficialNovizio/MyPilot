@@ -15,8 +15,6 @@ class DebtBody extends StatefulWidget {
 class _DebtBodyState extends State<DebtBody> {
   @override
   void initState() {
-    // account.loadSavedJobs();
-    // shift.loadShifts();
     super.initState();
   }
 

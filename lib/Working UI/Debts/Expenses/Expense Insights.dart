@@ -1,8 +1,10 @@
+import 'package:emptyproject/BaseScreen.dart';
 import 'package:emptyproject/Working%20UI/Constant%20UI.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../Constants.dart';
+import '../../Controllers.dart';
 
 // ------------------------------------------------------------
 // ASSUMES YOU ALREADY HAVE:
@@ -246,11 +248,13 @@ class NowToPaydayCtrl extends GetxController {
       if (_onOrBefore(d.dueDate, n)) score += 60;
 
       if (d.isCredit) {
-        if (d.utilization >= 0.70)
+        if (d.utilization >= 0.70) {
           score += 50;
-        else if (d.utilization >= 0.50)
+        } else if (d.utilization >= 0.50) {
           score += 30;
-        else if (d.utilization >= 0.30) score += 15;
+        } else if (d.utilization >= 0.30) {
+          score += 15;
+        }
       }
 
       if (d.promoEndDate != null) {
@@ -488,368 +492,417 @@ class NowToPaydayScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ctrl = Get.put(NowToPaydayCtrl());
 
-    return SizedBox(
-      height: height * .9,
-      child: Popup(
-        color: ProjectColors.blackColor,
-        body: Obx(
-          () => ListView(
-            physics: const BouncingScrollPhysics(),
-            children: [
-              SizedBox(height: height * 0.012),
+    return BaseScreen(
+      title: 'Insights for Jan',
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: height * 0.012),
 
-              // HEADER (no "close" label)
-              Row(
+            // HEADER (no "close" label)
+            Row(
+              children: [
+                textWidget(
+                  text: "Now → Payday",
+                  fontSize: 0.028,
+                  fontWeight: FontWeight.w900,
+                  color: ProjectColors.whiteColor,
+                ),
+                const Spacer(),
+                _Pill(label: ctrl.healthLabel, color: ctrl.healthColor),
+              ],
+            ),
+
+            SizedBox(height: height * 0.016),
+            DarkCard(
+              color: ProjectColors.greenColor,
+              opacity: 1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  textWidget(text: 'This Month', fontSize: .02, fontWeight: FontWeight.w900),
+                  SizedBox(height: height * .01),
+                  Row(
+                    children: ['Fixed', 'Variable', 'Total']
+                        .map(
+                          (t) => Padding(
+                            padding: EdgeInsets.only(right: width * .1),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                textWidget(text: t, fontWeight: FontWeight.w700, fontSize: .018),
+                                SizedBox(height: height * .005),
+                                textWidget(
+                                  text: t == 'Fixed'
+                                      ? money(expenseV2.expensesModel.value.monthSummary!.fixedPlanned)
+                                      : t == 'Variable'
+                                          ? money(expenseV2.expensesModel.value.monthSummary!.variableSpent)
+                                          : money(expenseV2.expensesModel.value.monthSummary!.total),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: .022,
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  SizedBox(height: height * .01),
+                  // SizedBox(
+                  //   width: width * .8,
+                  //   child: ClipRRect(
+                  //     borderRadius: BorderRadius.circular(999),
+                  //     child: LinearProgressIndicator(
+                  //       value: expenseV2.totalFixedExpense!.value + expenseV2.totalVariableExpense!.value <= 0
+                  //           ? 0.0
+                  //           : (expenseV2.totalFixedExpense!.value / expenseV2.totalFixedExpense!.value + expenseV2.totalVariableExpense!.value)
+                  //               .clamp(0.0, 1.0),
+                  //       minHeight: 10,
+                  //       backgroundColor: ProjectColors.pureBlackColor.withOpacity(0.06),
+                  //       valueColor: const AlwaysStoppedAnimation(ProjectColors.pureBlackColor),
+                  //     ),
+                  //   ),
+                  // ),
+                  SizedBox(height: height * .01),
+                  textWidget(text: 'Based on your monthly & per-paycheque expenses', fontSize: .015),
+                ],
+              ),
+            ),
+            SizedBox(height: height * 0.016),
+            _GlassCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   textWidget(
-                    text: "Now → Payday",
-                    fontSize: 0.028,
+                    text: "Safe-to-spend until payday",
+                    fontSize: 0.016,
+                    fontWeight: FontWeight.w800,
+                    color: ProjectColors.whiteColor.withOpacity(0.70),
+                  ),
+                  SizedBox(height: height * 0.008),
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      textWidget(
+                        text: _moneySigned(ctrl.safeToSpendUntilPayday),
+                        fontSize: 0.040,
+                        fontWeight: FontWeight.w900,
+                        color: ctrl.healthColor,
+                      ),
+                      SizedBox(width: width * 0.02),
+                      Padding(
+                        padding: EdgeInsets.only(bottom: height * 0.005),
+                        child: textWidget(
+                          text: "until ${_md(ctrl.forecast.value.nextPayDate)}",
+                          fontSize: 0.015,
+                          fontWeight: FontWeight.w700,
+                          color: ProjectColors.whiteColor.withOpacity(0.55),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: height * 0.008),
+
+                  // ADDED: clarity line (kills confusion)
+                  textWidget(
+                    text: "After bills + minimums + buffer (${_money(ctrl.bufferTarget.value)}).",
+                    fontSize: 0.014,
+                    fontWeight: FontWeight.w700,
+                    color: ProjectColors.whiteColor.withOpacity(0.55),
+                  ),
+
+                  SizedBox(height: height * 0.014),
+
+                  _MiniRow(label: "Expected income", value: _money(ctrl.incomeUntilPayday)),
+                  SizedBox(height: height * 0.006),
+                  _MiniRow(label: "Bills due", value: _money(ctrl.billsUntilPayday)),
+                  SizedBox(height: height * 0.006),
+                  _MiniRow(label: "Debt minimums", value: _money(ctrl.minsUntilPayday)),
+                  SizedBox(height: height * 0.006),
+                  _MiniRow(label: "Buffer target", value: _money(ctrl.bufferTarget.value)),
+
+                  if (ctrl.showAddHoursSuggestion) ...[
+                    SizedBox(height: height * 0.012),
+                    _HintRow(
+                      icon: Icons.schedule,
+                      iconColor: ProjectColors.lightGreenColor,
+                      text: ctrl.addHoursCopy,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            SizedBox(height: height * 0.014),
+
+            // 2) NEXT BEST MOVE (button is specific now)
+            _GlassCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  textWidget(
+                    text: "Next best move",
+                    fontSize: 0.018,
                     fontWeight: FontWeight.w900,
                     color: ProjectColors.whiteColor,
                   ),
-                  const Spacer(),
-                  _Pill(label: ctrl.healthLabel, color: ctrl.healthColor),
+                  SizedBox(height: height * 0.008),
+                  textWidget(
+                    text: ctrl.nextMoveTitle,
+                    fontSize: 0.022,
+                    fontWeight: FontWeight.w900,
+                    color: ProjectColors.whiteColor.withOpacity(0.92),
+                  ),
+                  SizedBox(height: height * 0.008),
+                  textWidget(
+                    text: ctrl.nextMoveReason,
+                    fontSize: 0.015,
+                    fontWeight: FontWeight.w600,
+                    color: ProjectColors.whiteColor.withOpacity(0.58),
+                  ),
+                  SizedBox(height: height * 0.014),
+                  normalButton(
+                    title: ctrl.nextMoveCTA,
+                    cHeight: 0.06,
+                    cWidth: 1.0,
+                    bColor: ProjectColors.lightGreenColor,
+                    invertColors: true,
+                    callback: () {
+                      // TODO: open correct bottom sheet
+                    },
+                  ),
                 ],
               ),
+            ),
 
-              SizedBox(height: height * 0.016),
+            SizedBox(height: height * 0.014),
 
-              // 1) COMMAND CENTER
-              _GlassCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    textWidget(
-                      text: "Safe-to-spend until payday",
-                      fontSize: 0.016,
-                      fontWeight: FontWeight.w800,
-                      color: ProjectColors.whiteColor.withOpacity(0.70),
-                    ),
-                    SizedBox(height: height * 0.008),
-
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        textWidget(
-                          text: _moneySigned(ctrl.safeToSpendUntilPayday),
-                          fontSize: 0.040,
-                          fontWeight: FontWeight.w900,
-                          color: ctrl.healthColor,
-                        ),
-                        SizedBox(width: width * 0.02),
-                        Padding(
-                          padding: EdgeInsets.only(bottom: height * 0.005),
-                          child: textWidget(
-                            text: "until ${_md(ctrl.forecast.value.nextPayDate)}",
-                            fontSize: 0.015,
-                            fontWeight: FontWeight.w700,
-                            color: ProjectColors.whiteColor.withOpacity(0.55),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: height * 0.008),
-
-                    // ADDED: clarity line (kills confusion)
-                    textWidget(
-                      text: "After bills + minimums + buffer (${_money(ctrl.bufferTarget.value)}).",
-                      fontSize: 0.014,
-                      fontWeight: FontWeight.w700,
-                      color: ProjectColors.whiteColor.withOpacity(0.55),
-                    ),
-
-                    SizedBox(height: height * 0.014),
-
-                    _MiniRow(label: "Expected income", value: _money(ctrl.incomeUntilPayday)),
-                    SizedBox(height: height * 0.006),
-                    _MiniRow(label: "Bills due", value: _money(ctrl.billsUntilPayday)),
-                    SizedBox(height: height * 0.006),
-                    _MiniRow(label: "Debt minimums", value: _money(ctrl.minsUntilPayday)),
-                    SizedBox(height: height * 0.006),
-                    _MiniRow(label: "Buffer target", value: _money(ctrl.bufferTarget.value)),
-
-                    if (ctrl.showAddHoursSuggestion) ...[
-                      SizedBox(height: height * 0.012),
-                      _HintRow(
-                        icon: Icons.schedule,
-                        iconColor: ProjectColors.lightGreenColor,
-                        text: ctrl.addHoursCopy,
-                      ),
-                    ],
-                  ],
-                ),
+            // 3) LEAKS & SPIKES (less text, more premium)
+            _GlassCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  textWidget(
+                    text: "Leaks & spikes",
+                    fontSize: 0.018,
+                    fontWeight: FontWeight.w900,
+                    color: ProjectColors.whiteColor,
+                  ),
+                  SizedBox(height: height * 0.012),
+                  _RowTile(
+                    icon: Icons.repeat,
+                    iconColor: ProjectColors.brownColor,
+                    title: "New recurring: ${ctrl.leak.value.merchant} • ${_money2(ctrl.leak.value.amountMonthly)}/mo",
+                    subtitle: "~${_money2(ctrl.leak.value.annualCost)}/yr • Confidence: ${ctrl.leak.value.confidenceLabel}",
+                    onTap: () {
+                      // TODO: open spending leaks sheet (show matched evidence there)
+                    },
+                  ),
+                  SizedBox(height: height * 0.010),
+                  _RowTile(
+                    icon: Icons.bolt,
+                    iconColor: ProjectColors.yellowColor,
+                    title: "Spending spike: +${_money(ctrl.spike.value.spikeAmount)} at ${ctrl.spike.value.merchant}",
+                    subtitle: "Happened ${ctrl.spike.value.whenLabel}. Tap to tag/split/mark essential.",
+                    onTap: () {},
+                  ),
+                ],
               ),
+            ),
 
-              SizedBox(height: height * 0.014),
+            SizedBox(height: height * 0.014),
 
-              // 2) NEXT BEST MOVE (button is specific now)
-              _GlassCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    textWidget(
-                      text: "Next best move",
-                      fontSize: 0.018,
-                      fontWeight: FontWeight.w900,
-                      color: ProjectColors.whiteColor,
-                    ),
-                    SizedBox(height: height * 0.008),
-                    textWidget(
-                      text: ctrl.nextMoveTitle,
-                      fontSize: 0.022,
-                      fontWeight: FontWeight.w900,
-                      color: ProjectColors.whiteColor.withOpacity(0.92),
-                    ),
-                    SizedBox(height: height * 0.008),
-                    textWidget(
-                      text: ctrl.nextMoveReason,
-                      fontSize: 0.015,
-                      fontWeight: FontWeight.w600,
-                      color: ProjectColors.whiteColor.withOpacity(0.58),
-                    ),
-                    SizedBox(height: height * 0.014),
-                    normalButton(
-                      title: ctrl.nextMoveCTA,
-                      cHeight: 0.06,
-                      cWidth: 1.0,
-                      bColor: ProjectColors.lightGreenColor,
-                      invertColors: true,
-                      callback: () {
-                        // TODO: open correct bottom sheet
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: height * 0.014),
-
-              // 3) LEAKS & SPIKES (less text, more premium)
-              _GlassCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    textWidget(
-                      text: "Leaks & spikes",
-                      fontSize: 0.018,
-                      fontWeight: FontWeight.w900,
-                      color: ProjectColors.whiteColor,
-                    ),
-                    SizedBox(height: height * 0.012),
-                    _RowTile(
-                      icon: Icons.repeat,
-                      iconColor: ProjectColors.brownColor,
-                      title: "New recurring: ${ctrl.leak.value.merchant} • ${_money2(ctrl.leak.value.amountMonthly)}/mo",
-                      subtitle: "~${_money2(ctrl.leak.value.annualCost)}/yr • Confidence: ${ctrl.leak.value.confidenceLabel}",
-                      onTap: () {
-                        // TODO: open spending leaks sheet (show matched evidence there)
-                      },
-                    ),
-                    SizedBox(height: height * 0.010),
-                    _RowTile(
-                      icon: Icons.bolt,
-                      iconColor: ProjectColors.yellowColor,
-                      title: "Spending spike: +${_money(ctrl.spike.value.spikeAmount)} at ${ctrl.spike.value.merchant}",
-                      subtitle: "Happened ${ctrl.spike.value.whenLabel}. Tap to tag/split/mark essential.",
+            // 4) MOST RISKY VS MOST EXPENSIVE (tappable affordance)
+            Row(
+              children: [
+                Expanded(
+                  child: _GlassCard(
+                    child: _DebtMini(
+                      label: "Most risky",
+                      title: ctrl.dangerDebt.name,
+                      subtitle: _dangerSubtitle(ctrl.dangerDebt),
+                      accent: ProjectColors.yellowColor,
                       onTap: () {},
                     ),
-                  ],
+                  ),
                 ),
-              ),
-
-              SizedBox(height: height * 0.014),
-
-              // 4) MOST RISKY VS MOST EXPENSIVE (tappable affordance)
-              Row(
-                children: [
-                  Expanded(
-                    child: _GlassCard(
-                      child: _DebtMini(
-                        label: "Most risky",
-                        title: ctrl.dangerDebt.name,
-                        subtitle: _dangerSubtitle(ctrl.dangerDebt),
-                        accent: ProjectColors.yellowColor,
-                        onTap: () {},
-                      ),
+                SizedBox(width: width * 0.03),
+                Expanded(
+                  child: _GlassCard(
+                    child: _DebtMini(
+                      label: "Most expensive",
+                      title: ctrl.drainDebt.name,
+                      subtitle: "Interest burn ~${_money2(ctrl.drainDebt.interestPerDay)}/day",
+                      accent: ProjectColors.lightGreenColor,
+                      onTap: () {},
                     ),
                   ),
-                  SizedBox(width: width * 0.03),
-                  Expanded(
-                    child: _GlassCard(
-                      child: _DebtMini(
-                        label: "Most expensive",
-                        title: ctrl.drainDebt.name,
-                        subtitle: "Interest burn ~${_money2(ctrl.drainDebt.interestPerDay)}/day",
-                        accent: ProjectColors.lightGreenColor,
-                        onTap: () {},
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: height * 0.014),
-
-              // 5) FORECAST RISK (NEW POINT #1 REAL)
-              ForecastCard(
-                model: ForecastCardModel(
-                  risk: ForecastRisk.high,
-                  issue: "Jan 2–5 is tight (2 bills before pay).",
-                  insight: "Move \$300 to buffer or cut \$50 spending.",
-                  primaryText: "Move",
-                  onPrimary: () {
-                    // TODO: open “Reserve/Schedule” sheet
-                  },
-                  secondaryText: "Cut",
-                  onSecondary: () {
-                    // TODO: open “Save \$50 fastest” sheet
-                  },
-                ),
-                onTap: () {
-                  // TODO: open “Forecast detail” sheet
-                },
-              ),
-              if (ctrl.showAddHoursSuggestion) ...[
-                SizedBox(height: height * 0.010),
-                normalButton(
-                  title: "Add ${ctrl.forecast.value.suggestedExtraHours.toStringAsFixed(0)} hours plan",
-                  cHeight: 0.055,
-                  cWidth: 1.0,
-                  bColor: Colors.white.withOpacity(0.08),
-                  invertColors: false,
-                  callback: () {
-                    // TODO: open shift planner / availability suggestion
-                  },
                 ),
               ],
-              SizedBox(height: height * 0.014),
-              Save50FastCard(
-                model: SaveFastModel(
-                  health: PayHealth.tight,
-                  title: "Save \$50 fastest",
-                  subtitle: "Quick cuts to protect your buffer before payday.",
-                  suggestions: const [
-                    "Pause dining out this week saves ~\$35.",
-                    "Cancel/hold subscription saves \$14.99.",
-                    "Reduce fuel spending by \$20.",
-                  ],
-                  ctaText: "Open cuts checklist",
-                  onCtaTap: () {
-                    // TODO: open bottom sheet with checklist + toggles
-                  },
-                ),
+            ),
+
+            SizedBox(height: height * 0.014),
+
+            // 5) FORECAST RISK (NEW POINT #1 REAL)
+            ForecastCard(
+              model: ForecastCardModel(
+                risk: ForecastRisk.high,
+                issue: "Jan 2–5 is tight (2 bills before pay).",
+                insight: "Move \$300 to buffer or cut \$50 spending.",
+                primaryText: "Move",
+                onPrimary: () {
+                  // TODO: open “Reserve/Schedule” sheet
+                },
+                secondaryText: "Cut",
+                onSecondary: () {
+                  // TODO: open “Save \$50 fastest” sheet
+                },
               ),
-              SizedBox(height: height * 0.014),
-
-              // 6) AUTOMATION RULES (NEW POINT #2)
-              _GlassCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        textWidget(
-                          text: "Automation rules",
-                          fontSize: 0.018,
-                          fontWeight: FontWeight.w900,
-                          color: ProjectColors.whiteColor,
-                        ),
-                        const Spacer(),
-                        InkWell(
-                          onTap: () {
-                            // TODO: open add rule sheet
-                          },
-                          borderRadius: BorderRadius.circular(999),
-                          child: Padding(
-                            padding: EdgeInsets.all(width * 0.01),
-                            child: Icon(
-                              Icons.add,
-                              color: ProjectColors.lightGreenColor,
-                              size: height * 0.026,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: height * 0.012),
-
-                    // show 1–2 active rules only (low clutter)
-                    ...ctrl.activeRules.take(2).map((r) => Padding(
-                          padding: EdgeInsets.only(bottom: height * 0.010),
-                          child: _RuleRow(rule: r),
-                        )),
-
-                    if (ctrl.activeRules.isEmpty)
-                      textWidget(
-                        text: "No active rules yet. Add one to stop thinking about this.",
-                        fontSize: 0.014,
-                        fontWeight: FontWeight.w600,
-                        color: ProjectColors.whiteColor.withOpacity(0.55),
-                      ),
-
-                    if (ctrl.activeRules.length > 2) ...[
-                      SizedBox(height: height * 0.004),
-                      textWidget(
-                        text: "+${ctrl.activeRules.length - 2} more rules",
-                        fontSize: 0.014,
-                        fontWeight: FontWeight.w800,
-                        color: ProjectColors.whiteColor.withOpacity(0.45),
-                      ),
-                    ],
-
-                    SizedBox(height: height * 0.010),
-                    normalButton(
-                      title: "Add a rule",
-                      cHeight: 0.055,
-                      cWidth: 1.0,
-                      bColor: ProjectColors.lightGreenColor,
-                      invertColors: true,
-                      callback: () {
-                        // TODO: open add rule sheet
-                      },
-                    ),
-                  ],
-                ),
+              onTap: () {
+                // TODO: open “Forecast detail” sheet
+              },
+            ),
+            if (ctrl.showAddHoursSuggestion) ...[
+              SizedBox(height: height * 0.010),
+              normalButton(
+                title: "Add ${ctrl.forecast.value.suggestedExtraHours.toStringAsFixed(0)} hours plan",
+                cHeight: 0.055,
+                cWidth: 1.0,
+                bColor: Colors.white.withOpacity(0.08),
+                invertColors: false,
+                callback: () {
+                  // TODO: open shift planner / availability suggestion
+                },
               ),
+            ],
+            SizedBox(height: height * 0.014),
+            Save50FastCard(
+              model: SaveFastModel(
+                health: PayHealth.tight,
+                title: "Save \$50 fastest",
+                subtitle: "Quick cuts to protect your buffer before payday.",
+                suggestions: const [
+                  "Pause dining out this week saves ~\$35.",
+                  "Cancel/hold subscription saves \$14.99.",
+                  "Reduce fuel spending by \$20.",
+                ],
+                ctaText: "Open cuts checklist",
+                onCtaTap: () {
+                  // TODO: open bottom sheet with checklist + toggles
+                },
+              ),
+            ),
+            SizedBox(height: height * 0.014),
 
-              // 7) SAVE $50 FASTEST (OPTIONAL POINT #3)
-              if (ctrl.showSave50) ...[
-                SizedBox(height: height * 0.014),
-                _GlassCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            // 6) AUTOMATION RULES (NEW POINT #2)
+            _GlassCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
                       textWidget(
-                        text: "Save \$50 fastest",
+                        text: "Automation rules",
                         fontSize: 0.018,
                         fontWeight: FontWeight.w900,
                         color: ProjectColors.whiteColor,
                       ),
-                      SizedBox(height: height * 0.01),
-                      ...ctrl.save50Suggestions.map((s) => Padding(
-                            padding: EdgeInsets.only(bottom: height * 0.008),
-                            child: _Bullet(s),
-                          )),
-                      SizedBox(height: height * 0.012),
-                      normalButton(
-                        title: "Open cuts checklist",
-                        cHeight: 0.06,
-                        cWidth: 1.0,
-                        bColor: Colors.white.withOpacity(0.10),
-                        invertColors: false,
-                        callback: () {
-                          // TODO: open cuts sheet
+                      const Spacer(),
+                      InkWell(
+                        onTap: () {
+                          // TODO: open add rule sheet
                         },
+                        borderRadius: BorderRadius.circular(999),
+                        child: Padding(
+                          padding: EdgeInsets.all(width * 0.01),
+                          child: Icon(
+                            Icons.add,
+                            color: ProjectColors.lightGreenColor,
+                            size: height * 0.026,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  SizedBox(height: height * 0.012),
 
-              SizedBox(height: height * 0.03),
+                  // show 1–2 active rules only (low clutter)
+                  ...ctrl.activeRules.take(2).map((r) => Padding(
+                        padding: EdgeInsets.only(bottom: height * 0.010),
+                        child: _RuleRow(rule: r),
+                      )),
+
+                  if (ctrl.activeRules.isEmpty)
+                    textWidget(
+                      text: "No active rules yet. Add one to stop thinking about this.",
+                      fontSize: 0.014,
+                      fontWeight: FontWeight.w600,
+                      color: ProjectColors.whiteColor.withOpacity(0.55),
+                    ),
+
+                  if (ctrl.activeRules.length > 2) ...[
+                    SizedBox(height: height * 0.004),
+                    textWidget(
+                      text: "+${ctrl.activeRules.length - 2} more rules",
+                      fontSize: 0.014,
+                      fontWeight: FontWeight.w800,
+                      color: ProjectColors.whiteColor.withOpacity(0.45),
+                    ),
+                  ],
+
+                  SizedBox(height: height * 0.010),
+                  normalButton(
+                    title: "Add a rule",
+                    cHeight: 0.055,
+                    cWidth: 1.0,
+                    bColor: ProjectColors.lightGreenColor,
+                    invertColors: true,
+                    callback: () {
+                      // TODO: open add rule sheet
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            // 7) SAVE $50 FASTEST (OPTIONAL POINT #3)
+            if (ctrl.showSave50) ...[
+              SizedBox(height: height * 0.014),
+              _GlassCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    textWidget(
+                      text: "Save \$50 fastest",
+                      fontSize: 0.018,
+                      fontWeight: FontWeight.w900,
+                      color: ProjectColors.whiteColor,
+                    ),
+                    SizedBox(height: height * 0.01),
+                    ...ctrl.save50Suggestions.map((s) => Padding(
+                          padding: EdgeInsets.only(bottom: height * 0.008),
+                          child: _Bullet(s),
+                        )),
+                    SizedBox(height: height * 0.012),
+                    normalButton(
+                      title: "Open cuts checklist",
+                      cHeight: 0.06,
+                      cWidth: 1.0,
+                      bColor: Colors.white.withOpacity(0.10),
+                      invertColors: false,
+                      callback: () {
+                        // TODO: open cuts sheet
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ],
-          ),
+
+            SizedBox(height: height * 0.03),
+          ],
         ),
       ),
     );

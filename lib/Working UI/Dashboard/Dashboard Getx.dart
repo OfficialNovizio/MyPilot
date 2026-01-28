@@ -2,7 +2,7 @@ import 'package:emptyproject/Working%20UI/Account/Account.dart';
 import 'package:emptyproject/Working%20UI/Shift/Shift%20Screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../Debts/Debt Screen.dart';
+import '../Debts/Debt and Expense Tab.dart';
 import '../Priotizer/Priotizer Screen.dart';
 
 enum ScreenEnums {

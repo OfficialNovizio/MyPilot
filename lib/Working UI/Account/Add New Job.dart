@@ -106,17 +106,17 @@ class NewJob extends StatelessWidget {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.end,
-                              children: account.payFrequency
+                              children: account.payFrequency.entries
                                   .map(
                                     (t) => Padding(
                                       padding: EdgeInsets.only(top: height * .01),
                                       child: GestureDetector(
                                         onTap: () {
-                                          account.controllers![4].controller.text = t;
+                                          account.controllers![4].controller.text = t.key;
                                           account.showPayFrq!.value = !account.showPayFrq!.value;
                                         },
                                         child: textWidget(
-                                          text: t,
+                                          text: t.key,
                                           fontSize: .016,
                                           fontWeight: FontWeight.w600,
                                           color: ProjectColors.whiteColor.withOpacity(.55),
@@ -130,7 +130,8 @@ class NewJob extends StatelessWidget {
                           _divider(),
                           GestureDetector(
                             onTap: () {
-                              AppDatePicker.pickDate(minDate: DateTime.now().subtract(const Duration(days: 30))).then((onValue) {
+                              AppDatePicker.pickDate(minDate: DateTime.now().subtract(const Duration(days: 30)), maxDate: DateTime.now())
+                                  .then((onValue) {
                                 if (onValue != null) {
                                   account.controllers![3].controller.text = formatDate(onValue);
                                   account.controllers![3].pickedDate = onValue;
@@ -248,32 +249,25 @@ class NewJob extends StatelessWidget {
                           callback: () {
                             if (account.jobs!.any((test) => test.jobName!.toLowerCase() == account.controllers![0].controller.text.toLowerCase()) &&
                                 account.status!.value == JobStatus.create) {
-                              showSnackBar("Existed", "A job under this name is already existed");
+                              showSnackBar("Already exists", "A job with this name already exists.");
                             } else {
-                              account.createNewJob().then((onValue) {
-                                if (onValue) {
-                                  account.loadSavedJobs();
-                                }
-                              });
+                              account.createNewJob();
                             }
                           },
                         ),
                       ),
                       SizedBox(height: height * .02),
                       Visibility(
-                        visible: true,
-                        // visible: account.status!.value != JobStatus.create ? true : false,
+                        visible: account.status!.value != JobStatus.create ? true : false,
                         child: Center(
                           child: outLinedButton(
                             title: "Delete",
+                            color: ProjectColors.errorColor,
+                            cHeight: .05,
                             cWidth: .8,
                             callback: () {
                               account.status!.value = JobStatus.delete;
-                              account.createNewJob().then((onValue) {
-                                if (onValue) {
-                                  account.loadSavedJobs();
-                                }
-                              });
+                              account.createNewJob();
                             },
                           ),
                         ),

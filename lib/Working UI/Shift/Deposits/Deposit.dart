@@ -16,7 +16,7 @@ class DepositsTab extends StatefulWidget {
 class _DepositsTabState extends State<DepositsTab> {
   @override
   void initState() {
-    deposit.setOverviews();
+    deposit.shiftMonth(0);
     super.initState();
   }
 
@@ -42,7 +42,7 @@ class _DepositsTabState extends State<DepositsTab> {
               ),
             ),
           ),
-          shift.shifts!.isEmpty || shift.shifts!.firstWhere((m) => m.month == monthName(overview.selectedMonth.value)).dates!.length < 10
+          shift.minimumShifts!.value == false
               ? Padding(
                   padding: EdgeInsets.only(top: height * .15),
                   child: EmptyInsightsScreen(
@@ -53,8 +53,6 @@ class _DepositsTabState extends State<DepositsTab> {
               : Column(
                   children: [
                     DepositInsightsScreen(vm: deposit.depositInsight!.value!, showAll: true),
-
-                    // _WeeklyDepositsCard(),
                     SizedBox(height: height * .018),
                     MonthlyKpiLineCard(
                       title: deposit.weekChart!.value!.title,

@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../models/Priotizer model.dart';
 import '../../../models/Projection Model.dart';
 import 'Projection Getx.dart';
 
@@ -45,6 +46,7 @@ class _ProjectionTabState extends State<ProjectionTab> {
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      SizedBox(height: height * .04),
                       IncomeProjectionCard(
                         jobs: account.jobs!.map((f) => JobProjection(name: f.jobName!, hourlyRate: double.parse(f.wageHr!), hours: 10)).toList(),
                         maxAvailableHours: 50,
@@ -65,7 +67,7 @@ class _ProjectionTabState extends State<ProjectionTab> {
               },
             ),
             SizedBox(height: height * .02),
-            Visibility(visible: !account.jobs!.isEmpty, child: GoalsSection()),
+            Visibility(visible: !account.jobs!.isNotEmpty, child: GoalsSection()),
           ],
         ),
       ),
@@ -137,7 +139,18 @@ class GoalSetupCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GoalTypeSegment(),
+            segmentedToggle(
+              options: projection.goalTypeList!.map((e) => e['name'] as String).toList(),
+              itemWidthFactor: .23,
+              verticalPadding: .012,
+              selectedIndex: (() {
+                final idx = projection.goalTypeList!.map((e) => e['type'] as GoalType).toList().indexOf(projection.goalType.value);
+                return idx < 0 ? 0 : idx;
+              })(),
+              onChanged: (i, v) {
+                projection.goalType.value = projection.goalTypeList!.map((e) => e['type'] as GoalType).toList()[i];
+              },
+            ),
             SizedBox(height: height * 0.018),
             DarkTextField(controller: projection.titleCtrl, hintText: 'Goal name', title: 'Goal Title'),
             SizedBox(height: height * 0.015),
@@ -162,9 +175,9 @@ class GoalSetupCard extends StatelessWidget {
                         color: ProjectColors.whiteColor.withOpacity(0.6),
                       ),
                       SizedBox(height: height * 0.005),
-                      _DateField(
+                      DateField(
                         label: dateLabel,
-                        onTap: projection.pickDate,
+                        onTap: () {},
                       ),
                     ],
                   ),
@@ -179,7 +192,12 @@ class GoalSetupCard extends StatelessWidget {
               title: 'Description (optional)',
             ),
             SizedBox(height: height * 0.018),
-            PriorityRow(),
+            PriorityRow(
+              selected: projection.priority.value,
+              onChanged: (p) {
+                projection.priority.value = p;
+              },
+            ),
             SizedBox(height: height * 0.018),
             textWidget(
               text: 'How will you fund it?',
@@ -188,7 +206,18 @@ class GoalSetupCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
             SizedBox(height: height * 0.008),
-            FrequencySegment(),
+            segmentedToggle(
+              options: projection.fundingType!.map((e) => e['name'] as String).toList(),
+              itemWidthFactor: .23,
+              verticalPadding: .012,
+              selectedIndex: (() {
+                final idx = projection.fundingType!.map((e) => e['type'] as SavingFrequency).toList().indexOf(projection.frequency.value);
+                return idx < 0 ? 0 : idx;
+              })(),
+              onChanged: (i, v) {
+                projection.frequency.value = projection.fundingType!.map((e) => e['type'] as SavingFrequency).toList()[i];
+              },
+            ),
             SizedBox(height: height * 0.015),
             if (plan?.perPeriod != null && plan?.periods != null) ...[
               textWidget(
@@ -466,299 +495,6 @@ class _GoalListCard extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// ---------------------------------------------------------------------------
-/// SMALL SUBWIDGETS (segments, fields, etc.)
-/// ---------------------------------------------------------------------------
-
-class GoalTypeSegment extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    Widget chip(String label, GoalType type) {
-      return Expanded(
-        child: GestureDetector(
-          onTap: () {
-            projection.goalType.value = type;
-          },
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: height * 0.011),
-            decoration: BoxDecoration(
-              color: projection.goalType.value == type ? ProjectColors.greenColor.withOpacity(0.2) : Colors.transparent,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            alignment: Alignment.center,
-            child: textWidget(
-              text: label,
-              fontSize: 0.017,
-              color: projection.goalType.value == type ? ProjectColors.greenColor : ProjectColors.whiteColor,
-              fontWeight: projection.goalType.value == type ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: EdgeInsets.all(height * 0.004),
-      decoration: BoxDecoration(
-        color: const Color(0xff222222),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        children: [
-          chip('Save', GoalType.save),
-          SizedBox(width: width * 0.01),
-          chip('Debt', GoalType.debt),
-          SizedBox(width: width * 0.01),
-          chip('Surplus', GoalType.surplus),
-        ],
-      ),
-    );
-  }
-}
-
-class FrequencySegment extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    Widget chip(String label, SavingFrequency type) {
-      return Expanded(
-        child: GestureDetector(
-          onTap: () {
-            projection.frequency.value = type;
-            projection.frequency.refresh();
-          },
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: height * 0.010),
-            decoration: BoxDecoration(
-              color: projection.frequency.value == type ? ProjectColors.greenColor.withOpacity(0.18) : Colors.transparent,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            alignment: Alignment.center,
-            child: textWidget(
-              text: label,
-              fontSize: 0.016,
-              color: projection.frequency.value == type ? ProjectColors.greenColor : ProjectColors.whiteColor,
-              fontWeight: projection.frequency.value == type ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Obx(
-      () => Container(
-        padding: EdgeInsets.all(height * 0.004),
-        decoration: BoxDecoration(
-          color: const Color(0xff222222),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Row(
-          children: [
-            chip('Weekly', SavingFrequency.weekly),
-            SizedBox(width: width * 0.01),
-            chip('Bi-weekly', SavingFrequency.biweekly),
-            SizedBox(width: width * 0.01),
-            chip('Monthly', SavingFrequency.monthly),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PriorityRow extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    Widget pill(String label, GoalPriority p, Color color) {
-      return GestureDetector(
-        onTap: () {
-          projection.priority.value = p;
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: width * 0.03,
-            vertical: height * 0.008,
-          ),
-          decoration: BoxDecoration(
-            color: projection.priority.value == p ? color.withOpacity(0.18) : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: projection.priority.value == p ? color : Colors.white.withOpacity(0.12),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: height * 0.012,
-                height: height * 0.012,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              SizedBox(width: width * 0.012),
-              textWidget(
-                text: label,
-                fontSize: 0.015,
-                color: ProjectColors.whiteColor,
-                fontWeight: projection.priority.value == p ? FontWeight.w600 : FontWeight.w400,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Obx(
-      () => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          textWidget(
-            text: 'Priority',
-            fontSize: 0.016,
-            color: ProjectColors.whiteColor.withOpacity(0.6),
-          ),
-          SizedBox(height: height * 0.008),
-          Row(
-            children: [
-              pill('High', GoalPriority.high, Colors.redAccent),
-              SizedBox(width: width * 0.02),
-              pill('Medium', GoalPriority.medium, Colors.orangeAccent),
-              SizedBox(width: width * 0.02),
-              pill('Low', GoalPriority.low, Colors.greenAccent),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class DarkTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? hintText;
-  final TextInputType? keyboardType;
-  final String? prefixText;
-  final String? title;
-  final int maxLines;
-
-  const DarkTextField({
-    Key? key,
-    required this.controller,
-    this.hintText,
-    this.keyboardType,
-    this.prefixText,
-    this.title,
-    this.maxLines = 1,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        textWidget(
-          text: title,
-          fontSize: 0.016,
-          color: ProjectColors.whiteColor.withOpacity(0.6),
-        ),
-        SizedBox(height: height * 0.005),
-        TextField(
-          controller: controller,
-          maxLines: maxLines,
-          style: TextStyle(
-            fontSize: height * 0.018,
-            color: ProjectColors.whiteColor,
-            fontFamily: 'poppins',
-          ),
-          keyboardType: keyboardType,
-          cursorColor: ProjectColors.yellowColor,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: const Color(0xff1c1c1c),
-            hintText: hintText,
-            hintStyle: TextStyle(
-              fontSize: height * 0.017,
-              color: ProjectColors.blackColor.withOpacity(0.6),
-              fontFamily: 'poppins',
-            ),
-            prefixText: prefixText,
-            prefixStyle: TextStyle(
-              fontSize: height * 0.018,
-              color: ProjectColors.whiteColor,
-              fontFamily: 'poppins',
-            ),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: width * 0.03,
-              vertical: height * 0.012,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withOpacity(0.05),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: ProjectColors.yellowColor,
-                width: 1.3,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DateField extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-
-  const _DateField({
-    Key? key,
-    required this.label,
-    required this.onTap,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: width * 0.03,
-          vertical: height * 0.012,
-        ),
-        decoration: BoxDecoration(
-          color: const Color(0xff1c1c1c),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.05),
-          ),
-        ),
-        child: Row(
-          children: [
-            textWidget(
-              text: label,
-              fontSize: 0.018,
-              color: ProjectColors.whiteColor,
-            ),
-            const Spacer(),
-            Icon(
-              Icons.calendar_today_outlined,
-              size: height * 0.018,
-              color: ProjectColors.blackColor.withOpacity(0.6),
-            ),
-          ],
-        ),
       ),
     );
   }

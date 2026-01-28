@@ -6,7 +6,8 @@ import 'package:get/get.dart';
 
 import '../../Constants.dart';
 import '../Debt Dashboard/Debt Insights.dart';
-import '../Debt Dashboard/New Data.dart';
+import '../Expenses/Expense Insight Logic V2.dart';
+import '../Expenses/Expense Insights.dart';
 import '../Debt Dashboard/Payday Buffer.dart';
 import '../Debt Dashboard/Visa Cards.dart';
 
@@ -354,6 +355,8 @@ class InsightCard extends StatelessWidget {
     required this.rightWidget,
     this.footer,
     this.onTap,
+    this.disableCard = false,
+    this.disableReason,
   });
 
   final String title;
@@ -362,96 +365,97 @@ class InsightCard extends StatelessWidget {
   final String? leftSub;
   final Widget rightWidget;
   final Widget? footer;
+  final bool? disableCard;
   final VoidCallback? onTap;
+  final InsightsGateVM? disableReason;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: DarkCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return !disableCard!
+        ? GestureDetector(
+            onTap: onTap,
+            child: DarkCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      textWidget(
+                        text: title,
+                        fontSize: 0.03,
+                        fontWeight: FontWeight.w800,
+                        color: ProjectColors.whiteColor,
+                      ),
+                      textWidget(
+                        text: "View Insights >",
+                        fontSize: .018,
+                        fontWeight: FontWeight.bold,
+                        color: ProjectColors.greenColor,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              textWidget(
+                                text: leftMain,
+                                fontSize: 0.045,
+                                fontWeight: FontWeight.w900,
+                                color: ProjectColors.whiteColor,
+                              ),
+                              SizedBox(width: width * 0.02),
+                              if (leftTag != null) leftTag!,
+                            ],
+                          ),
+                          if (leftSub != null) ...[
+                            textWidget(
+                                text: leftSub!, fontSize: 0.02, color: ProjectColors.whiteColor.withOpacity(0.65), fontWeight: FontWeight.w600),
+                          ],
+                        ],
+                      ),
+                      rightWidget,
+                    ],
+                  ),
+                  if (footer != null) footer!,
+                ],
+              ),
+            ),
+          )
+        : DarkCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 textWidget(
-                  text: title,
+                  text: 'Insights Status',
                   fontSize: 0.03,
                   fontWeight: FontWeight.w800,
                   color: ProjectColors.whiteColor,
                 ),
+                SizedBox(height: height * .01),
+                if (leftTag != null) leftTag!,
+                // textWidget(
+                //   text: disableReason!.title,
+                //   fontSize: 0.02,
+                //   fontWeight: FontWeight.w800,
+                //   color: ProjectColors.errorColor,
+                // ),
+                SizedBox(height: height * .015),
                 textWidget(
-                  text: "View Insights >",
-                  fontSize: .018,
-                  color: ProjectColors.greenColor,
-                  fontWeight: FontWeight.bold,
+                  text: disableReason!.subtitle,
+                  needContainer: true,
+                  cWidth: .9,
+                  color: ProjectColors.whiteColor,
                 ),
               ],
             ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        textWidget(
-                          text: leftMain,
-                          fontSize: 0.045,
-                          fontWeight: FontWeight.w900,
-                          color: ProjectColors.whiteColor,
-                        ),
-                        SizedBox(width: width * 0.02),
-                        if (leftTag != null) leftTag!,
-                      ],
-                    ),
-                    if (leftSub != null) ...[
-                      textWidget(
-                        text: leftSub!,
-                        fontSize: 0.02,
-                        color: ProjectColors.whiteColor.withOpacity(0.55),
-                      ),
-                    ],
-                  ],
-                ),
-                rightWidget,
-              ],
-            ),
-            if (footer != null) footer!,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PlainCard extends StatelessWidget {
-  const _PlainCard({required this.child, this.onTap});
-  final Widget child;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final card = Container(
-      padding: EdgeInsets.all(width * 0.04),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
-      ),
-      child: child,
-    );
-
-    if (onTap == null) return card;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(22),
-      onTap: onTap,
-      child: card,
-    );
+          );
   }
 }
 

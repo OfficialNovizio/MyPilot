@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/Priotizer model.dart';
+import '../../models/Projection Model.dart';
 import '../../models/TextForm.dart';
 import '../Constants.dart';
 import '../Shared Preferences.dart';
@@ -19,7 +20,8 @@ class ProitizerGetx extends GetxController {
   // RxString timeScope = 'today'.obs;
   // Rx<TaskStatus> taskStatus = TaskStatus.pending.obs;
   Rx<ButtonState> state = Rx<ButtonState>(ButtonState.loading);
-  Rx<TaskPriority> taskPriority = TaskPriority.low.obs;
+  // Rx<GoalPriority> GoalPriority = GoalPriority.low.obs;
+  Rx<GoalPriority> priority = GoalPriority.medium.obs;
   Rx<TaskSection> taskType = TaskSection.must.obs;
   Rx<PrioritizerModel?> taskModel = PrioritizerModel(status: 200, message: 'ok', data: <Task>[]).obs;
   RxList<Task> tasks = <Task>[].obs;
@@ -45,9 +47,9 @@ class ProitizerGetx extends GetxController {
   RxList? sections = ['Due Now', 'Coming Up', 'Optional', 'Done'].obs;
 
   RxList<Map> priorityType = RxList<Map>([
-    {"Title": 'High', "Type": TaskPriority.high, 'Color': ProjectColors.errorColor},
-    {"Title": 'Medium', "Type": TaskPriority.medium, 'Color': ProjectColors.yellowColor},
-    {"Title": 'Low', "Type": TaskPriority.low, 'Color': ProjectColors.greenColor},
+    {"Title": 'High', "Type": GoalPriority.high, 'Color': ProjectColors.errorColor},
+    {"Title": 'Medium', "Type": GoalPriority.medium, 'Color': ProjectColors.yellowColor},
+    {"Title": 'Low', "Type": GoalPriority.low, 'Color': ProjectColors.greenColor},
   ]);
 
   // ========= DATE HELPERS =========
@@ -70,7 +72,7 @@ class ProitizerGetx extends GetxController {
 
   TaskSection decideTaskSection({
     required DateTime hardDeadline,
-    required TaskPriority priority,
+    required GoalPriority priority,
     DateTime? now,
   }) {
     final today = _dateOnly(now ?? DateTime.now());
@@ -94,7 +96,7 @@ class ProitizerGetx extends GetxController {
     if (softDate != null) {
       // on or past soft, but before hard
       if (daysToSoft != null && daysToSoft <= 0 && daysToHard > 0) {
-        if (priority == TaskPriority.high) {
+        if (priority == GoalPriority.high) {
           return TaskSection.must;
         }
         return TaskSection.atRisk;
@@ -105,10 +107,10 @@ class ProitizerGetx extends GetxController {
 
     // no soft (should almost never hit here, but keep fallback)
     switch (priority) {
-      case TaskPriority.high:
+      case GoalPriority.high:
         return TaskSection.atRisk;
-      case TaskPriority.medium:
-      case TaskPriority.low:
+      case GoalPriority.medium:
+      case GoalPriority.low:
         return TaskSection.ifTime;
     }
   }
@@ -183,7 +185,7 @@ class ProitizerGetx extends GetxController {
     final soft = computeSoftDeadline(controllers[3].pickedDate!);
     final section = decideTaskSection(
       hardDeadline: controllers[3].pickedDate!,
-      priority: taskPriority.value,
+      priority: priority.value,
     );
 
     final item = Task(
@@ -193,7 +195,7 @@ class ProitizerGetx extends GetxController {
       section: section,
       hardDeadline: controllers[3].pickedDate!,
       softDeadline: soft,
-      priority: taskPriority.value,
+      priority: priority.value,
       status: TaskStatus.pending,
     );
 
@@ -223,7 +225,7 @@ class ProitizerGetx extends GetxController {
     final soft = computeSoftDeadline(controllers[3].pickedDate!);
     final section = decideTaskSection(
       hardDeadline: controllers[3].pickedDate!,
-      priority: taskPriority.value,
+      priority: priority.value,
     );
 
     final updated = Task(
@@ -233,7 +235,7 @@ class ProitizerGetx extends GetxController {
       section: section,
       hardDeadline: controllers[3].pickedDate!,
       softDeadline: soft,
-      priority: taskPriority.value,
+      priority: priority.value,
       status: selectedTask.value!.status, // keep current status
     );
 

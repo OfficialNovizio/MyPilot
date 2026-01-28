@@ -170,13 +170,15 @@ class CreditCardModel {
   final String? cardHolderName;
   final String? cvvCode; // don't store in production
   final String? bankName;
+  final String? cardType;
   final double? creditLimit;
   final double? creditLimitUsed;
   final bool isDefault;
   final int createdAtMs;
 
   // ✅ billing fields
-  final DateTime? lastBillDate; // last statement/bill generated date
+  final DateTime? statementDate; // last statement/bill generated date
+  final DateTime? paymentDueDate; // last statement/bill generated date
   final int billingCycleDays; // e.g., 30
   final int dueDaysAfterStatement; // e.g., 21
 
@@ -188,12 +190,14 @@ class CreditCardModel {
     this.cvvCode,
     this.bankName,
     this.creditLimit,
+    this.cardType,
     this.creditLimitUsed,
     this.isDefault = false,
     required this.createdAtMs,
 
     // ✅ new (null-safe)
-    this.lastBillDate,
+    this.statementDate,
+    this.paymentDueDate,
     this.billingCycleDays = 30,
     this.dueDaysAfterStatement = 21,
   });
@@ -203,13 +207,15 @@ class CreditCardModel {
     String? cardNumber,
     DateTime? expiryDate,
     String? cardHolderName,
+    String? cardType,
     String? cvvCode,
     String? bankName,
     double? creditLimit,
     double? creditLimitUsed,
     bool? isDefault,
     int? createdAtMs,
-    DateTime? lastBillDate,
+    DateTime? statementDate,
+    DateTime? paymentDueDate,
     int? billingCycleDays,
     int? dueDaysAfterStatement,
   }) {
@@ -218,13 +224,15 @@ class CreditCardModel {
       cardNumber: cardNumber ?? this.cardNumber,
       expiryDate: expiryDate ?? this.expiryDate,
       cardHolderName: cardHolderName ?? this.cardHolderName,
+      cardType: cardType ?? this.cardType,
       cvvCode: cvvCode ?? this.cvvCode,
       bankName: bankName ?? this.bankName,
       creditLimit: creditLimit ?? this.creditLimit,
       creditLimitUsed: creditLimitUsed ?? this.creditLimitUsed,
       isDefault: isDefault ?? this.isDefault,
       createdAtMs: createdAtMs ?? this.createdAtMs,
-      lastBillDate: lastBillDate ?? this.lastBillDate,
+      statementDate: statementDate ?? statementDate,
+      paymentDueDate: paymentDueDate ?? paymentDueDate,
       billingCycleDays: billingCycleDays ?? this.billingCycleDays,
       dueDaysAfterStatement: dueDaysAfterStatement ?? this.dueDaysAfterStatement,
     );
@@ -235,6 +243,7 @@ class CreditCardModel {
         "cardNumber": cardNumber,
         "expiryDateMs": expiryDate?.millisecondsSinceEpoch,
         "cardHolderName": cardHolderName,
+        "cardType": cardType,
         "cvvCode": cvvCode,
         "bankName": bankName,
         "creditLimit": creditLimit,
@@ -243,7 +252,8 @@ class CreditCardModel {
         "createdAtMs": createdAtMs,
 
         // ✅ new
-        "lastBillDateMs": lastBillDate?.millisecondsSinceEpoch,
+        "statementDate": statementDate?.millisecondsSinceEpoch,
+        "paymentDueDate": paymentDueDate?.millisecondsSinceEpoch,
         "billingCycleDays": billingCycleDays,
         "dueDaysAfterStatement": dueDaysAfterStatement,
       };
@@ -284,13 +294,15 @@ class CreditCardModel {
       cardHolderName: json["cardHolderName"]?.toString(),
       cvvCode: json["cvvCode"]?.toString(),
       bankName: json["bankName"]?.toString(),
+      cardType: json["cardType"]?.toString(),
       creditLimit: _toDouble(json["creditLimit"]),
       creditLimitUsed: _toDouble(json["creditLimitUsed"]),
       isDefault: _toBool(json["isDefault"]),
       createdAtMs: _toInt(json["createdAtMs"]) ?? 0,
 
       // ✅ new
-      lastBillDate: _toDate(json["lastBillDateMs"]),
+      statementDate: _toDate(json["statementDate"]),
+      paymentDueDate: _toDate(json["paymentDueDate"]),
       billingCycleDays: _toInt(json["billingCycleDays"]) ?? 30,
       dueDaysAfterStatement: _toInt(json["dueDaysAfterStatement"]) ?? 21,
     );

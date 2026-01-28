@@ -6,8 +6,248 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import '../models/Projection Model.dart';
 import 'Controllers.dart';
 import 'Shift/Shift Getx.dart';
+
+void callBottomSheet({required Widget child, String? title, bool isScrollControlled = true}) {
+  Get.bottomSheet(
+    DarkCard(
+      color: ProjectColors.blackColor,
+      opacity: 1,
+      borderColor: ProjectColors.whiteColor,
+      borderOpacity: .1,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title != null) ...[
+            Center(
+              child: Container(
+                height: height * .005,
+                width: width * .25,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  color: ProjectColors.greenColor,
+                ),
+              ),
+            ),
+            SizedBox(height: height * .015),
+            Center(
+              child: textWidget(
+                text: title,
+                fontSize: .02,
+                fontWeight: FontWeight.w900,
+                color: ProjectColors.whiteColor,
+              ),
+            ),
+            SizedBox(height: height * .012),
+          ],
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: height * .015),
+            child: child,
+          ),
+        ],
+      ),
+    ),
+    isScrollControlled: isScrollControlled,
+  );
+}
+
+class DarkTextField extends StatelessWidget {
+  final String title;
+
+  // Editable mode
+  final TextEditingController? controller;
+  final TextInputType? keyboardType;
+  final String? prefixText;
+  final int maxLines;
+
+  // Picker/display mode
+  final String? value; // show when controller == null
+  final String? hintText;
+  final VoidCallback? onTap; // if not null => acts like a tile picker
+  final void Function(String value)? onChanged;
+
+  // Slots
+  final Widget? trailing;
+  final Widget? leading;
+
+  // Optional
+  final bool enabled;
+
+  // ✅ NEW
+  final double? tileHeight; // e.g. height * 0.085
+  final Color? backgroundColor; // override default bg
+
+  const DarkTextField({
+    super.key,
+    required this.title,
+    this.controller,
+    this.keyboardType,
+    this.prefixText,
+    this.maxLines = 1,
+    this.value,
+    this.hintText,
+    this.onTap,
+    this.onChanged,
+    this.trailing,
+    this.leading,
+    this.enabled = true,
+
+    // ✅ NEW
+    this.tileHeight,
+    this.backgroundColor,
+  });
+
+  bool get _isPicker => onTap != null;
+  bool get _isTextField => controller != null;
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = backgroundColor ?? ProjectColors.backgroundColor;
+    final borderColor = ProjectColors.whiteColor.withOpacity(0.05);
+
+    final content = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (leading != null) ...[
+          leading!,
+          SizedBox(width: width * 0.02),
+        ],
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center, // ✅ helps when fixed height
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              textWidget(
+                text: title,
+                color: ProjectColors.whiteColor.withOpacity(0.55),
+                fontWeight: FontWeight.w600,
+              ),
+              SizedBox(height: height * 0.006),
+              _isTextField ? _buildBoldTextField() : _buildBoldValue(),
+            ],
+          ),
+        ),
+        if (trailing != null) ...[
+          SizedBox(width: width * 0.02),
+          trailing!,
+        ],
+      ],
+    );
+
+    final pad = EdgeInsets.symmetric(horizontal: width * 0.03, vertical: height * 0.008);
+
+    return GestureDetector(
+      onTap: (!enabled || !_isPicker) ? null : onTap,
+      child: Opacity(
+        opacity: enabled ? 1 : 0.45,
+        child: Container(
+          alignment: Alignment.center, // ✅ center content vertically
+          padding: pad,
+          decoration: BoxDecoration(
+            color: bg, // ✅ NEW
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor),
+          ),
+          child: content,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBoldValue() {
+    final v = (value ?? '').trim();
+    final isEmpty = v.isEmpty;
+
+    return textWidget(
+      text: isEmpty ? (hintText ?? '') : v,
+      color: isEmpty ? ProjectColors.whiteColor.withOpacity(0.6) : ProjectColors.whiteColor,
+      fontWeight: FontWeight.w800,
+    );
+  }
+
+  Widget _buildBoldTextField() {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      enabled: enabled,
+      onChanged: onChanged,
+      keyboardType: keyboardType,
+      textInputAction: TextInputAction.done,
+      onSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+      style: TextStyle(
+        fontSize: height * 0.015,
+        color: ProjectColors.whiteColor,
+        fontFamily: 'poppins',
+        fontWeight: FontWeight.w800,
+      ),
+      cursorColor: ProjectColors.yellowColor,
+      decoration: InputDecoration(
+        isCollapsed: true,
+        border: InputBorder.none,
+        hintText: hintText,
+        hintStyle: TextStyle(
+          fontSize: height * 0.015,
+          color: ProjectColors.whiteColor.withOpacity(0.45),
+          fontFamily: 'poppins',
+          fontWeight: FontWeight.w600,
+        ),
+        prefixText: prefixText,
+        prefixStyle: TextStyle(
+          fontSize: height * 0.015,
+          color: ProjectColors.whiteColor,
+          fontFamily: 'poppins',
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class DateField extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const DateField({
+    Key? key,
+    required this.label,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: width * 0.03, vertical: height * 0.012),
+        decoration: BoxDecoration(
+          color: const Color(0xff1c1c1c),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.05),
+          ),
+        ),
+        child: Row(
+          children: [
+            textWidget(
+              text: label,
+              fontSize: 0.018,
+              color: ProjectColors.whiteColor,
+            ),
+            const Spacer(),
+            Icon(
+              Icons.calendar_today_outlined,
+              size: height * 0.018,
+              color: ProjectColors.blackColor.withOpacity(0.6),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class BigFormField extends StatelessWidget {
   const BigFormField({
@@ -58,29 +298,106 @@ class BigFormField extends StatelessWidget {
   }
 }
 
+class PriorityRow extends StatelessWidget {
+  final GoalPriority selected;
+  final ValueChanged<GoalPriority> onChanged;
+
+  const PriorityRow({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget pill(String label, GoalPriority p, Color color) {
+      final isSelected = selected == p;
+
+      return GestureDetector(
+        onTap: () => onChanged(p), // ✅ return selected value
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: width * 0.03,
+            vertical: height * 0.008,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withOpacity(0.18) : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? color : Colors.white.withOpacity(0.12),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: height * 0.012,
+                height: height * 0.012,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+              SizedBox(width: width * 0.012),
+              textWidget(
+                text: label,
+                fontSize: 0.015,
+                color: ProjectColors.whiteColor,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        textWidget(
+          text: 'Priority',
+          fontSize: 0.016,
+          color: ProjectColors.whiteColor.withOpacity(0.6),
+        ),
+        SizedBox(height: height * 0.008),
+        Row(
+          children: [
+            pill('High', GoalPriority.high, Colors.redAccent),
+            SizedBox(width: width * 0.02),
+            pill('Medium', GoalPriority.medium, Colors.orangeAccent),
+            SizedBox(width: width * 0.02),
+            pill('Low', GoalPriority.low, Colors.greenAccent),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+
 Widget segmentedToggle({
   required List<String> options,
   required int selectedIndex,
   required void Function(int index, String value) onChanged,
-  double pillPadding = .005,
+  double pillPadding = .01,
   double verticalPadding = .009,
   double itemWidthFactor = .2, // each item width = width * this
-  Color bgColor = ProjectColors.blackColor,
+  Color bgColor = ProjectColors.backgroundColor,
   Color activeColor = ProjectColors.greenColor,
   Color textColor = ProjectColors.whiteColor,
   double fontSize = .015,
+  cWidth = 1.0,
 }) {
   assert(options.isNotEmpty, 'options cannot be empty');
   assert(selectedIndex >= 0 && selectedIndex < options.length, 'selectedIndex out of range');
 
   return Container(
+    width: width * cWidth,
     padding: EdgeInsets.all(width * pillPadding),
     decoration: BoxDecoration(
       color: bgColor,
       borderRadius: BorderRadius.circular(999),
     ),
     child: Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(options.length, (i) {
         final selected = i == selectedIndex;
 
@@ -90,7 +407,7 @@ Widget segmentedToggle({
             width: width * itemWidthFactor,
             padding: EdgeInsets.symmetric(vertical: height * verticalPadding),
             decoration: BoxDecoration(
-              color: selected ? activeColor : Colors.transparent,
+              color: selected ? activeColor.withOpacity(0.2) : Colors.transparent,
               borderRadius: BorderRadius.circular(999),
             ),
             alignment: Alignment.center,
@@ -98,7 +415,7 @@ Widget segmentedToggle({
               text: options[i],
               fontSize: fontSize,
               fontWeight: FontWeight.w700,
-              color: textColor,
+              color: selected ? activeColor : textColor,
             ),
           ),
         );
@@ -180,25 +497,26 @@ class AddContent extends StatelessWidget {
   String? title;
   String? subTitle;
   VoidCallback? callback;
+  Color? color;
+  IconData? icon;
 
-  AddContent({this.title, this.subTitle, this.callback});
+  AddContent({this.title, this.subTitle, this.callback, this.icon = Icons.add, this.color});
 
   @override
   Widget build(BuildContext context) {
     return DarkCard(
-      child: InkWell(
+      child: GestureDetector(
         onTap: callback,
-        borderRadius: BorderRadius.circular(16),
         child: Row(
           children: [
             Container(
               width: height * .05,
               height: height * .05,
               decoration: BoxDecoration(
-                color: ProjectColors.whiteColor.withOpacity(0.1),
+                color: ProjectColors.whiteColor.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Icons.add, color: ProjectColors.whiteColor),
+              child: Icon(icon, color: ProjectColors.whiteColor),
             ),
             SizedBox(width: width * .02),
             Expanded(
@@ -304,22 +622,25 @@ class SegmentTabs extends StatelessWidget {
         ),
     };
 
-    return Container(
-      width: width * cWidth!,
-      decoration: BoxDecoration(
-        color: ProjectColors.whiteColor.withOpacity(bgOpacity),
-        borderRadius: BorderRadius.circular(40),
-        border: Border.all(color: ProjectColors.whiteColor.withOpacity(borderOpacity)),
-      ),
-      child: CupertinoSlidingSegmentedControl<String>(
-        groupValue: value,
-        thumbColor: ProjectColors.greenColor.withOpacity(thumbOpacity),
-        backgroundColor: Colors.transparent,
-        padding: EdgeInsetsGeometry.symmetric(vertical: height * .001),
-        onValueChanged: (v) {
-          if (v != null) onChanged(v);
-        },
-        children: children,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(40),
+      child: Container(
+        width: width * cWidth!,
+        decoration: BoxDecoration(
+          color: ProjectColors.whiteColor.withOpacity(bgOpacity),
+          borderRadius: BorderRadius.circular(40),
+          border: Border.all(color: ProjectColors.whiteColor.withOpacity(borderOpacity)),
+        ),
+        child: CupertinoSlidingSegmentedControl<String>(
+          groupValue: value,
+          thumbColor: ProjectColors.greenColor.withOpacity(thumbOpacity),
+          backgroundColor: Colors.transparent,
+          padding: EdgeInsetsGeometry.symmetric(vertical: height * .001),
+          onValueChanged: (v) {
+            if (v != null) onChanged(v);
+          },
+          children: children,
+        ),
       ),
     );
   }
@@ -355,59 +676,28 @@ class _SegItem extends StatelessWidget {
   }
 }
 
-// class DarkCard extends StatelessWidget {
-//   final Widget child;
-//   final Color? color;
-//   const DarkCard({required this.child, this.color = ProjectColors.blackColor});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return ClipRRect(
-//       borderRadius: BorderRadius.circular(20),
-//       child: BackdropFilter(
-//         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-//         child: DecoratedBox(
-//           decoration: BoxDecoration(
-//             gradient: LinearGradient(
-//               begin: Alignment.topLeft,
-//               end: Alignment.bottomRight,
-//               colors: [
-//                 Color(0x66FFFFFF), // top highlight
-//                 Color(0x22FFFFFF), // mid
-//                 Colors.white, // subtle dark edge
-//               ],
-//               stops: [0.0, 0.55, 1.0],
-//             ),
-//             border: Border.all(color: const Color(0x33000000), width: 1),
-//           ),
-//           child: Container(
-//             width: width,
-//             padding: EdgeInsets.symmetric(horizontal: width * .02, vertical: height * .018),
-//             // decoration: BoxDecoration(
-//             //   color: color,
-//             //   borderRadius: BorderRadius.circular(20),
-//             // ),
-//             child: child,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 class DarkCard extends StatelessWidget {
   final Widget child;
   final Color? color;
-  const DarkCard({required this.child, this.color = ProjectColors.blackColor});
+  final Color? borderColor;
+  final double? opacity;
+  final double? borderOpacity;
+  const DarkCard({
+    required this.child,
+    this.color = ProjectColors.whiteColor,
+    this.opacity = .1,
+    this.borderColor = ProjectColors.whiteColor,
+    this.borderOpacity = .15,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: width * .02, vertical: height * .018),
+      padding: EdgeInsets.symmetric(horizontal: width * .02, vertical: height * .01),
       decoration: BoxDecoration(
-        color: color,
+        color: color!.withOpacity(opacity!),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor!.withOpacity(borderOpacity!)),
       ),
       child: child,
     );
@@ -425,27 +715,6 @@ class Popup extends StatelessWidget {
       borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
       child: CupertinoPageScaffold(
         backgroundColor: color,
-        //   navigationBar: CupertinoNavigationBar(
-        //     middle: textWidget(
-        //       text: title!,
-        //       fontSize: .025,
-        //       fontWeight: FontWeight.w600,
-        //       textAlign: TextAlign.center,
-        //       color: color == ProjectColors.whiteColor ? ProjectColors.pureBlackColor : ProjectColors.whiteColor,
-        //     ),
-        //     backgroundColor: Colors.white,
-        //     leading: GestureDetector(
-        //       onTap: () {
-        //         Get.back();
-        //       },
-        //       child: textWidget(
-        //         text: "close",
-        //         fontSize: .02,
-        //         fontWeight: FontWeight.w500,
-        //         color: color == ProjectColors.whiteColor ? ProjectColors.pureBlackColor : ProjectColors.whiteColor,
-        //       ),
-        //     ),
-        //   ),
         child: Material(
           color: Colors.transparent,
           child: SizedBox(
@@ -489,498 +758,127 @@ class Popup extends StatelessWidget {
   }
 }
 
-class MyFormField extends StatelessWidget {
-  final TextForm form;
-  final bool? textInputDone;
-  final bool? needSuffix;
-  final bool? needCustomPadding;
-  final bool? needDigitKeyboard;
-  final bool? needLengthRestrict;
-  final bool? needBorder;
-  final bool? obscureText;
-  final bool? enable;
-  final EdgeInsetsGeometry? padding;
-  final String? Function(String?)? validator;
-  final bool? inverseColor;
-
-  MyFormField({
-    required this.form,
-    this.textInputDone,
-    this.validator,
-    this.needSuffix,
-    this.needCustomPadding = false,
-    this.padding = EdgeInsets.zero,
-    this.needDigitKeyboard = false,
-    this.needLengthRestrict = false,
-    this.needBorder = false,
-    this.enable = true,
-    this.obscureText = false,
-    this.inverseColor = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: needCustomPadding == true ? padding! : EdgeInsets.fromLTRB(width * .15, height * .02, width * .15, 0),
-      child: TextFormField(
-        controller: form.controller,
-        validator: validator,
-        enabled: enable,
-        obscureText: obscureText == false ? false : true,
-        inputFormatters: needLengthRestrict! ? [LengthLimitingTextInputFormatter(4)] : [],
-        keyboardType: needDigitKeyboard! ? TextInputType.phone : TextInputType.text,
-        decoration: InputDecoration(
-          labelText: form.title,
-          labelStyle: TextStyle(
-            fontFamily: "poppins",
-            fontSize: height * .018,
-            color: inverseColor!
-                ? (form.controller.text.isEmpty ? ProjectColors.whiteColor.withOpacity(0.7) : ProjectColors.whiteColor)
-                : (form.controller.text.isEmpty ? ProjectColors.blackColor.withOpacity(0.7) : ProjectColors.blackColor),
-          ),
-          enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              color: inverseColor!
-                  ? (form.controller.text.isEmpty ? ProjectColors.whiteColor.withOpacity(0.7) : ProjectColors.whiteColor)
-                  : (form.controller.text.isEmpty ? ProjectColors.blackColor.withOpacity(0.7) : ProjectColors.blackColor),
-              width: 1,
-            ),
-          ),
-          focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              color: inverseColor! ? ProjectColors.whiteColor : ProjectColors.blackColor,
-              width: 1,
-            ),
-          ),
-          errorBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(
-              color: ProjectColors.errorColor,
-              width: 1,
-            ),
-          ),
-          contentPadding: EdgeInsets.zero,
-        ),
-        textInputAction: textInputDone == false ? TextInputAction.next : TextInputAction.done,
-        style: TextStyle(
-          fontFamily: "poppins",
-          fontSize: height * .018,
-          color: inverseColor! ? ProjectColors.whiteColor : ProjectColors.blackColor,
-        ),
-      ),
-    );
-  }
-}
-
-class UniversalChoiceChips<T> extends StatelessWidget {
-  const UniversalChoiceChips({
-    super.key,
-    required this.items,
-    required this.labelOf,
-    required this.value,
-    required this.onChanged,
-    this.keyOf,
-    this.enabled = true,
-    this.spacing = 8,
-    this.runSpacing = 8,
-    this.wrapAlignment = WrapAlignment.start,
-    this.padding,
-    this.selectedColor,
-    this.unselectedColor,
-    this.selectedLabelStyle,
-    this.unselectedLabelStyle,
-    this.avatarOf,
-    this.chipSide,
-    this.clipBehavior = Clip.none,
-  });
-
-  /// Items to render as chips.
-  final Iterable<T> items;
-
-  /// Turn an item into a visible label.
-  final String Function(T) labelOf;
-
-  /// Currently selected item (or null for “none”).
-  final T? value;
-
-  /// Called when the user picks a chip.
-  final ValueChanged<T> onChanged;
-
-  /// Extracts a stable identity key for comparison & ValueKey.
-  /// If omitted, equality uses `==`. Pass this if your model doesn’t override ==/hashCode.
-  final Object Function(T)? keyOf;
-
-  /// Global enable/disable.
-  final bool enabled;
-
-  /// Layout / style.
-  final double spacing;
-  final double runSpacing;
-  final WrapAlignment wrapAlignment;
-  final EdgeInsetsGeometry? padding;
-
-  /// Colors & styles (fallback to ChipTheme).
-  final Color? selectedColor;
-  final Color? unselectedColor;
-  final TextStyle? selectedLabelStyle;
-  final TextStyle? unselectedLabelStyle;
-
-  /// Optional avatar per chip.
-  final Widget Function(T)? avatarOf;
-
-  /// Optional border/side for each chip.
-  final BorderSide? chipSide;
-
-  final Clip clipBehavior;
-
-  // --------- Convenience factories ---------
-
-  /// From a List<T>
-  factory UniversalChoiceChips.fromList({
-    Key? key,
-    required List<T> items,
-    required String Function(T) labelOf,
-    required T? value,
-    required ValueChanged<T> onChanged,
-    Object Function(T)? keyOf,
-    bool enabled = true,
-    double spacing = 8,
-    double runSpacing = 8,
-  }) {
-    return UniversalChoiceChips<T>(
-      key: key,
-      items: items,
-      labelOf: labelOf,
-      value: value,
-      onChanged: onChanged,
-      keyOf: keyOf,
-      enabled: enabled,
-      spacing: spacing,
-      runSpacing: runSpacing,
-    );
-  }
-
-  /// From a Map<T,String> (keys are items, value is label).
-  factory UniversalChoiceChips.fromMap({
-    Key? key,
-    required Map<T, String> map,
-    required T? value,
-    required ValueChanged<T> onChanged,
-    Object Function(T)? keyOf,
-    bool enabled = true,
-    double spacing = 8,
-    double runSpacing = 8,
-  }) {
-    return UniversalChoiceChips<T>(
-      key: key,
-      items: map.keys,
-      labelOf: (t) => map[t] ?? t.toString(),
-      value: value,
-      onChanged: onChanged,
-      keyOf: keyOf,
-      enabled: enabled,
-      spacing: spacing,
-      runSpacing: runSpacing,
-    );
-  }
-
-  bool _isSelected(T item) {
-    if (value == null) return false;
-    if (keyOf != null) {
-      final a = keyOf!(item);
-      final b = keyOf!(value as T);
-      return a == b;
-    }
-    return value == item;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final chipTheme = ChipTheme.of(context);
-
-    return Wrap(
-      alignment: wrapAlignment,
-      spacing: spacing,
-      runSpacing: runSpacing,
-      clipBehavior: clipBehavior,
-      children: items.map((item) {
-        final selected = _isSelected(item);
-        final identity = keyOf?.call(item) ?? item as Object;
-
-        final bgSelected = selectedColor ?? chipTheme.selectedColor ?? Theme.of(context).colorScheme.primary.withOpacity(.18);
-        final bgUnselected = unselectedColor ?? chipTheme.backgroundColor;
-        final lblSelected = selectedLabelStyle ??
-            chipTheme.labelStyle?.copyWith(color: Theme.of(context).colorScheme.onPrimary) ??
-            TextStyle(color: Theme.of(context).colorScheme.primary);
-        final lblUnselected = unselectedLabelStyle ?? chipTheme.labelStyle;
-
-        return ChoiceChip(
-          key: ValueKey(identity),
-          label: textWidget(text: labelOf(item), fontSize: .015, color: ProjectColors.pureBlackColor),
-          selected: selected,
-          onSelected: enabled ? (_) => onChanged(item) : null,
-          backgroundColor: ProjectColors.whiteColor,
-          shadowColor: Colors.transparent,
-          avatarBorder: Border.all(color: Colors.transparent),
-          disabledColor: ProjectColors.pureBlackColor,
-          selectedColor: ProjectColors.greenColor,
-          labelStyle: selected ? lblSelected : lblUnselected,
-          avatar: avatarOf?.call(item),
-          side: chipSide,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class CupertinoTimePickerField extends StatefulWidget {
-  const CupertinoTimePickerField({
-    super.key,
-    required this.value, // current time (nullable)
-    required this.onChanged, // gets TimeOfDay? (null if cancelled)
-    this.placeholder = 'Select time',
-    this.minuteInterval = 1, // must divide 60
-    this.use24h, // null -> follow device
-    this.icon,
-    this.doneText = 'Done',
-    this.cancelText = 'Cancel',
-  });
-
-  final TimeOfDay? value;
-  final ValueChanged<TimeOfDay?> onChanged;
-  final String placeholder;
-  final int minuteInterval;
-  final bool? use24h;
-  final IconData? icon;
-  final String doneText;
-  final String cancelText;
-
-  @override
-  State<CupertinoTimePickerField> createState() => _CupertinoTimePickerFieldState();
-}
-
-class _CupertinoTimePickerFieldState extends State<CupertinoTimePickerField> {
-  @override
-  Widget build(BuildContext context) {
-    final use24h = widget.use24h ?? MediaQuery.of(context).alwaysUse24HourFormat;
-    final display = widget.value == null ? widget.placeholder : _fmt(widget.value!, context, use24h);
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () async {
-        DateTime temp = _toToday(widget.value ?? const TimeOfDay(hour: 9, minute: 0));
-        final picked = await showCupertinoModalPopup<TimeOfDay?>(
-          context: context,
-          builder: (_) => Material(
-            color: CupertinoColors.systemBackground.resolveFrom(context),
-            child: SafeArea(
-              top: false,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Toolbar
-                  Container(
-                    color: CupertinoColors.systemGrey6.resolveFrom(context),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: Row(
-                      children: [
-                        CupertinoButton(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          onPressed: () => Navigator.pop(context, null),
-                          child: Text(widget.cancelText),
-                        ),
-                        const Spacer(),
-                        CupertinoButton(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          onPressed: () => Navigator.pop(context, TimeOfDay.fromDateTime(temp)),
-                          child: Text(widget.doneText, style: const TextStyle(fontWeight: FontWeight.w600)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Picker
-                  SizedBox(
-                    height: 216,
-                    child: CupertinoDatePicker(
-                      mode: CupertinoDatePickerMode.time,
-                      use24hFormat: use24h,
-                      minuteInterval: widget.minuteInterval,
-                      initialDateTime: temp,
-                      onDateTimeChanged: (dt) => temp = dt,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            ),
-          ),
-        );
-
-        widget.onChanged(picked);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: CupertinoColors.systemGrey6.resolveFrom(context),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            if (widget.icon != null)
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Icon(widget.icon, size: 18, color: CupertinoColors.inactiveGray),
-              ),
-            Expanded(
-              child: Text(
-                display,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: widget.value == null ? CupertinoColors.placeholderText.resolveFrom(context) : CupertinoColors.label.resolveFrom(context),
-                  fontSize: 16,
-                ),
-              ),
-            ),
-            const Icon(CupertinoIcons.clock, size: 18, color: CupertinoColors.inactiveGray),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // === tiny local utils ===
-  static DateTime _toToday(TimeOfDay t) {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day, t.hour, t.minute);
-  }
-
-  static String _fmt(TimeOfDay t, BuildContext ctx, bool use24h) {
-    if (use24h) {
-      final hh = t.hour.toString().padLeft(2, '0');
-      final mm = t.minute.toString().padLeft(2, '0');
-      return '$hh:$mm';
-    }
-    return t.format(ctx);
-  }
-}
-
-// class TimePicker extends StatefulWidget {
-//   String? updatedValue;
-//   TimePicker({this.updatedValue = ''});
-//   @override
-//   State<TimePicker> createState() => _TimePickerState();
-// }
-//
-// class _TimePickerState extends State<TimePicker> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Popup(
-//       title: 'Select Date',
-//       body: SizedBox(
-//         height: height * .5,
-//         child: Column(
-//           children: [
-//             SizedBox(
-//               height: height * .4,
-//               child:  CupertinoDatePicker(
-//                 mode: CupertinoDatePickerMode.time,
-//                 use24hFormat: false,
-//                 minuteInterval: 1,
-//                 initialDateTime: DateTime.now(),
-//                 onDateTimeChanged: (dt) {
-//                   widget.updatedValue = DateFormat('HH:mm').format(dt);
-//                 },
-//               ),
-//             ),
-//             normalButton(
-//               title: "Done",
-//               cWidth: .4,
-//               callback: () {},
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 class PickShiftTime extends StatelessWidget {
   final int columnIndex;
   const PickShiftTime({super.key, this.columnIndex = 0});
 
-  bool _isBreak(ShiftController shift) => shift.newShiftColumns![columnIndex].title == 'Unpaid break time';
+  bool _isBreak(ShiftController shift) => (shift.newShiftColumns?[columnIndex].title ?? '').toLowerCase().contains('break');
 
-  DateTime _defaultSeed(ShiftController shift) {
+  DateTime _seed(ShiftController shift) {
     final d = shift.selectedDay!.value;
     return DateTime(d.year, d.month, d.day, 9, 0);
   }
 
-  DateTime _parseOrDefault(ShiftController shift) {
-    final text = shift.newShiftColumns![columnIndex].controller.text.trim();
-    if (text.isEmpty) return _defaultSeed(shift);
+  DateTime _readTimeOrSeed(ShiftController shift, DateTime seed) {
+    final t = (shift.newShiftColumns?[columnIndex].controller.text ?? '').trim();
+    if (t.isEmpty) return seed;
 
-    final isBreak = _isBreak(shift);
-    final format = isBreak ? DateFormat('yyyy-MM-dd HH:mm:ss.SSS') : DateFormat('yyyy-MM-dd hh:mm a');
-
-    final dt = format.parse(text);
-    return DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute);
+    // expects: "yyyy-MM-dd hh:mm a" (your existing)
+    try {
+      final dt = DateFormat('hh:mm a').parse(t);
+      return DateTime(seed.year, seed.month, seed.day, dt.hour, dt.minute);
+    } catch (_) {
+      return seed;
+    }
   }
 
-  void _setText(ShiftController shift, DateTime dt) {
-    final isBreak = _isBreak(shift);
-    final format = isBreak ? DateFormat('yyyy-MM-dd HH:mm:ss.SSS') : DateFormat('yyyy-MM-dd hh:mm a');
+  int _readBreakOrDefault(ShiftController shift) {
+    final t = (shift.newShiftColumns?[columnIndex].controller.text ?? '').trim();
+    if (t.isEmpty) return 0;
+    return int.tryParse(t.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+  }
 
-    shift.newShiftColumns![columnIndex].controller.text = format.format(dt);
+  void _write(ShiftController shift, {DateTime? time, int? breakMin}) {
+    final col = shift.newShiftColumns![columnIndex];
+
+    if (breakMin != null) {
+      col.controller.text = breakMin.toString(); // ✅ store minutes
+      col.pickedDate = null;
+    } else if (time != null) {
+      col.controller.text = DateFormat('hh:mm a').format(time);
+      col.pickedDate = time;
+    }
+
     shift.newShiftColumns!.refresh();
   }
 
   @override
   Widget build(BuildContext context) {
     final isBreak = _isBreak(shift);
-    final seed = _parseOrDefault(shift);
+    final seed = _seed(shift);
+
+    final initialTime = isBreak ? null : _readTimeOrSeed(shift, seed);
+    final initialBreak = isBreak ? _readBreakOrDefault(shift) : 0;
 
     return SizedBox(
-      height: height * .5,
+      height: height * .6, // ✅ compact
       child: Popup(
-        title: 'Pick Shift Timing',
+        color: ProjectColors.blackColor,
+        title: isBreak ? 'Set break (minutes)' : 'Set time',
         body: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              height: height * .35,
-              child: isBreak
-                  ? CupertinoPicker(
-                      itemExtent: 32,
-                      scrollController: FixedExtentScrollController(
-                        initialItem: seed.minute.clamp(0, 59),
-                      ),
-                      onSelectedItemChanged: (m) {
-                        // break stored as date with only minutes used
-                        final dt = DateTime(seed.year, seed.month, seed.day, 0, m);
-                        _setText(shift, dt);
-                      },
-                      children: List.generate(
-                        60,
-                        (m) => Center(child: Text(m.toString().padLeft(2, '0'))),
-                      ),
-                    )
-                  : CupertinoDatePicker(
-                      mode: CupertinoDatePickerMode.time,
-                      minuteInterval: 1,
-                      use24hFormat: false,
-                      initialDateTime: seed,
-                      onDateTimeChanged: (dt) {
-                        final updated = DateTime(seed.year, seed.month, seed.day, dt.hour, dt.minute);
-                        _setText(shift, updated);
-                      },
+            GlassV2(
+              body: CupertinoTheme(
+                data: CupertinoTheme.of(navigatorKey.currentContext!).copyWith(
+                  textTheme: CupertinoTextThemeData(
+                    dateTimePickerTextStyle: TextStyle(
+                      color: ProjectColors.whiteColor,
+                      fontSize: height * .025,
+                      fontWeight: FontWeight.w600,
                     ),
+                  ),
+                ),
+                child: SizedBox(
+                  height: height * .28,
+                  child: isBreak
+                      ? CupertinoPicker(
+                          itemExtent: 36,
+                          scrollController: FixedExtentScrollController(
+                            initialItem: (initialBreak / 5).round().clamp(0, 36), // 0..180 step 5
+                          ),
+                          onSelectedItemChanged: (i) {
+                            final m = i * 5;
+                            _write(shift, breakMin: m);
+                          },
+                          children: List.generate(
+                            37, // 0..180
+                            (i) => Center(
+                              child: textWidget(
+                                text: '${(i * 5)}',
+                                fontSize: 0.02,
+                                color: ProjectColors.whiteColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        )
+                      : CupertinoDatePicker(
+                          mode: CupertinoDatePickerMode.time,
+                          use24hFormat: false,
+                          minuteInterval: 1,
+                          initialDateTime: initialTime,
+                          onDateTimeChanged: (dt) {
+                            final fixed = DateTime(seed.year, seed.month, seed.day, dt.hour, dt.minute);
+                            _write(shift, time: fixed);
+                          },
+                        ),
+                ),
+              ),
             ),
-            SizedBox(height: height * .01),
-            normalButton(
-              title: 'Done',
-              cWidth: .4,
-              callback: Get.back,
+            Padding(
+              padding: EdgeInsets.only(top: height * .02),
+              child: Center(
+                child: normalButton(
+                  title: "Save",
+                  bColor: ProjectColors.greenColor,
+                  cWidth: .8,
+                  loading: false,
+                  callback: () {
+                    Get.back();
+                  },
+                ),
+              ),
             ),
           ],
         ),
@@ -1021,44 +919,26 @@ class AppDatePicker {
             height: height * .5,
             child: Column(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0x66FFFFFF), // top highlight
-                            Color(0x22FFFFFF), // mid
-                            Color(0x11000000), // subtle dark edge
-                          ],
-                          stops: [0.0, 0.55, 1.0],
+                Glass(
+                  body: SizedBox(
+                    height: height * .3,
+                    child: CupertinoTheme(
+                      data: CupertinoTheme.of(navigatorKey.currentContext!).copyWith(
+                        textTheme: CupertinoTextThemeData(
+                          dateTimePickerTextStyle: TextStyle(
+                            color: ProjectColors.whiteColor,
+                            fontSize: height * .025,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                      child: SizedBox(
-                        height: height * .3,
-                        child: CupertinoTheme(
-                          data: CupertinoTheme.of(navigatorKey.currentContext!).copyWith(
-                            textTheme: CupertinoTextThemeData(
-                              dateTimePickerTextStyle: TextStyle(
-                                color: ProjectColors.whiteColor,
-                                fontSize: height * .025,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          child: CupertinoDatePicker(
-                            mode: CupertinoDatePickerMode.date,
-                            backgroundColor: Colors.transparent,
-                            initialDateTime: temp,
-                            minimumDate: safeMin,
-                            maximumDate: safeMax,
-                            onDateTimeChanged: (val) => temp = val,
-                          ),
-                        ),
+                      child: CupertinoDatePicker(
+                        mode: CupertinoDatePickerMode.date,
+                        backgroundColor: Colors.transparent,
+                        initialDateTime: temp,
+                        minimumDate: safeMin,
+                        maximumDate: safeMax,
+                        onDateTimeChanged: (val) => temp = val,
                       ),
                     ),
                   ),
@@ -1085,5 +965,314 @@ class AppDatePicker {
       },
     );
     return result;
+  }
+}
+
+class Glass extends StatelessWidget {
+  Widget? body;
+  double? blur;
+  double? radius;
+  Glass({this.body, this.blur = 20, this.radius = 20});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius!),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blur!, sigmaY: blur!),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0x66FFFFFF), // top highlight
+                Color(0x22FFFFFF), // mid
+                Color(0x11000000), // subtle dark edge
+              ],
+              stops: [0.0, 0.55, 1.0],
+            ),
+          ),
+          child: body,
+        ),
+      ),
+    );
+  }
+}
+
+class GlassV2 extends StatelessWidget {
+  Widget? body;
+  Color? glassColor;
+
+  GlassV2({this.body, this.glassColor = ProjectColors.whiteColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: height * 0.01),
+      padding: EdgeInsets.all(width * 0.02),
+      decoration: BoxDecoration(
+        color: glassColor!.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: glassColor!.withOpacity(0.15)),
+      ),
+      child: body,
+    );
+  }
+}
+
+enum PickerMode { date, time, minutes, dayOfMonth }
+
+class PickerResult {
+  final DateTime? dateTime;
+  final int? minutes;
+
+  const PickerResult({this.dateTime, this.minutes});
+
+  bool get isCancelled => dateTime == null && minutes == null;
+}
+
+class AppPicker {
+  AppPicker._();
+
+  /// One function for Date / Time / Minutes / Day-of-month.
+  ///
+  /// Returns:
+  /// - PickerMode.date      -> PickerResult(dateTime: yyyy-mm-dd)
+  /// - PickerMode.time      -> PickerResult(dateTime: seedDate with picked hh:mm)
+  /// - PickerMode.minutes   -> PickerResult(minutes: int)
+  /// - PickerMode.dayOfMonth-> PickerResult(minutes: int)  // (reusing minutes field as "day")
+  static Future<PickerResult?> pick({
+    required PickerMode mode,
+
+    // common
+    String title = "Select",
+    Color sheetColor = ProjectColors.blackColor,
+
+    // date params
+    DateTime? initialDate,
+    DateTime? minDate,
+    DateTime? maxDate,
+
+    // time params
+    DateTime? seedDate, // day to attach time to
+    DateTime? initialTime,
+
+    // minutes params
+    int initialMinutes = 0,
+    int minMinutes = 0,
+    int maxMinutes = 180,
+    int stepMinutes = 5,
+
+    // days
+    int initialDay = 15,
+    int minDay = 1,
+    int maxDay = 31,
+  }) async {
+    final now = DateTime.now();
+
+    // ----- date safety -----
+    final DateTime safeMin = minDate ?? now;
+    final DateTime safeMax = maxDate ?? DateTime(now.year + 5);
+
+    DateTime dateTemp = initialDate ?? safeMin;
+    if (dateTemp.isBefore(safeMin)) dateTemp = safeMin;
+    if (dateTemp.isAfter(safeMax)) dateTemp = safeMax;
+
+    // ----- time seed -----
+    final DateTime seed = seedDate ?? DateTime(now.year, now.month, now.day, 9, 0);
+
+    DateTime timeTemp = initialTime ?? DateTime(seed.year, seed.month, seed.day, 9, 0);
+    timeTemp = DateTime(seed.year, seed.month, seed.day, timeTemp.hour, timeTemp.minute);
+
+    // ----- minutes & day -----
+    int minutesTemp = initialMinutes.clamp(minMinutes, maxMinutes);
+    int dayTemp = initialDay.clamp(minDay, maxDay);
+
+    PickerResult? result;
+
+    await showCupertinoModalPopup(
+      context: navigatorKey.currentContext!,
+      barrierColor: ProjectColors.blackColor.withOpacity(0.5),
+      builder: (ctx) {
+        return Popup(
+          color: sheetColor,
+          title: title,
+          body: SizedBox(
+            height: height * .5,
+            child: Column(
+              children: [
+                DarkCard(
+                  child: SizedBox(
+                    height: height * .3,
+                    child: CupertinoTheme(
+                      data: CupertinoTheme.of(navigatorKey.currentContext!).copyWith(
+                        textTheme: CupertinoTextThemeData(
+                          dateTimePickerTextStyle: TextStyle(
+                            color: ProjectColors.whiteColor,
+                            fontSize: height * .025,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      child: _pickerBody(
+                        mode: mode,
+
+                        // date
+                        safeMin: safeMin,
+                        safeMax: safeMax,
+                        dateTemp: dateTemp,
+                        onDateChanged: (v) => dateTemp = v,
+
+                        // time
+                        seed: seed,
+                        timeTemp: timeTemp,
+                        onTimeChanged: (v) => timeTemp = v,
+
+                        // minutes
+                        minutesTemp: minutesTemp,
+                        onMinutesChanged: (v) => minutesTemp = v,
+                        minMinutes: minMinutes,
+                        maxMinutes: maxMinutes,
+                        stepMinutes: stepMinutes,
+
+                        // day-of-month
+                        dayTemp: dayTemp,
+                        onDayChanged: (v) => dayTemp = v, // ✅ FIX: update outer variable
+                        minDay: minDay,
+                        maxDay: maxDay,
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: height * .02),
+                  child: Center(
+                    child: normalButton(
+                      title: "Save",
+                      bColor: ProjectColors.greenColor,
+                      cWidth: .8,
+                      loading: false,
+                      callback: () {
+                        if (mode == PickerMode.minutes) {
+                          result = PickerResult(minutes: minutesTemp);
+                        } else if (mode == PickerMode.time) {
+                          result = PickerResult(
+                            dateTime: DateTime(seed.year, seed.month, seed.day, timeTemp.hour, timeTemp.minute),
+                          );
+                        } else if (mode == PickerMode.dayOfMonth) {
+                          result = PickerResult(minutes: dayTemp); // reuse minutes field as int day
+                        } else {
+                          result = PickerResult(
+                            dateTime: DateTime(dateTemp.year, dateTemp.month, dateTemp.day),
+                          );
+                        }
+                        Get.back();
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    return result;
+  }
+
+  static Widget _pickerBody({
+    required PickerMode mode,
+
+    // date
+    required DateTime safeMin,
+    required DateTime safeMax,
+    required DateTime dateTemp,
+    required void Function(DateTime) onDateChanged,
+
+    // time
+    required DateTime seed,
+    required DateTime timeTemp,
+    required void Function(DateTime) onTimeChanged,
+
+    // minutes
+    required int minutesTemp,
+    required void Function(int) onMinutesChanged,
+    required int minMinutes,
+    required int maxMinutes,
+    required int stepMinutes,
+
+    // day-of-month
+    required int dayTemp,
+    required void Function(int) onDayChanged,
+    required int minDay,
+    required int maxDay,
+  }) {
+    if (mode == PickerMode.dayOfMonth) {
+      final count = (maxDay - minDay) + 1;
+      final initialIndex = (dayTemp - minDay).clamp(0, count - 1);
+
+      return CupertinoPicker(
+        itemExtent: 36,
+        scrollController: FixedExtentScrollController(initialItem: initialIndex),
+        onSelectedItemChanged: (i) => onDayChanged(minDay + i), // ✅ FIX
+        children: List.generate(
+          count,
+          (i) => Center(
+            child: textWidget(
+              text: '${minDay + i}',
+              fontSize: 0.02,
+              color: ProjectColors.whiteColor,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (mode == PickerMode.date) {
+      return CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.date,
+        backgroundColor: Colors.transparent,
+        initialDateTime: dateTemp,
+        minimumDate: safeMin,
+        maximumDate: safeMax,
+        onDateTimeChanged: onDateChanged,
+      );
+    }
+
+    if (mode == PickerMode.time) {
+      return CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.time,
+        use24hFormat: false,
+        minuteInterval: 1,
+        initialDateTime: timeTemp,
+        onDateTimeChanged: (dt) => onTimeChanged(
+          DateTime(seed.year, seed.month, seed.day, dt.hour, dt.minute),
+        ),
+      );
+    }
+
+    // minutes picker
+    final steps = ((maxMinutes - minMinutes) / stepMinutes).floor();
+    final initialIndex = ((minutesTemp - minMinutes) / stepMinutes).round().clamp(0, steps);
+
+    return CupertinoPicker(
+      itemExtent: 36,
+      scrollController: FixedExtentScrollController(initialItem: initialIndex),
+      onSelectedItemChanged: (i) => onMinutesChanged(minMinutes + (i * stepMinutes)),
+      children: List.generate(
+        steps + 1,
+        (i) => Center(
+          child: textWidget(
+            text: '${minMinutes + (i * stepMinutes)}',
+            fontSize: 0.02,
+            color: ProjectColors.whiteColor,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
   }
 }

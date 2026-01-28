@@ -1,9 +1,6 @@
 import 'dart:convert';
 
-
 enum ExpenseType { fixed, variable, subscription, bill }
-
-enum ExpenseFrequency { perPaycheque, weekly, monthly, quarterly, yearly }
 
 double? _toDouble(dynamic v) {
   if (v == null) return null;
@@ -96,7 +93,7 @@ class ExpenseItem {
   final String? accountId; // link to your card/bank list
   final String? accountName; // link to your card/bank list
 
-  final int dateMs; // expense date
+  final DateTime dateMs; // expense date
   final int? dueDay; // for monthly bills: 1..31 (like “Due 1st”)
 
   final bool isEssential; // essential toggle
@@ -129,7 +126,7 @@ class ExpenseItem {
         "category": category,
         "accountId": accountId,
         "accountName": accountName,
-        "dateMs": dateMs,
+        "dateMs": dateMs.toIso8601String(),
         "dueDay": dueDay,
         "isEssential": isEssential,
         "frequency": frequency,
@@ -146,7 +143,7 @@ class ExpenseItem {
       category: (json["category"] ?? "").toString(),
       accountId: json["accountId"]?.toString(),
       accountName: json["accountName"]?.toString(),
-      dateMs: _toInt(json["dateMs"]) ?? 0,
+      dateMs: DateTime.parse(json['dateMs'] as String),
       dueDay: _toInt(json["dueDay"]),
       isEssential: _toBool(json["isEssential"]),
       frequency: (json["frequency"] ?? "").toString(),

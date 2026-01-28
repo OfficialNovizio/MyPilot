@@ -180,3 +180,46 @@ PlanSummary buildPlan({
     payoffDate: rows.isEmpty ? null : DateTime(cur.year, cur.month, 1),
   );
 }
+
+String newDebtId() {
+  final r = Random();
+  final t = DateTime.now().millisecondsSinceEpoch;
+  return '${t}_${r.nextInt(1 << 20)}';
+}
+
+extension DebtAccountX on DebtAccount {
+  DebtAccount copyWith({
+    String? id,
+    String? name,
+    DebtType? type,
+    double? principal,
+    double? apr,
+    double? minPayment,
+    int? dueDay,
+    double? extraPerMonth,
+    String? notes,
+  }) {
+    return DebtAccount(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      principal: principal ?? this.principal,
+      apr: apr ?? this.apr,
+      minPayment: minPayment ?? this.minPayment,
+      dueDay: dueDay ?? this.dueDay,
+      extraPerMonth: extraPerMonth ?? this.extraPerMonth,
+      notes: notes ?? this.notes,
+    );
+  }
+
+  String get typeLabel {
+    switch (type) {
+      case DebtType.revolving:
+        return 'Credit';
+      case DebtType.installment:
+        return 'Loan';
+      case DebtType.iou:
+        return 'IOU';
+    }
+  }
+}

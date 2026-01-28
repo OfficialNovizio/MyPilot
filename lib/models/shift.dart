@@ -1,49 +1,5 @@
 import 'package:emptyproject/models/job.dart';
 
-class Shift {
-  String? id;
-  String? jobId;
-  String? date; // YYYY-MM-DD
-  String? start; // HH:mm
-  String? end; // HH:mm
-  String? breakMin;
-  String? notes;
-  bool? isStat; // NEW
-
-  Shift({
-    this.id,
-    this.jobId,
-    this.date,
-    this.start,
-    this.end,
-    this.breakMin,
-    this.notes,
-    this.isStat = false, // NEW default
-  });
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'jobId': jobId,
-        'date': date,
-        'start': start,
-        'end': end,
-        'breakMin': breakMin,
-        'notes': notes,
-        'isStat': isStat, // NEW
-      };
-
-  factory Shift.fromJson(Map<String, dynamic> j) => Shift(
-        id: j['id'] as String,
-        jobId: j['jobId'] as String,
-        date: j['date'] as String,
-        start: j['start'] as String,
-        end: j['end'] as String,
-        breakMin: j['breakMin'] as String,
-        notes: j['notes'] as String?,
-        isStat: (j['isStat'] ?? false) as bool, // NEW
-      );
-}
-
 class ShiftModel {
   int? status;
   String? message;
@@ -103,7 +59,7 @@ class ShiftDay {
   double? totalDayIncome;
   double? totalWorkingHour;
 
-  ShiftDay({this.date, this.data,this.totalDayIncome,this.totalWorkingHour});
+  ShiftDay({this.date, this.data, this.totalDayIncome, this.totalWorkingHour});
 
   ShiftDay.fromJson(Map<String, dynamic>? json) {
     date = json?['date'];
@@ -130,10 +86,10 @@ class ShiftDay {
 
 class AllShifts {
   String? id;
-  String? date; // "YYYY-MM-DD"
-  String? start;
-  String? end;
-  String? breakMin; // if you actually add numbers, make this int
+  DateTime? date; // "YYYY-MM-DD"
+  DateTime? start;
+  DateTime? end;
+  int? breakMin; // if you actually add numbers, make this int
   String? notes;
   JobData? jobFrom; // nested object
   bool? isStat;
@@ -155,10 +111,17 @@ class AllShifts {
 
   AllShifts.fromJson(Map<String, dynamic>? json) {
     id = json?['id'];
-    date = json?['date'];
-    start = json?['start'];
-    end = json?['end'];
-    breakMin = json?['breakMin'];
+    date = DateTime.parse(json?['date'] as String);
+    start = DateTime.parse(json?['start'] as String);
+    end = DateTime.parse(json?['end'] as String);
+    final bm = json?['breakMin'];
+    if (bm is int) {
+      breakMin = bm;
+    } else if (bm is String) {
+      breakMin = int.tryParse(bm.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+    } else {
+      breakMin = 0;
+    }
     notes = json?['notes'];
     totalHours = json?['totalHours'];
     income = json?['income'];
@@ -180,9 +143,9 @@ class AllShifts {
   Map<String, dynamic> toJson() {
     final m = <String, dynamic>{};
     m['id'] = id;
-    m['date'] = date;
-    m['start'] = start;
-    m['end'] = end;
+    m['date'] = date?.toIso8601String();
+    m['start'] = start?.toIso8601String();
+    m['end'] = end?.toIso8601String();
     m['breakMin'] = breakMin;
     m['notes'] = notes;
     if (jobFrom != null) m['jobFrom'] = jobFrom!.toJson(); // ✅ emit Map

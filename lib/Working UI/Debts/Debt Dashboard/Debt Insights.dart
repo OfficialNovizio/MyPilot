@@ -63,7 +63,8 @@ class ComparisonCardsHomeScreen extends StatelessWidget {
             children: [
               SizedBox(height: height * .015),
               segmentedToggle(
-                activeColor: ProjectColors.greenColor.withOpacity(0.2),
+                cWidth: .45,
+                activeColor: ProjectColors.greenColor,
                 options: ['Safest', 'Fastest'],
                 selectedIndex: debt.debtResolve!.value == 'Safest' ? 0 : 1,
                 onChanged: (i, v) {
@@ -109,6 +110,7 @@ class ComparisonCardsHomeScreen extends StatelessWidget {
               SizedBox(height: height * .01),
               DarkCard(
                 color: ProjectColors.greenColor,
+                opacity: 1,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -201,7 +203,6 @@ class ComparisonCardsHomeScreen extends StatelessWidget {
               SizedBox(height: height * .014),
               _TopBurnerRow(),
               SizedBox(height: height * .02),
-              SizedBox(height: height * .01),
             ],
           ),
         ),
@@ -413,7 +414,6 @@ class _MinimumCard extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: width * .035, vertical: height * .014),
-
             child: Row(
               children: [
                 Expanded(
@@ -486,13 +486,13 @@ class _IfUnchangedRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                textWidget(text: 'If unchanged...', fontSize: .0155, fontWeight: FontWeight.w700, color: Colors.black87),
+                textWidget(text: 'If unchanged...', fontSize: .0155, fontWeight: FontWeight.w700, color: ProjectColors.whiteColor),
                 SizedBox(height: height * .006),
-                textWidget(text: c.ifUnchanged, fontSize: .0165, fontWeight: FontWeight.w800),
+                textWidget(text: c.ifUnchanged, fontSize: .0165, fontWeight: FontWeight.w800, color: ProjectColors.whiteColor),
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: Colors.black54, size: height * .028),
+          Icon(Icons.chevron_right_rounded, color: ProjectColors.whiteColor, size: height * .028),
         ],
       ),
     );
@@ -505,13 +505,12 @@ class _TopBurnerRow extends StatelessWidget {
     final c = Get.find<DebtFreeHomeController>();
 
     return DarkCard(
-      color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              textWidget(text: 'Top Burner', fontSize: .017, fontWeight: FontWeight.w800),
+              textWidget(text: 'Top Burner', fontSize: .017, fontWeight: FontWeight.w800, color: ProjectColors.whiteColor),
               const Spacer(),
               // small fake bars like the ref (tiny, purely decorative)
               Row(
@@ -522,7 +521,7 @@ class _TopBurnerRow extends StatelessWidget {
                     height: height * (.008 + (i % 3) * .004),
                     margin: EdgeInsets.only(left: width * .008),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(.08),
+                      color: ProjectColors.greenColor.withOpacity(.5),
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
@@ -555,7 +554,7 @@ class _TopBurnerRow extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      textWidget(text: 'VISA', fontSize: .0115, color: Colors.white70, fontWeight: FontWeight.w700),
+                      textWidget(text: 'VISA', fontSize: .0115, fontWeight: FontWeight.w700, color: ProjectColors.whiteColor),
                     ],
                   ),
                 ),
@@ -568,7 +567,7 @@ class _TopBurnerRow extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        textWidget(text: c.topBurnerName, fontSize: .0165, fontWeight: FontWeight.w800),
+                        textWidget(text: c.topBurnerName, fontSize: .0165, fontWeight: FontWeight.w800, color: ProjectColors.whiteColor),
                         const Spacer(),
                         textWidget(
                           text: c.topBurnerPerDay,
@@ -582,7 +581,7 @@ class _TopBurnerRow extends StatelessWidget {
                     textWidget(
                       text: c.topBurnerMeta,
                       fontSize: .0135,
-                      color: Colors.black54,
+                      color: ProjectColors.whiteColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ],
@@ -592,71 +591,6 @@ class _TopBurnerRow extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _BottomNav extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: width * .06, vertical: height * .012),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.black.withOpacity(.06)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: const [
-          _NavIcon(active: true, icon: Icons.home_rounded),
-          _NavIcon(active: false, icon: Icons.bar_chart_rounded),
-          _NavIcon(active: false, icon: Icons.receipt_long_rounded),
-          _NavIcon(active: false, icon: Icons.person_outline_rounded),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavIcon extends StatelessWidget {
-  final bool active;
-  final IconData icon;
-  const _NavIcon({required this.active, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width * .12,
-      height: width * .12,
-      decoration: BoxDecoration(
-        color: active ? ProjectColors.greenColor.withOpacity(.16) : Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Icon(
-        icon,
-        color: active ? ProjectColors.greenColor : Colors.black45,
-        size: height * .028,
-      ),
-    );
-  }
-}
-
-class _IconCircle extends StatelessWidget {
-  final IconData icon;
-  const _IconCircle({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width * .11,
-      height: width * .11,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.black.withOpacity(.06)),
-      ),
-      child: Icon(icon, size: height * .026, color: Colors.black54),
     );
   }
 }

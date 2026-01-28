@@ -22,7 +22,10 @@ final navigatorKey = GlobalKey<NavigatorState>();
 String checkTimeline(TimeOfDay t) => t.hour < 12 ? 'AM' : 'PM';
 String monthName(DateTime d) => DateFormat.MMMM().format(d);
 String monthDate(DateTime d) => DateFormat.d().format(d);
+String monthDateName(DateTime d) => DateFormat('MMMM d').format(d);
 String formatDate(DateTime d, {type = 'dd/MM/yyyy'}) => DateFormat(type).format(d);
+String formatTime(DateTime d, {type = 'hh:mm a'}) => DateFormat(type).format(d);
+DateTime dayKey(DateTime d) => DateUtils.dateOnly(d);
 String formatCardNo(String s) {
   final d = s.replaceAll(RegExp(r'[^0-9]'), '');
   return List.generate((d.length / 4).ceil(), (i) {
@@ -31,41 +34,30 @@ String formatCardNo(String s) {
     return d.substring(start, end);
   }).join(' ');
 }
-
-String toHmAm(String input, {bool onlyMinutes = false}) {
-  DateTime dt;
-  final hasAmPm = RegExp(r'\bAM\b|\bPM\b', caseSensitive: false).hasMatch(input);
-  if (hasAmPm) {
-    dt = DateFormat('yyyy-MM-dd h:mm a').parse(input);
-  } else {
-    final normalized = input.contains('T') ? input : input.replaceFirst(' ', 'T');
-    dt = DateTime.parse(normalized);
+String money(double v) {
+  final n = v.round();
+  final s = n.toString();
+  final buf = StringBuffer();
+  for (int i = 0; i < s.length; i++) {
+    final pos = s.length - i;
+    buf.write(s[i]);
+    if (pos > 1 && pos % 3 == 1) buf.write(',');
   }
-  return DateFormat(onlyMinutes ? 'mm' : 'hh:mm a').format(dt);
+  return '\$$buf';
 }
 
-String diffHoursMinutes(String startStr, String endStr) {
-  // inline parser: supports "2025-11-15 04:00 PM" and "2025-11-15 16:00:00.000"
-  DateTime parseFlexible(String s) {
-    final hasAmPm = RegExp(r'\bAM\b|\bPM\b', caseSensitive: false).hasMatch(s);
-    if (hasAmPm) {
-      // accept both "4:00 PM" and "04:00 PM"
-      return DateFormat('yyyy-MM-dd h:mm a').parse(s);
-    } else {
-      final norm = s.contains('T') ? s : s.replaceFirst(' ', 'T');
-      return DateTime.parse(norm);
-    }
-  }
+String money2(double v) {
+  final x = v.isNaN ? 0.0 : v;
+  return "\$${x.toStringAsFixed(2)}";
+}
 
-  final start = parseFlexible(startStr);
-  var end = parseFlexible(endStr);
+String diffHoursMinutesDT(DateTime start, DateTime end, {int breakMin = 0}) {
+  // cross-midnight (end next day)
+  if (end.isBefore(start)) end = end.add(const Duration(days: 1));
 
-  // cross-midnight: roll end to next day if earlier than start
-  if (end.isBefore(start)) {
-    end = DateTime(end.year, end.month, end.day + 1, end.hour, end.minute);
-  }
+  var mins = end.difference(start).inMinutes - breakMin;
+  if (mins < 0) mins = 0;
 
-  final mins = end.difference(start).inMinutes;
   final h = mins ~/ 60;
   final m = mins % 60;
   return '${h}h ${m.toString().padLeft(2, '0')}m';
@@ -83,6 +75,16 @@ void showSnackBar(String? title, String? subtitle, {Duration duration = const Du
   ).show(navigatorKey.currentContext!);
 }
 
+void callPopup(body) {
+  showModalBottomSheet(
+    context: navigatorKey.currentContext!,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    enableDrag: true,
+    builder: (_) => body,
+  );
+}
+
 enum ButtonState {
   init,
   loading,
@@ -96,25 +98,16 @@ double? toDouble(String? v) {
   return double.tryParse(s.replaceAll(',', ''));
 }
 
-double sumWhere(bool Function(ExpenseItem e) test) {
-  return expense.expenses // optional
-      .where(test)
-      .fold(0.0, (s, e) => s + e.amount);
-}
+// double sumWhere(bool Function(ExpenseItem e) test) {
+//   return expense.expenses // optional
+//       .where(test)
+//       .fold(0.0, (s, e) => s + e.amount);
+// }
 
-String money(double v) {
-  final n = v.round();
-  final s = n.toString();
-  final buf = StringBuffer();
-  for (int i = 0; i < s.length; i++) {
-    final pos = s.length - i;
-    buf.write(s[i]);
-    if (pos > 1 && pos % 3 == 1) buf.write(',');
-  }
-  return '\$$buf';
-}
+
+
 class ProjectColors {
-  static const blackColor = Color(0xff2A2A2A);
+  static const blackColor = Color(0xff1c1b1b);
   static const pureBlackColor = Colors.black;
   static const errorColor = Color(0xffff3737);
   static const brownColor = Color(0xffefe5d7);
@@ -123,7 +116,6 @@ class ProjectColors {
   static const yellowColor = Color(0xfffffb16);
   static const purpleColor = Color(0xff662d61);
   static const whiteColor = Colors.white;
-  static const backgroundColor = Color(0xffFCFBF4);
 
   // ✅ NEW (palette inspired by your screenshot)
   static const loginTop = Color(0xFF0E1A2B); // deep navy
@@ -133,14 +125,13 @@ class ProjectColors {
   static const glassFill = Color(0x1AFFFFFF); // white @ 10%
   static const glassStroke = Color(0x26FFFFFF); // white @ 15%
   static const hintWhite = Color(0x99FFFFFF); // white @ 60%
-  static const navyTop = Color(0xFF24344D);      // top glow
-  static const navyMid = Color(0xFF111722);      // mid
-  static const navyBottom = Color(0xFF07080A);   // bottom
+  static const navyTop = Color(0xFF24344D); // top glow
+  static const navyMid = Color(0xFF111722); // mid
+  static const navyBottom = Color(0xFF07080A); // bottom
   static const accentBlue = Color(0xFF3F5F8E);
-  static const gridLine = Color(0x26FFFFFF);     // 15% white
+  static const backgroundColor = Color(0xff1c1c1c); // 15% white
   static const softText = Color(0xB3FFFFFF);
 }
-
 
 // class Methods {
 //   static const loginUser = 'v1/user/login';
@@ -258,6 +249,14 @@ class ProjectColors {
 //   static const refunded = 3;
 // }
 //
+
+Widget divider() {
+  return Container(
+    height: height * .0012,
+    margin: EdgeInsets.symmetric(vertical: height * .006),
+    color: ProjectColors.whiteColor.withOpacity(.06),
+  );
+}
 Widget loader({animationType = LoadingAnimationWidget.staggeredDotsWave, size = .04}) {
   return Center(
     child: animationType(
@@ -360,7 +359,7 @@ Widget circularButton({
 Widget outLinedButton({
   String? title = "",
   VoidCallback? callback,
-  double? cHeight = .035,
+  double? cHeight = .045,
   double? fontSize = .018,
   double? cWidth = .8,
   bool? loading = false,
@@ -396,7 +395,7 @@ Widget normalButton({
   bool? needIconText = false,
   bool? invertColors = false,
   VoidCallback? callback,
-  double? cHeight = .048,
+  double? cHeight = .05,
   double? fSize = .02,
   String? image = "",
   double? paddingWidth = .05,

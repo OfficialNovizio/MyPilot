@@ -26,6 +26,17 @@ class ProjectionController extends GetxController {
   Rxn<GoalItem> selectedGoal = Rxn<GoalItem>();
   Rx<ButtonState>? buttonState = Rx<ButtonState>(ButtonState.loading);
 
+  RxList<Map>? goalTypeList = <Map<String, dynamic>>[
+    {"name": "Save", "type": GoalType.save},
+    {"name": "Debt", "type": GoalType.debt},
+    {"name": "Surplus", "type": GoalType.surplus},
+  ].obs;
+  RxList<Map>? fundingType = <Map<String, dynamic>>[
+    {"name": "Weekly", "type": SavingFrequency.weekly},
+    {"name": "Bi-weekly", "type": SavingFrequency.biweekly},
+    {"name": "Monthly", "type": SavingFrequency.monthly},
+  ].obs;
+
   String verb() {
     switch (goalType.value) {
       case GoalType.save:
@@ -162,37 +173,6 @@ class ProjectionController extends GetxController {
     return RequiredPlan(per, periods);
   }
 
-  Future<void> pickDate() async {
-    final now = DateTime.now();
-    final first = DateTime(now.year, now.month, now.day);
-    final initial = targetDate.isBefore(first) ? first : targetDate;
-    final last = DateTime(now.year + 10, 12, 31);
-
-    // final picked = await showDatePicker(
-    //   context: navigatorKey.currentContext!,
-    //   initialDate: initial,
-    //   firstDate: first,
-    //   lastDate: last,
-    //   builder: (context, child) {
-    //     return Theme(
-    //       data: Theme.of(context).copyWith(
-    //         colorScheme: const ColorScheme.dark(
-    //           primary: ProjectColors.yellowColor,
-    //           onPrimary: Colors.black,
-    //           surface: Colors.black,
-    //           onSurface: ProjectColors.whiteColor,
-    //         ),
-    //       ),
-    //       child: child!,
-    //     );
-    //   },
-    // );
-    //
-    // if (picked != null) {
-    //   targetDate = picked;
-    // }
-  }
-
   void loadShifts() async {
     final listData = await _loadProjectionModel();
     goals.clear();
@@ -202,7 +182,6 @@ class ProjectionController extends GetxController {
         goals.add(files);
       }
     }
-
 
     goalModel!.refresh();
     goals.refresh();

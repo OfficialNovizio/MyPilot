@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-enum TaskSection { must, atRisk, ifTime, completed }
+import 'package:emptyproject/models/Projection%20Model.dart';
 
-enum TaskPriority { high, medium, low }
+enum TaskSection { must, atRisk, ifTime, completed }
 
 enum TaskStatus { pending, inProgress, completed }
 
@@ -35,8 +35,6 @@ class PrioritizerModel {
   }
 }
 
-DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
-
 class Task {
   Task({
     required this.id,
@@ -45,7 +43,7 @@ class Task {
     required this.section,
     required this.hardDeadline,
     this.softDeadline,
-    this.priority = TaskPriority.medium,
+    this.priority = GoalPriority.medium,
     this.status = TaskStatus.pending,
   });
 
@@ -55,7 +53,7 @@ class Task {
   TaskSection section;
   DateTime hardDeadline;
   DateTime? softDeadline;
-  TaskPriority priority;
+  GoalPriority priority;
   TaskStatus status;
 
   // ====== DISPLAY HELPERS ======
@@ -75,7 +73,7 @@ class Task {
     TaskSection? section,
     DateTime? hardDeadline,
     DateTime? softDeadline,
-    TaskPriority? priority,
+    GoalPriority? priority,
     TaskStatus? status,
   }) {
     return Task(
@@ -103,9 +101,9 @@ class Task {
       ),
       hardDeadline: DateTime.parse(json['hardDeadline'] as String),
       softDeadline: json['softDeadline'] != null ? DateTime.parse(json['softDeadline'] as String) : null,
-      priority: TaskPriority.values.firstWhere(
+      priority: GoalPriority.values.firstWhere(
         (e) => e.name == json['priority'],
-        orElse: () => TaskPriority.medium,
+        orElse: () => GoalPriority.medium,
       ),
       status: TaskStatus.values.firstWhere(
         (e) => e.name == json['status'],

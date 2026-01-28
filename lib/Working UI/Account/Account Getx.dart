@@ -9,18 +9,61 @@ import 'package:emptyproject/models/job.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../models/shift.dart';
+import '../Cards and Account/Cards.dart';
+import 'Active Jobs.dart';
+
 enum JobStatus { create, edit, delete }
 
 class PayMarker {
+  final String? jobName;
+  final int? jobId;
+  final Color? color;
+  PayMarker({this.jobName, this.color, this.jobId});
+}
+
+
+
+class PayJobLine {
+  final int jobId;
   final String jobName;
   final Color color;
-  const PayMarker({required this.jobName, required this.color});
+
+  final DateTime payDate; // actual payday
+  final DateTime periodStart; // inclusive
+  final DateTime periodEnd; // inclusive
+
+  final double payTotal; // sum of shift incomes in period
+  final double hoursTotal; // sum of hours in period
+
+  const PayJobLine({
+    required this.jobId,
+    required this.jobName,
+    required this.color,
+    required this.payDate,
+    required this.periodStart,
+    required this.periodEnd,
+    required this.payTotal,
+    required this.hoursTotal,
+  });
+}
+
+class PayCell {
+  final List<PayJobLine> lines;
+  const PayCell(this.lines);
+
+  int get count => lines.length;
+  double get totalPay => lines.fold(0.0, (s, x) => s + x.payTotal);
+  double get totalHours => lines.fold(0.0, (s, x) => s + x.hoursTotal);
+
+  // UI convenience (still pick first color for badge)
+  Color get color => lines.first.color;
 }
 
 class AccountController extends GetxController {
   final daysShort = const ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  final payFrequency = const ["Weekly", "By Weekly", "Monthly"];
+  final payFrequency = const {"Weekly": 7, "By Weekly": 14, "Monthly": 30};
 
   final colorChoices = const [
     '0xff16a34a',
@@ -34,11 +77,19 @@ class AccountController extends GetxController {
     '0xffef4444'
   ];
 
+  List<dynamic>? columns = [
+    {'title': 'Active Jobs', 'icon': Icons.work_outline_rounded},
+    {'title': 'Payment Accounts', 'icon': Icons.account_balance_outlined},
+    {'title': 'Settings', 'icon': Icons.settings},
+    {'title': 'Permissions', 'icon': Icons.perm_device_info_outlined},
+    {'title': 'Privacy Policy', 'icon': Icons.policy_outlined},
+    {'title': 'Logout', 'icon': Icons.logout_outlined},
+  ];
+
   RxList<TextForm>? savedJobs = <TextForm>[].obs;
   RxList<JobData>? jobs = <JobData>[].obs;
   RxBool? showPayFrq = false.obs;
   RxBool? showDays = false.obs;
-
   JobData? addNewJob;
 
   RxList<TextForm>? controllers = RxList<TextForm>([
@@ -51,50 +102,51 @@ class AccountController extends GetxController {
     TextForm(title: "Stat pay", controller: TextEditingController(text: '')),
   ]);
 
-  final GlobalKey<FormState> controllerValidator = GlobalKey<FormState>();
-  Rx<JobStatus>? status = Rx<JobStatus>(JobStatus.create);
+  void changeScreen(screen) {
+    switch (screen) {
+      case "Active Jobs":
+        Get.to(() => ActiveJobs());
+        break;
 
-  /// ---------------- SHARED HELPERS ----------------
+      case "Payment Accounts":
+        Get.to(() => PaymentMethodsScreen());
+        break;
 
-  DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
+      case "Settings":
+        Get.to(() => ActiveJobs());
+        break;
 
-  DateTime _parseYmdSlashes(String s) {
-    final p = s.split('/');
-    if (p.length != 3) throw const FormatException('Bad date');
-    return DateTime(int.parse(p[0]), int.parse(p[1]), int.parse(p[2]));
-  }
-
-  int _stepDays(String? freq) {
-    final v = (freq ?? '').toLowerCase().replaceAll(RegExp(r'\s+'), '');
-    return (v.contains('biweek') || v.contains('byweek')) ? 14 : 7;
-  }
-
-  Color _parseColor(String? hex, {int fallback = 0xff999999}) {
-    try {
-      return Color(int.parse(hex ?? '$fallback'));
-    } catch (_) {
-      return Color(fallback);
+      case "Permissions":
+        Get.to(() => ActiveJobs());
+        break;
+      case "Privacy Policy":
+        Get.to(() => ActiveJobs());
+        break;
+      case "logout":
+        Get.to(() => ActiveJobs());
+        break;
     }
   }
 
-  DateTime _addDays(DateTime d, int n) => DateTime(d.year, d.month, d.day + n);
+  final GlobalKey<FormState> controllerValidator = GlobalKey<FormState>();
+  Rx<JobStatus>? status = Rx<JobStatus>(JobStatus.create);
 
   /// ---------------- PUBLIC METHODS ----------------
 
   void loadSavedJobs() async {
     final listData = await getLocalData('savedJobs') ?? '';
     jobs!.clear();
+    if (listData != '') {
+      final job = Job.fromJson(jsonDecode(listData));
+      for (final files in job.data ?? const <JobData>[]) {
+        jobs!.add(files);
+      }
 
-    final job = Job.fromJson(jsonDecode(listData));
-    for (final files in job.data ?? const <JobData>[]) {
-      jobs!.add(files);
+      if (jobs!.isNotEmpty) {
+        shift.selectedJob.value = jobs!.first;
+        shift.selectedJob.refresh();
+      }
     }
-
-    if (jobs!.isNotEmpty) {
-      shift.selectedJob.value = jobs!.first;
-      shift.selectedJob.refresh();
-    }
-
     jobs!.refresh();
   }
 
@@ -102,18 +154,29 @@ class AccountController extends GetxController {
     final listData = await getLocalData('savedJobs') ?? '';
     Job job;
 
+    if (status!.value == JobStatus.create) {
+      addNewJob = null;
+    }
+
+    if (controllers!.any((test) => test.controller.text.isEmpty)) {
+      showSnackBar('Missing details', 'Please fill all required fields before continuing.');
+      return false;
+    }
+
     final newItem = JobData(
       id: addNewJob == null ? Random().nextInt(500000) : addNewJob!.id,
       jobName: controllers![0].controller.text,
       wageHr: controllers![1].controller.text,
       jobColor: controllers![2].controller.text,
-      lastPayChequeDate: controllers![3].controller.text,
+      lastPayChequeDate: controllers![3].pickedDate,
       payFrequency: controllers![4].controller.text,
       weekStart: controllers![5].controller.text,
       statPay: controllers![6].controller.text,
     );
 
-    job = listData.isEmpty ? Job(status: 1, message: 'created data', data: [newItem]) : Job.fromJson(jsonDecode(listData));
+    print(newItem.id);
+
+    job = listData.isEmpty ? Job(status: 1, message: 'created data', data: []) : Job.fromJson(jsonDecode(listData));
 
     Get.back();
 
@@ -137,46 +200,153 @@ class AccountController extends GetxController {
 
     await saveLocalData('savedJobs', jsonEncode(job.toJson()));
     loadSavedJobs(); // refresh jobs immediately
-
     return true;
   }
 
-  /// payday markers for calendar
-  Map<DateTime, List<PayMarker>> computePayMarkers({required DateTime focusedDay, int bufferDays = 14}) {
-    final start = _day(DateTime(focusedDay.year, focusedDay.month, 1).subtract(Duration(days: bufferDays)));
-    final end = _day(DateTime(focusedDay.year, focusedDay.month + 1, 0).add(Duration(days: bufferDays)));
+// hours from shift (prefer start/end - break, fallback to totalHours string)
+  double shiftHours(AllShifts s) => (s.start == null || s.end == null)
+      ? (double.tryParse((s.totalHours ?? '').trim()) ?? 0.0)
+      : (((s.end!.difference(s.start!).inMinutes - (s.breakMin ?? 0)) <= 0)
+          ? 0.0
+          : (s.end!.difference(s.start!).inMinutes - (s.breakMin ?? 0)) / 60.0);
 
-    final out = <DateTime, List<PayMarker>>{};
+// pay from shift
+  double shiftPay(AllShifts s) => s.income ?? 0.0;
+  int weekStartFromString(String? s) =>
+      const {
+        'monday': DateTime.monday,
+        'tuesday': DateTime.tuesday,
+        'wednesday': DateTime.wednesday,
+        'thursday': DateTime.thursday,
+        'friday': DateTime.friday,
+        'saturday': DateTime.saturday,
+        'sunday': DateTime.sunday,
+      }[(s ?? '').trim().toLowerCase()] ??
+      DateTime.monday;
 
-    for (final j in (jobs?.toList() ?? const <JobData>[])) {
-      final last = j.lastPayChequeDate;
-      if (last == null || last.isEmpty) continue;
+  Map<DateTime, PayCell> buildPayCellsForMonth({int bufferDays = 14}) {
+    // --- tiny helpers ---
+    DateTime dayKey(DateTime d) => DateUtils.dateOnly(d);
 
-      DateTime d;
-      try {
-        d = _day(_parseYmdSlashes(last));
-      } catch (_) {
-        continue;
+    DateTime startOfWeek(DateTime d, int weekStart) => dayKey(d.subtract(Duration(days: (d.weekday - weekStart + 7) % 7)));
+
+    DateTime endOfWeek(DateTime d, int weekStart) => dayKey(startOfWeek(d, weekStart).add(const Duration(days: 6)));
+
+    ({DateTime start, DateTime end}) periodFromPayDate({
+      required DateTime payDate,
+      required int cycleLenDays,
+      required int weekStartDow,
+    }) {
+      final pay = dayKey(payDate);
+      final thisWeekEnd = endOfWeek(pay, weekStartDow);
+
+      // ✅ pick week-end BEFORE payDate
+      final periodEnd = thisWeekEnd.isAfter(pay) ? dayKey(thisWeekEnd.subtract(const Duration(days: 7))) : thisWeekEnd;
+
+      final periodStart = dayKey(periodEnd.subtract(Duration(days: cycleLenDays - 1)));
+      return (start: periodStart, end: periodEnd);
+    }
+
+    // Prefer start/end/break over totalHours string
+    double shiftHours(AllShifts s) {
+      final st = s.start, en = s.end;
+      if (st != null && en != null) {
+        final mins = en.difference(st).inMinutes - (s.breakMin ?? 0);
+        return mins <= 0 ? 0.0 : mins / 60.0;
       }
-
-      final step = _stepDays(j.payFrequency);
-      final color = _parseColor(j.jobColor);
-      final name = j.jobName ?? 'Job';
-
-      if (d.isBefore(start)) {
-        final diff = start.difference(d).inDays;
-        final jumps = (diff / step).ceil();
-        d = _addDays(d, jumps * step);
+      final txt = (s.totalHours ?? '').trim();
+      final asDouble = double.tryParse(txt);
+      if (asDouble != null) return asDouble;
+      final parts = txt.split(':');
+      if (parts.length == 2) {
+        final h = double.tryParse(parts[0]) ?? 0;
+        final m = double.tryParse(parts[1]) ?? 0;
+        return h + (m / 60.0);
       }
+      return 0.0;
+    }
 
-      for (; !d.isAfter(end); d = _addDays(d, step)) {
-        final key = _day(d);
-        (out[key] ??= <PayMarker>[]).add(
-          PayMarker(jobName: name, color: color),
-        );
+    // --- month window ---
+    final focused = shift.selectedMonth!.value;
+
+    final start = dayKey(DateTime(focused.year, focused.month, 1).subtract(Duration(days: bufferDays)));
+
+    final end = dayKey(DateTime(focused.year, focused.month + 1, 0).add(Duration(days: bufferDays)));
+
+    // --- index shifts by day for fast summing ---
+    final shiftsByDay = <DateTime, List<AllShifts>>{};
+    for (final m in shift.shiftModel.value?.data ?? const <ShiftMonth>[]) {
+      for (final day in m.dates ?? const <ShiftDay>[]) {
+        for (final s in day.data ?? const <AllShifts>[]) {
+          final k = dayKey(s.date ?? s.start ?? DateTime.now());
+          (shiftsByDay[k] ??= <AllShifts>[]).add(s);
+        }
       }
     }
 
-    return out;
+    ({double pay, double hours}) sumJobPeriod(int jobId, DateTime a, DateTime b) {
+      double pay = 0.0, hours = 0.0;
+      for (var d = a; !d.isAfter(b); d = dayKey(d.add(const Duration(days: 1)))) {
+        for (final s in shiftsByDay[d] ?? const <AllShifts>[]) {
+          if (s.jobFrom?.id != jobId) continue;
+          pay += (s.income ?? 0.0);
+          hours += shiftHours(s);
+        }
+      }
+      return (pay: pay, hours: hours);
+    }
+
+    // --- build pay cells ---
+    final out = <DateTime, List<PayJobLine>>{};
+
+    for (final j in jobs ?? const <JobData>[]) {
+      final anchorPayDate = j.lastPayChequeDate;
+      final jobId = j.id;
+      if (anchorPayDate == null || jobId == null) continue;
+
+      final step = payFrequency[j.payFrequency] ?? 0; // 7 / 14 etc.
+      if (step <= 0) continue;
+
+      // IMPORTANT: you said weekStart is known from job
+      // Add this field to JobData: int? weekStartDow (DateTime.sunday/monday/etc.)
+
+      final name = j.jobName ?? 'Job';
+      final color = Color(int.parse(j.jobColor!)); // if your jobColor is already an int string
+
+      var payDate = dayKey(anchorPayDate);
+
+      // Jump forward into the visible window (fast)
+      if (payDate.isBefore(start)) {
+        final diff = start.difference(payDate).inDays;
+        final jumps = (diff / step).ceil();
+        payDate = dayKey(payDate.add(Duration(days: jumps * step)));
+      }
+
+      while (!payDate.isAfter(end)) {
+        final p = periodFromPayDate(
+          payDate: payDate,
+          cycleLenDays: step,
+          weekStartDow: weekStartFromString(j.weekStart),
+        );
+
+        final totals = sumJobPeriod(jobId, p.start, p.end);
+
+        final line = PayJobLine(
+          jobId: jobId,
+          jobName: name,
+          color: color,
+          payDate: payDate,
+          periodStart: p.start,
+          periodEnd: p.end,
+          payTotal: totals.pay,
+          hoursTotal: totals.hours,
+        );
+
+        (out[payDate] ??= <PayJobLine>[]).add(line);
+        payDate = dayKey(payDate.add(Duration(days: step)));
+      }
+    }
+
+    return out.map((k, v) => MapEntry(k, PayCell(v)));
   }
 }

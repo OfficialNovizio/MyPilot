@@ -31,140 +31,69 @@ class _AccountScreenState extends State<AccountScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0x66FFFFFF), // top highlight
-                        Color(0x22FFFFFF), // mid
-                        Color(0x11000000), // subtle dark edge
-                      ],
-                      stops: [0.0, 0.55, 1.0],
-                    ),
+            Glass(
+              body: Padding(
+                padding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: width,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: CircleAvatar(
+                          radius: height * .03,
+                        ),
+                      ),
+                      SizedBox(height: height * .01),
+                      textWidget(
+                        text: "Hello User !",
+                        fontSize: .04,
+                        color: ProjectColors.whiteColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textWidget(
+                        text: "xyz.@gmail.com",
+                        color: ProjectColors.whiteColor,
+                      ),
+                      SizedBox(height: height * .015),
+                      normalButton(
+                        title: 'Remove Account',
+                        callback: () {},
+                        cWidth: .35,
+                        fSize: .015,
+                        bColor: ProjectColors.greenColor,
+                      ),
+                    ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: SizedBox(
-                      width: width,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+              ),
+            ),
+            SizedBox(height: height * .04),
+            ...account.columns!
+                .map(
+                  (t) => Padding(
+                    padding: EdgeInsets.symmetric(vertical: height * .01),
+                    child: GestureDetector(
+                      onTap: () {
+                        account.changeScreen(t['title']);
+                      },
+                      child: Row(
                         children: [
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: CircleAvatar(
-                              radius: height * .03,
-                            ),
-                          ),
-                          SizedBox(height: height * .01),
+                          DarkCard(child: Icon(t['icon'], color: ProjectColors.greenColor, size: height * .025)),
+                          SizedBox(width: width * .02),
                           textWidget(
-                            text: "Hello Siddharth !",
-                            fontSize: .04,
+                            text: t['title'],
+                            fontSize: .025,
                             color: ProjectColors.whiteColor,
                             fontWeight: FontWeight.bold,
-                          ),
-                          textWidget(
-                            text: "contact.novy1@gmail.com",
-                            color: ProjectColors.whiteColor,
-                          ),
-                          SizedBox(height: height * .015),
-                          Container(
-                            height: height * .04,
-                            width: width * .3,
-                            decoration: BoxDecoration(
-                              color: ProjectColors.greenColor,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            alignment: Alignment.center,
-                            child: textWidget(
-                              text: "Remove Account",
-                              fontSize: .012,
-                              fontWeight: FontWeight.bold,
-                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ),
-              ),
-            ),
-            SizedBox(height: height * .02),
-            AccountElements(
-              title: 'Active Jobs',
-              icon: Icons.work_outline_rounded,
-              callback: () {
-                Get.to(() => ActiveJobs());
-              },
-            ),
-            AccountElements(
-              title: 'Payment Accounts',
-              icon: Icons.account_balance_outlined,
-              callback: () {},
-            ),
-            AccountElements(
-              title: 'Settings',
-              icon: Icons.settings,
-              callback: () {},
-            ),
-            AccountElements(
-              title: 'Permissions',
-              icon: Icons.perm_device_info_outlined,
-              callback: () {},
-            ),
-            AccountElements(
-              title: 'Privacy Policy',
-              icon: Icons.policy_outlined,
-              callback: () {},
-            ),
-            AccountElements(
-              title: 'Logout',
-              icon: Icons.logout_outlined,
-              callback: () {},
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class AccountElements extends StatelessWidget {
-  IconData? icon;
-  String? title;
-  VoidCallback? callback;
-
-  AccountElements({this.icon, this.title, this.callback});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: height * .01),
-      child: GestureDetector(
-        onTap: callback,
-        child: Row(
-          children: [
-            Container(
-              width: height * .04,
-              height: height * .04,
-              decoration: BoxDecoration(
-                color: ProjectColors.whiteColor.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: ProjectColors.greenColor, size: height * .02),
-            ),
-            SizedBox(width: width * .02),
-            textWidget(
-              text: title,
-              fontSize: .02,
-              color: ProjectColors.whiteColor,
-              fontWeight: FontWeight.bold,
-            ),
+                )
+                .toList(),
           ],
         ),
       ),

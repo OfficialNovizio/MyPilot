@@ -4,8 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../models/Priotizer model.dart';
+import '../../models/Projection Model.dart';
 import '../Constants.dart';
-import '../Debts/Debt Dashboard/Add New Debt.dart';
+import '../Debts/Debt Dashboard/Add Debt/Add New Debt.dart';
 import 'Add Priority Task.dart';
 import 'Priotizer Getx.dart';
 
@@ -42,10 +43,7 @@ class _PrioritizerBodyState extends State<PrioritizerBody> {
                             subTitle: 'Log a shift to see hours, earnings, and patterns this month.',
                             btnTitle: 'Add Task',
                             callback: () {
-                              showCupertinoModalPopup(
-                                context: context,
-                                builder: (_) => AddTaskBottomSheet(),
-                              );
+                              Get.to(() => AddTask());
                             },
                           )
                         : SingleChildScrollView(child: PrioritizerScreen()),
@@ -84,10 +82,7 @@ class _PrioritizerScreenState extends State<PrioritizerScreen> {
                 title: "Add a Task",
                 subTitle: "Set a priority and deadline in seconds",
                 callback: () {
-                  showCupertinoModalPopup(
-                    context: context,
-                    builder: (_) => AddTaskBottomSheet(),
-                  );
+                  Get.to(() => AddTask());
                 }),
             SizedBox(height: height * .01),
             Center(
@@ -351,7 +346,7 @@ class _TaskBodyState extends State<TaskBody> {
                   textWidget(
                     text: 'Due On ${widget.task.hardDeadlineText}',
                     fontSize: 0.02,
-                    color: widget.task.priority == TaskPriority.high ? ProjectColors.errorColor : ProjectColors.whiteColor.withOpacity(0.5),
+                    color: widget.task.priority == GoalPriority.high ? ProjectColors.errorColor : ProjectColors.whiteColor.withOpacity(0.5),
                   ),
                   SizedBox(height: height * 0.004),
                   textWidget(
@@ -483,10 +478,7 @@ class TaskActions extends StatelessWidget {
             icon: Icons.edit_outlined,
             label: 'Edit task',
             onTap: () {
-              showCupertinoModalPopup(
-                context: context,
-                builder: (ctx) => AddTaskBottomSheet(task: task),
-              );
+              Get.to(()=>AddTask(task: task));
             },
           ),
 

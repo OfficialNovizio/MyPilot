@@ -23,13 +23,6 @@ class BaseScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: ProjectColors.whiteColor,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: ProjectColors.blackColor.withOpacity(.06),
-                    blurRadius: 14,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
               ),
               child: Icon(Icons.chevron_left_rounded, color: ProjectColors.blackColor, size: height * .03),
             ),
@@ -38,16 +31,15 @@ class BaseScreen extends StatelessWidget {
         centerTitle: true,
         title: textWidget(
           text: title,
-          fontSize: .03,
+          fontSize: .025,
           fontWeight: FontWeight.bold,
           color: ProjectColors.whiteColor,
         ),
       ),
-      body: SafeArea(
-          child: Padding(
+      body: Padding(
         padding: EdgeInsets.symmetric(horizontal: width * .02),
         child: body!,
-      )),
+      ),
     );
   }
 }

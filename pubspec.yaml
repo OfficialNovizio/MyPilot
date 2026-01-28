@@ -51,6 +51,9 @@ dependencies:
   flutter_credit_card: ^4.1.0
   carousel_slider: ^5.1.1
   onboarding: ^4.0.2
+  flutter_native_splash: ^2.4.7
+  flutter_slidable: ^4.0.3
+  json_serializable: ^6.11.4
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +65,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -97,6 +101,54 @@ flutter:
      - family: helsinki
        fonts:
          - asset: Assets/Fonts/helsinki.ttf
+
+     - family: Poppins
+       fonts:
+         - asset: Assets/Fonts/Poppins/Poppins-Thin.ttf
+           weight: 100
+         - asset: Assets/Fonts/Poppins/Poppins-ExtraLight.ttf
+           weight: 200
+         - asset: Assets/Fonts/Poppins/Poppins-Light.ttf
+           weight: 300
+         - asset: Assets/Fonts/Poppins/Poppins-Regular.ttf
+           weight: 400
+         - asset: Assets/Fonts/Poppins/Poppins-Medium.ttf
+           weight: 500
+         - asset: Assets/Fonts/Poppins/Poppins-SemiBold.ttf
+           weight: 600
+         - asset: Assets/Fonts/Poppins/Poppins-Bold.ttf
+           weight: 700
+         - asset: Assets/Fonts/Poppins/Poppins-ExtraBold.ttf
+           weight: 800
+         - asset: Assets/Fonts/Poppins/Poppins-Black.ttf
+           weight: 900
+         - asset: Assets/Fonts/Poppins/Poppins-ThinItalic.ttf
+           weight: 100
+           style: italic
+         - asset: Assets/Fonts/Poppins/Poppins-ExtraLightItalic.ttf
+           weight: 200
+           style: italic
+         - asset: Assets/Fonts/Poppins/Poppins-LightItalic.ttf
+           weight: 300
+           style: italic
+         - asset: Assets/Fonts/Poppins/Poppins-Italic.ttf
+           weight: 400
+           style: italic
+         - asset: Assets/Fonts/Poppins/Poppins-MediumItalic.ttf
+           weight: 500
+           style: italic
+         - asset: Assets/Fonts/Poppins/Poppins-SemiBoldItalic.ttf
+           weight: 600
+           style: italic
+         - asset: Assets/Fonts/Poppins/Poppins-BoldItalic.ttf
+           weight: 700
+           style: italic
+         - asset: Assets/Fonts/Poppins/Poppins-ExtraBoldItalic.ttf
+           weight: 800
+           style: italic
+         - asset: Assets/Fonts/Poppins/Poppins-BlackItalic.ttf
+           weight: 900
+           style: italic
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

@@ -462,7 +462,7 @@ class _SummaryCard extends StatelessWidget {
             ),
             SizedBox(width: width * .015),
             textWidget(
-              text: "${_pctText(vm.monthChangePct)} vs October",
+              text: "${vm.monthChangePct} vs ${monthName(DateTime(deposit.selectedMonth.value.year, deposit.selectedMonth.value.month - 1, 1))}",
               fontSize: .018,
               fontWeight: FontWeight.w700,
               color: c,
@@ -549,7 +549,6 @@ class _BestDayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = deposit.depositInsight!.value;
-    final dt = DateFormat('yyyy-MM-dd hh:mm a', 'en_US').parseStrict(data!.bestDayLabel![0].data![0].start!.trim());
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -560,7 +559,7 @@ class _BestDayCard extends StatelessWidget {
           color: ProjectColors.whiteColor,
         ),
         textWidget(
-          text: DateFormat('EEE dd', 'en_US').format(dt),
+          text: '${monthName(deposit.selectedMonth.value)} ${data!.bestDayLabel![0].date}',
           fontSize: .028,
           fontWeight: FontWeight.w800,
           color: ProjectColors.whiteColor,
@@ -658,7 +657,7 @@ class _TopSourceCard extends StatelessWidget {
                 text: data!.topSourceName,
                 fontSize: .024,
                 fontWeight: FontWeight.w800,
-                color: ProjectColors.whiteColor,
+                color: ProjectColors.greenColor,
               ),
               SizedBox(height: height * .006),
               textWidget(

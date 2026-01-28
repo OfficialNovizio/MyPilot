@@ -1,3 +1,5 @@
+import 'package:emptyproject/BaseScreen.dart';
+import 'package:emptyproject/models/Projection%20Model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -6,16 +8,16 @@ import '../Constant UI.dart';
 import '../Constants.dart';
 import '../Controllers.dart';
 
-class AddTaskBottomSheet extends StatefulWidget {
+class AddTask extends StatefulWidget {
   final Task? task; // null = create, not null = edit
 
-  const AddTaskBottomSheet({super.key, this.task});
+  const AddTask({super.key, this.task});
 
   @override
-  State<AddTaskBottomSheet> createState() => _AddTaskBottomSheetState();
+  State<AddTask> createState() => _AddTaskState();
 }
 
-class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
+class _AddTaskState extends State<AddTask> {
   DateTime? _hardDeadline;
   final int descControllerIndex = 4;
   bool get isEdit => widget.task != null;
@@ -29,8 +31,8 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
       final t = widget.task!;
       priotizer.controllers[0].controller.text = t.title;
       priotizer.controllers[1].controller.text = t.description ?? '';
-      priotizer.taskPriority.value = t.priority;
-      priotizer.controllers[2].controller.text = _priorityTitleFromEnum(t.priority);
+      priotizer.priority.value = t.priority;
+      priotizer.controllers[2].controller.text = priotizer.priority.value.toString();
       priotizer.controllers[3].controller.text = formatDate(t.hardDeadline);
       priotizer.controllers[3].pickedDate = t.hardDeadline;
     } else {
@@ -39,18 +41,7 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
       priotizer.controllers[1].controller.text = '';
       priotizer.controllers[2].controller.text = '';
       priotizer.controllers[3].controller.text = '';
-      priotizer.taskPriority.value = TaskPriority.low;
-    }
-  }
-
-  String _priorityTitleFromEnum(TaskPriority p) {
-    switch (p) {
-      case TaskPriority.high:
-        return 'High';
-      case TaskPriority.medium:
-        return 'Medium';
-      case TaskPriority.low:
-        return 'Low';
+      priotizer.priority.value = GoalPriority.low;
     }
   }
 
@@ -73,50 +64,57 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Popup(
-      color: ProjectColors.blackColor,
+    return BaseScreen(
       title: isEdit ? 'Edit Task' : 'Create Task',
       body: Obx(
         () => SizedBox(
           height: height * .65,
           child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(width * 0.05, height * 0.018, width * 0.05, height * 0.02),
+            padding: EdgeInsets.symmetric(vertical: height * .02),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: height * 0.02),
-                _label("Task Title"),
-                SizedBox(height: height * 0.008),
-                _darkTextField(
+                SizedBox(height: height * 0.03),
+                PriorityRow(
+                  selected: priotizer.priority.value,
+                  onChanged: (p) {
+                    priotizer.priority.value = p;
+                  },
+                ),
+                SizedBox(height: height * 0.03),
+                DarkTextField(
                   controller: priotizer.controllers[0].controller,
-                  hint: "Enter task title",
+                  hintText: 'Give this task a clear name',
                   maxLines: 1,
+                  title: 'Task title',
                 ),
-                SizedBox(height: height * 0.018),
-                _label("Priority"),
                 SizedBox(height: height * 0.01),
-                _priorityRow(),
-                SizedBox(height: height * 0.018),
-                _label("Description"),
-                SizedBox(height: height * 0.008),
-                _darkTextField(
+                DarkTextField(
                   controller: priotizer.controllers[1].controller,
-                  hint: "Enter description (optional)",
-                  maxLines: 3,
+                  hintText: 'Why is this goal important?',
+                  maxLines: 2,
+                  title: 'Description (optional)',
                 ),
-                SizedBox(height: height * 0.018),
-                _deadlineTile(
-                  label: "Deadline",
-                  value: priotizer.controllers[3].controller.text,
-                  onTap: _pickHardDeadline,
+                SizedBox(height: height * 0.01),
+                DarkTextField(
+                  title: 'Deadline',
+                  hintText: priotizer.controllers[3].controller.text.isEmpty ? '5' : priotizer.controllers[3].controller.text,
+                  onTap: () async {
+                    final res = await AppPicker.pick(mode: PickerMode.date, title: "Date of Charged");
+                    if (res != null) {
+                      priotizer.controllers[3].controller.text = formatDate(res.dateTime!);
+                      priotizer.controllers[3].pickedDate = res.dateTime!;
+                      priotizer.controllers.refresh();
+                    }
+                  },
+                  trailing: Icon(Icons.calendar_month_rounded, size: height * 0.022, color: ProjectColors.whiteColor.withOpacity(0.75)),
                 ),
-                SizedBox(height: height * 0.05),
+                SizedBox(height: height * 0.02),
                 Center(
                   child: normalButton(
                     title: isEdit ? "Save Changes" : "Create Task",
                     bColor: ProjectColors.greenColor,
-                    invertColors: true,
                     cWidth: .7,
                     loading: false,
                     callback: () async {
@@ -179,102 +177,58 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
     );
   }
 
-  Widget _priorityRow() {
-    return Row(
-      children: priotizer.priorityType.map((type) {
-        final bool active = priotizer.taskPriority.value == type['Type'];
-        final Color activeColor = type['Color']; // your map color
-
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: width * 0.01),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(999),
-              onTap: () {
-                priotizer.taskPriority.value = type['Type'];
-                priotizer.controllers[2].controller.text = type['Title'];
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: height * 0.012),
-                decoration: BoxDecoration(
-                  color: active ? activeColor : Colors.white.withOpacity(0.03),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: active ? Colors.transparent : Colors.white.withOpacity(0.10),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (type['Title'].toString().toLowerCase() == "high")
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Container(
-                          width: 7,
-                          height: 7,
-                          decoration: BoxDecoration(
-                            color: ProjectColors.errorColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                    textWidget(
-                      text: type['Title'],
-                      color: active ? ProjectColors.pureBlackColor : ProjectColors.whiteColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 0.017,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _deadlineTile({
-    required String label,
-    required String value,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: width * 0.04, vertical: height * 0.016),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.03),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.calendar_month, color: Colors.white.withOpacity(0.7)),
-            SizedBox(width: width * 0.03),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.85),
-                  fontWeight: FontWeight.w700,
-                  fontSize: height * 0.017,
-                ),
-              ),
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                color: value == "None" ? Colors.white.withOpacity(0.35) : Colors.white.withOpacity(0.75),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            SizedBox(width: width * 0.02),
-            Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.6)),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _priorityRow() {
+  //   return Row(
+  //     children: priotizer.priorityType.map((type) {
+  //       final bool active = priotizer.taskPriority.value == type['Type'];
+  //       final Color activeColor = type['Color']; // your map color
+  //
+  //       return Expanded(
+  //         child: Padding(
+  //           padding: EdgeInsets.symmetric(horizontal: width * 0.01),
+  //           child: InkWell(
+  //             borderRadius: BorderRadius.circular(999),
+  //             onTap: () {
+  //               priotizer.taskPriority.value = type['Type'];
+  //               priotizer.controllers[2].controller.text = type['Title'];
+  //             },
+  //             child: Container(
+  //               padding: EdgeInsets.symmetric(vertical: height * 0.012),
+  //               decoration: BoxDecoration(
+  //                 color: active ? activeColor : Colors.white.withOpacity(0.03),
+  //                 borderRadius: BorderRadius.circular(999),
+  //                 border: Border.all(
+  //                   color: active ? Colors.transparent : Colors.white.withOpacity(0.10),
+  //                 ),
+  //               ),
+  //               child: Row(
+  //                 mainAxisAlignment: MainAxisAlignment.center,
+  //                 children: [
+  //                   if (type['Title'].toString().toLowerCase() == "high")
+  //                     Padding(
+  //                       padding: const EdgeInsets.only(right: 8),
+  //                       child: Container(
+  //                         width: 7,
+  //                         height: 7,
+  //                         decoration: BoxDecoration(
+  //                           color: ProjectColors.errorColor,
+  //                           shape: BoxShape.circle,
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   textWidget(
+  //                     text: type['Title'],
+  //                     color: active ? ProjectColors.pureBlackColor : ProjectColors.whiteColor,
+  //                     fontWeight: FontWeight.w500,
+  //                     fontSize: 0.017,
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //       );
+  //     }).toList(),
+  //   );
+  // }
 }
