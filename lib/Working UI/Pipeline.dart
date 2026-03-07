@@ -10,7 +10,10 @@ class Pipeline {
   // Function that changes status of credit card balance and limit from expense screen
   // =================================================================================
   // =================================================================================
-  Future<bool> applyCardSpend({required String cardId, required double amount, bool blockIfOverLimit = true}) async {
+  Future<bool> applyCardSpend(
+      {required String cardId,
+      required double amount,
+      bool blockIfOverLimit = true}) async {
     bool? allowed = true;
     final list = cards.cards;
     final idx = list.indexWhere((c) => c.id == cardId);
@@ -22,7 +25,8 @@ class Pipeline {
     double totalUsed = existingUsedAmount + amount;
 
     if (blockIfOverLimit && limit > 0 && totalUsed > limit) {
-      showSnackBar("Card limit reached", "This charge would exceed your credit limit.");
+      showSnackBar(
+          "Card limit reached", "This charge would exceed your credit limit.");
       allowed = false;
     }
 
@@ -31,7 +35,8 @@ class Pipeline {
     final updatedCard = card.copyWith(creditLimitUsed: totalUsed);
     list[idx] = updatedCard;
 
-    final updateModel = cards.paymentModel.value.copyWith(creditCards: list, message: "card usage updated");
+    final updateModel = cards.paymentModel.value
+        .copyWith(creditCards: list, message: "card usage updated");
     await cards.saveAndApply(updateModel);
     await updateCardAndAccountStatus(id: cardId);
     return allowed;
@@ -42,7 +47,10 @@ class Pipeline {
   // Function that changes status of bank account balance and limit from expense screen
   // ==================================================================================
   // ==================================================================================
-  Future<bool> applyBankAccountSpend({required String cardId, required double amount, bool blockIfOverLimit = true}) async {
+  Future<bool> applyBankAccountSpend(
+      {required String cardId,
+      required double amount,
+      bool blockIfOverLimit = true}) async {
     bool? allowed = true;
     final list = cards.banks;
     final idx = list.indexWhere((c) => c.id == cardId);
@@ -53,14 +61,16 @@ class Pipeline {
     double balanceLeft = balanceHad - amount;
 
     if (balanceLeft < 0) {
-      showSnackBar("Card limit reached", "This charge would exceed your credit limit.");
+      showSnackBar(
+          "Card limit reached", "This charge would exceed your credit limit.");
       allowed = false;
     }
 
     final updateAccount = account.copyWith(balance: balanceLeft);
     list[idx] = updateAccount;
 
-    final updateModel = cards.paymentModel.value.copyWith(bankAccounts: list, message: "card usage updated");
+    final updateModel = cards.paymentModel.value
+        .copyWith(bankAccounts: list, message: "card usage updated");
     await cards.saveAndApply(updateModel);
 
     await updateCardAndAccountStatus(id: cardId);
@@ -77,9 +87,11 @@ class Pipeline {
     // if (hasDebt) {
     final debts = debtV2.debtsModel.value.debts;
     for (var file in cards.cards) {
-      bool? cardExist = debts.any((t) => t.linkedCreditCardId == file.cardNumber!);
+      bool? cardExist =
+          debts.any((t) => t.linkedCreditCardId == file.cardNumber!);
       if (!cardExist) {
-        var cycle = CreditCardDebtLogic().calculateStatementCycle(file.statementDate!);
+        var cycle =
+            CreditCardDebtLogic().calculateStatementCycle(file.statementDate!);
         debts.add(
           DebtItem(
             id: "dd_${file.id}",
@@ -138,9 +150,14 @@ class Pipeline {
   // =======================================================================================
   // =======================================================================================
   Future<void> updateCardAndAccountStatus(
-      {required String id, DateTime? now, bool createOnly = false, double? amount = 0.0, double? amountResolve = 0.0}) async {
+      {required String id,
+      DateTime? now,
+      bool createOnly = false,
+      double? amount = 0.0,
+      double? amountResolve = 0.0}) async {
     final debts = debtV2.debtsModel.value.debts.toList();
-    final debtIndex = debts.indexWhere((d) => d.id == "dd_cc_$id");
+    // Look up by linkedCreditCardId (works for all debt types, not just auto-created ones)
+    final debtIndex = debts.indexWhere((d) => d.linkedCreditCardId == id);
     final cardIndex = cards.cards.indexWhere((d) => d.id == id);
 
     final limit = cards.cards[cardIndex].creditLimit;

@@ -40,6 +40,7 @@ class _ShiftBodyState extends State<ShiftBody> {
                   onChanged: (value) {
                     shift.changeShiftTabs(value);
                     shift.activeShift!.value = value;
+                    print(value);
                   },
                   items: shift.shiftTypes,
                 ),

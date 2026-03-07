@@ -38,9 +38,17 @@ class PaymentMethodsResponse {
     final ccRaw = json["creditCards"];
     final bankRaw = json["bankAccounts"];
 
-    final ccList = (ccRaw is List) ? ccRaw.map((e) => CreditCardModel.fromJson(Map<String, dynamic>.from(e))).toList() : <CreditCardModel>[];
+    final ccList = (ccRaw is List)
+        ? ccRaw
+            .map((e) => CreditCardModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList()
+        : <CreditCardModel>[];
 
-    final bankList = (bankRaw is List) ? bankRaw.map((e) => BankAccountModel.fromJson(Map<String, dynamic>.from(e))).toList() : <BankAccountModel>[];
+    final bankList = (bankRaw is List)
+        ? bankRaw
+            .map((e) => BankAccountModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList()
+        : <BankAccountModel>[];
 
     return PaymentMethodsResponse(
       status: (json["status"] ?? "").toString(),
@@ -56,7 +64,8 @@ class PaymentMethodsResponse {
   static PaymentMethodsResponse decode(String raw) {
     try {
       final map = jsonDecode(raw);
-      if (map is Map<String, dynamic>) return PaymentMethodsResponse.fromJson(map);
+      if (map is Map<String, dynamic>)
+        return PaymentMethodsResponse.fromJson(map);
       return const PaymentMethodsResponse(
         status: "",
         message: "",
@@ -143,18 +152,23 @@ class BankAccountModel {
       accountType: json["accountType"]?.toString(),
       balance: _toDouble(json["balance"]),
       isDefault: _toBool(json["isDefault"]),
-      createdAtMs: (json["createdAtMs"] is int) ? json["createdAtMs"] as int : int.tryParse((json["createdAtMs"] ?? 0).toString()) ?? 0,
+      createdAtMs: (json["createdAtMs"] is int)
+          ? json["createdAtMs"] as int
+          : int.tryParse((json["createdAtMs"] ?? 0).toString()) ?? 0,
     );
   }
 
   // Helpers for local storage
-  static String encodeList(List<BankAccountModel> list) => jsonEncode(list.map((e) => e.toJson()).toList());
+  static String encodeList(List<BankAccountModel> list) =>
+      jsonEncode(list.map((e) => e.toJson()).toList());
 
   static List<BankAccountModel> decodeList(String raw) {
     try {
       final data = jsonDecode(raw);
       if (data is List) {
-        return data.map((e) => BankAccountModel.fromJson(Map<String, dynamic>.from(e))).toList();
+        return data
+            .map((e) => BankAccountModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
       }
       return [];
     } catch (_) {
@@ -231,10 +245,11 @@ class CreditCardModel {
       creditLimitUsed: creditLimitUsed ?? this.creditLimitUsed,
       isDefault: isDefault ?? this.isDefault,
       createdAtMs: createdAtMs ?? this.createdAtMs,
-      statementDate: statementDate ?? statementDate,
-      paymentDueDate: paymentDueDate ?? paymentDueDate,
+      statementDate: statementDate ?? this.statementDate,
+      paymentDueDate: paymentDueDate ?? this.paymentDueDate,
       billingCycleDays: billingCycleDays ?? this.billingCycleDays,
-      dueDaysAfterStatement: dueDaysAfterStatement ?? this.dueDaysAfterStatement,
+      dueDaysAfterStatement:
+          dueDaysAfterStatement ?? this.dueDaysAfterStatement,
     );
   }
 
@@ -309,13 +324,16 @@ class CreditCardModel {
   }
 
   // Helpers for local storage
-  static String encodeList(List<CreditCardModel> list) => jsonEncode(list.map((e) => e.toJson()).toList());
+  static String encodeList(List<CreditCardModel> list) =>
+      jsonEncode(list.map((e) => e.toJson()).toList());
 
   static List<CreditCardModel> decodeList(String raw) {
     try {
       final data = jsonDecode(raw);
       if (data is List) {
-        return data.map((e) => CreditCardModel.fromJson(Map<String, dynamic>.from(e))).toList();
+        return data
+            .map((e) => CreditCardModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
       }
       return [];
     } catch (_) {

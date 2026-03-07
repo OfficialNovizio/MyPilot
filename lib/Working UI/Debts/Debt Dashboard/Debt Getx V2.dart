@@ -6,6 +6,7 @@ import '../../../models/Expense Model V2.dart';
 import '../../../models/TextForm.dart';
 import '../../Shared Preferences.dart';
 import '../../Constants.dart';
+import '../../Controllers.dart';
 
 class DebtsController extends GetxController {
   // ---------------- UI FORM ----------------
@@ -23,11 +24,21 @@ class DebtsController extends GetxController {
   final RxBool secured = false.obs;
   final RxBool fixedInstallment = false.obs;
   final List<String> debtType = const ['Loan', 'Bnpl'];
-  final List<String> strategies = const ['SnowBall', 'Avalanche', 'Hybrid', 'Manuel'];
+  final List<String> strategies = const [
+    'SnowBall',
+    'Avalanche',
+    'Hybrid',
+    'Manuel'
+  ];
   final RxString payback = "Monthly".obs;
   final List<String> paybackOptions = const ["Monthly", "Bi-weekly", "Weekly"];
   final RxString loanType = "Auto Loan".obs;
-  final List<String> loanTypes = const ["Auto Loan", "Personal Loan", "Student Loan", "Mortgage"];
+  final List<String> loanTypes = const [
+    "Auto Loan",
+    "Personal Loan",
+    "Student Loan",
+    "Mortgage"
+  ];
   final Rx<PayoffStrategy> strategy = PayoffStrategy.snowball.obs;
   final RxDouble extraBudget = 0.0.obs;
   Rxn<BnplProvider> selectedBnpl = Rxn<BnplProvider>();
@@ -42,8 +53,16 @@ class DebtsController extends GetxController {
       market: "CA",
       website: "https://www.klarna.com/ca/customer-service/how-can-i-pay/",
       plans: [
-        BnplPlan(type: BnplPlanType.payIn4, installments: 4, cadence: "biweekly", canBeZeroApr: true),
-        BnplPlan(type: BnplPlanType.payMonthly, installments: null, cadence: "monthly", canBeZeroApr: false),
+        BnplPlan(
+            type: BnplPlanType.payIn4,
+            installments: 4,
+            cadence: "biweekly",
+            canBeZeroApr: true),
+        BnplPlan(
+            type: BnplPlanType.payMonthly,
+            installments: null,
+            cadence: "monthly",
+            canBeZeroApr: false),
       ],
       supportedRepaymentMethods: [
         RepaymentMethodType.debitCard,
@@ -52,7 +71,8 @@ class DebtsController extends GetxController {
       rules: RepaymentRules(
         firstPaymentRequiresCard: true,
         creditCardAllowedForScheduledPayments: true,
-        notes: "Accepts major debit/credit cards; prepaid and AMEX not accepted (per Klarna CA help).",
+        notes:
+            "Accepts major debit/credit cards; prepaid and AMEX not accepted (per Klarna CA help).",
       ),
       isActiveInMarket: true,
     ),
@@ -60,9 +80,14 @@ class DebtsController extends GetxController {
       id: "afterpay_ca",
       name: "Afterpay",
       market: "CA",
-      website: "https://help.afterpay.com/hc/en-ca/articles/20249507136025-Which-cards-does-Afterpay-accept",
+      website:
+          "https://help.afterpay.com/hc/en-ca/articles/20249507136025-Which-cards-does-Afterpay-accept",
       plans: [
-        BnplPlan(type: BnplPlanType.payIn4, installments: 4, cadence: "biweekly", canBeZeroApr: true),
+        BnplPlan(
+            type: BnplPlanType.payIn4,
+            installments: 4,
+            cadence: "biweekly",
+            canBeZeroApr: true),
       ],
       supportedRepaymentMethods: [
         RepaymentMethodType.debitCard,
@@ -73,7 +98,8 @@ class DebtsController extends GetxController {
       rules: RepaymentRules(
         firstPaymentRequiresCard: true,
         creditCardAllowedForScheduledPayments: true,
-        notes: "Accepts Visa/Mastercard issued in your country; supports Apple Pay/Google Pay; no bank transfer.",
+        notes:
+            "Accepts Visa/Mastercard issued in your country; supports Apple Pay/Google Pay; no bank transfer.",
       ),
       isActiveInMarket: true,
     ),
@@ -83,8 +109,16 @@ class DebtsController extends GetxController {
       market: "CA",
       website: "https://helpcenter.affirm.ca/s/article/add-a-payment-method-ca",
       plans: [
-        BnplPlan(type: BnplPlanType.payIn4, installments: 4, cadence: "biweekly", canBeZeroApr: true),
-        BnplPlan(type: BnplPlanType.payMonthly, installments: null, cadence: "monthly", canBeZeroApr: false),
+        BnplPlan(
+            type: BnplPlanType.payIn4,
+            installments: 4,
+            cadence: "biweekly",
+            canBeZeroApr: true),
+        BnplPlan(
+            type: BnplPlanType.payMonthly,
+            installments: null,
+            cadence: "monthly",
+            canBeZeroApr: false),
       ],
       supportedRepaymentMethods: [
         RepaymentMethodType.debitCard,
@@ -94,7 +128,8 @@ class DebtsController extends GetxController {
       rules: RepaymentRules(
         firstPaymentRequiresCard: false,
         creditCardAllowedForScheduledPayments: false,
-        notes: "Payments can be debit card or pre-authorized debit; some purchases allow credit card for down payment only.",
+        notes:
+            "Payments can be debit card or pre-authorized debit; some purchases allow credit card for down payment only.",
       ),
       isActiveInMarket: true,
     ),
@@ -104,8 +139,16 @@ class DebtsController extends GetxController {
       market: "CA",
       website: "https://helpcenter.affirm.ca/ca/s/article/paybright-payments",
       plans: [
-        BnplPlan(type: BnplPlanType.payIn4, installments: 4, cadence: "biweekly", canBeZeroApr: true),
-        BnplPlan(type: BnplPlanType.payMonthly, installments: null, cadence: "monthly", canBeZeroApr: false),
+        BnplPlan(
+            type: BnplPlanType.payIn4,
+            installments: 4,
+            cadence: "biweekly",
+            canBeZeroApr: true),
+        BnplPlan(
+            type: BnplPlanType.payMonthly,
+            installments: null,
+            cadence: "monthly",
+            canBeZeroApr: false),
       ],
       supportedRepaymentMethods: [
         RepaymentMethodType.debitCard,
@@ -115,7 +158,8 @@ class DebtsController extends GetxController {
       rules: RepaymentRules(
         firstPaymentRequiresCard: false,
         creditCardAllowedForScheduledPayments: false,
-        notes: "Affirm/PayBright: debit + PAD widely supported; credit card availability varies by plan type (per PayBright help).",
+        notes:
+            "Affirm/PayBright: debit + PAD widely supported; credit card availability varies by plan type (per PayBright help).",
       ),
       isActiveInMarket: true,
     ),
@@ -123,28 +167,44 @@ class DebtsController extends GetxController {
       id: "sezzle_ca",
       name: "Sezzle",
       market: "CA",
-      website: "https://shopper-help.sezzle.com/hc/en-ca/articles/360046901131-How-do-I-add-a-new-payment-method",
+      website:
+          "https://shopper-help.sezzle.com/hc/en-ca/articles/360046901131-How-do-I-add-a-new-payment-method",
       plans: [
-        BnplPlan(type: BnplPlanType.payIn4, installments: 4, cadence: "6 weeks", canBeZeroApr: true),
-        BnplPlan(type: BnplPlanType.payMonthly, installments: null, cadence: "monthly", canBeZeroApr: false),
+        BnplPlan(
+            type: BnplPlanType.payIn4,
+            installments: 4,
+            cadence: "6 weeks",
+            canBeZeroApr: true),
+        BnplPlan(
+            type: BnplPlanType.payMonthly,
+            installments: null,
+            cadence: "monthly",
+            canBeZeroApr: false),
       ],
       supportedRepaymentMethods: [
         RepaymentMethodType.debitCard,
         RepaymentMethodType.creditCard,
         RepaymentMethodType.bankAccountPAD,
-        RepaymentMethodType.prepaidCard, // Sezzle supports adding prepaid, with constraints
+        RepaymentMethodType
+            .prepaidCard, // Sezzle supports adding prepaid, with constraints
       ],
       rules: RepaymentRules(
         firstPaymentRequiresCard: true,
         creditCardAllowedForScheduledPayments: true,
-        notes: "Bank accounts may be used for scheduled installments, but first installment requires a debit/credit card (per Sezzle help).",
+        notes:
+            "Bank accounts may be used for scheduled installments, but first installment requires a debit/credit card (per Sezzle help).",
       ),
       isActiveInMarket: true,
     ),
   ];
 
   // ---------------- DATA ----------------
-  final Rx<DebtsResponse> debtsModel = const DebtsResponse(status: "200", message: "ok", version: 2, strategy: "snowball", debts: []).obs;
+  final Rx<DebtsResponse> debtsModel = const DebtsResponse(
+      status: "200",
+      message: "ok",
+      version: 2,
+      strategy: "snowball",
+      debts: []).obs;
 
   final Rxn<DebtItem> selectedDebt = Rxn<DebtItem>();
 
@@ -189,7 +249,9 @@ class DebtsController extends GetxController {
                 : PayoffStrategy.snowball;
 
     strategy.value = s;
-    await debtsIO(model: debtsModel.value.copyWith(strategy: s.name, message: "strategy updated"));
+    await debtsIO(
+        model: debtsModel.value
+            .copyWith(strategy: s.name, message: "strategy updated"));
   }
 
   String strategyDescription(PayoffStrategy s) {
@@ -212,9 +274,11 @@ class DebtsController extends GetxController {
   }
 
   // ---------------- QUICK GETTERS ----------------
-  List<DebtItem> get activeDebts => debtsModel.value.debts.where((d) => d.isActive && d.balance > 0).toList();
+  List<DebtItem> get activeDebts =>
+      debtsModel.value.debts.where((d) => d.isActive && d.balance > 0).toList();
   double get totalDebt => activeDebts.fold(0.0, (s, d) => s + d.balance);
-  double get totalInitial => activeDebts.fold(0.0, (s, d) => s + (d.initialBalance <= 0 ? d.balance : d.initialBalance));
+  double get totalInitial => activeDebts.fold(0.0,
+      (s, d) => s + (d.initialBalance <= 0 ? d.balance : d.initialBalance));
   double get paidPct {
     final init = totalInitial;
     if (init <= 0) return 0.0;
@@ -239,7 +303,12 @@ class DebtsController extends GetxController {
     // LOAD
     final raw = (await getLocalData(_kSavedDebts) ?? "").trim();
     if (raw.isEmpty) {
-      return const DebtsResponse(status: "200", message: "ok", version: 2, strategy: "snowball", debts: []);
+      return const DebtsResponse(
+          status: "200",
+          message: "ok",
+          version: 2,
+          strategy: "snowball",
+          debts: []);
     }
     return DebtsResponse.decode(raw);
   }
@@ -267,8 +336,10 @@ class DebtsController extends GetxController {
     final notes = controllers[5].controller.text.trim();
 
     if (name.isEmpty) return showSnackBar("Missing Info", "Enter debt name.");
-    if (bal == null || bal <= 0) return showSnackBar("Invalid Balance", "Enter a valid balance.");
-    if (dueDay < 1 || dueDay > 31) return showSnackBar("Invalid Due Day", "Use 1–31.");
+    if (bal == null || bal <= 0)
+      return showSnackBar("Invalid Balance", "Enter a valid balance.");
+    if (dueDay < 1 || dueDay > 31)
+      return showSnackBar("Invalid Due Day", "Use 1–31.");
 
     final nowMs = DateTime.now().millisecondsSinceEpoch;
 
@@ -286,7 +357,8 @@ class DebtsController extends GetxController {
       notes: notes,
       isActive: true,
       createdAtMs: nowMs,
-      linkedCreditCardId: selectedAccount.value!.id,
+      linkedCreditCardId:
+          selectedAccount.value?.id, // safe null — account is optional
       paymentsMade: const [],
       // paymentScheduleOverride: const [],
     );
@@ -330,7 +402,8 @@ class DebtsController extends GetxController {
     final notes = controllers[5].controller.text.trim();
 
     if (name.isEmpty) return showSnackBar("Missing Info", "Enter debt name.");
-    if (bal == null || bal < 0) return showSnackBar("Invalid Balance", "Enter a valid balance.");
+    if (bal == null || bal < 0)
+      return showSnackBar("Invalid Balance", "Enter a valid balance.");
     // if (dueDay < 1 || dueDay > 31) return showSnackBar("Invalid Due Day", "Use 1–31.");
 
     final list = debtsModel.value.debts.toList();
@@ -353,7 +426,8 @@ class DebtsController extends GetxController {
       notes: notes,
     );
 
-    await debtsIO(model: debtsModel.value.copyWith(message: "debt updated", debts: list));
+    await debtsIO(
+        model: debtsModel.value.copyWith(message: "debt updated", debts: list));
     selectedDebt.value = list[idx];
     resetForm();
     Get.back();
@@ -361,8 +435,10 @@ class DebtsController extends GetxController {
   }
 
   Future<void> deleteDebt(String id) async {
-    final list = debtsModel.value.debts.toList()..removeWhere((d) => d.id == id);
-    await debtsIO(model: debtsModel.value.copyWith(message: "debt deleted", debts: list));
+    final list = debtsModel.value.debts.toList()
+      ..removeWhere((d) => d.id == id);
+    await debtsIO(
+        model: debtsModel.value.copyWith(message: "debt deleted", debts: list));
     if (selectedDebt.value?.id == id) selectedDebt.value = null;
     loadDebts();
     showSnackBar("Success", "Debt removed.");
@@ -371,7 +447,8 @@ class DebtsController extends GetxController {
   // ---------------- PAYMENTS (INSIDE DEBT ITEM NOW) ----------------
 
   Future<void> recordPayment({amount, note, date}) async {
-    if (amount.isNaN || amount <= 0) return showSnackBar("Invalid", "Enter a valid payment amount.");
+    if (amount.isNaN || amount <= 0)
+      return showSnackBar("Invalid", "Enter a valid payment amount.");
     final nowMs = DateTime.now().millisecondsSinceEpoch;
 
     final newPayment = DebtPayment(
@@ -388,12 +465,18 @@ class DebtsController extends GetxController {
     final start = selectedDebt.value!.initialBalance;
     final newBal = (start - totalPaid);
 
-    selectedDebt.value = selectedDebt.value!.copyWith(balance: newBal, paymentsMade: paidList);
+    selectedDebt.value =
+        selectedDebt.value!.copyWith(balance: newBal, paymentsMade: paidList);
     final list = debtsModel.value.debts.toList();
     final idx = list.indexWhere((x) => x.id == selectedDebt.value!.id);
     list[idx] = selectedDebt.value!;
-    print(selectedDebt.value);
-    await debtsIO(model: debtsModel.value.copyWith(message: "payment saved", debts: list));
+    await debtsIO(
+        model:
+            debtsModel.value.copyWith(message: "payment saved", debts: list));
+
+    // ── Sync payment to linked card / bank account ──
+    await _syncPaymentToAccount(list[idx], amount);
+
     Get.back();
     Future.delayed(const Duration(milliseconds: 500), () {
       showSnackBar("Success", "Payment saved.");
@@ -403,20 +486,80 @@ class DebtsController extends GetxController {
   Future<void> deletePayment(String paymentId) async {
     final list = debtsModel.value.debts.toList();
     final idx = list.indexWhere((x) => x.id == selectedDebt.value!.id);
-    final newPaidList = selectedDebt.value!.paymentsMade!.toList()..removeWhere((x) => x.id == paymentId);
+
+    // Capture the amount being removed BEFORE mutating
+    final removedPayment =
+        selectedDebt.value!.paymentsMade!.firstWhere((x) => x.id == paymentId);
+
+    final newPaidList = selectedDebt.value!.paymentsMade!.toList()
+      ..removeWhere((x) => x.id == paymentId);
     final totalPaid = newPaidList.fold(0.0, (x, y) => x + y.amount);
     final start = selectedDebt.value!.initialBalance;
     final newBal = (start - totalPaid);
-    selectedDebt.value = selectedDebt.value!.copyWith(balance: newBal, paymentsMade: newPaidList);
+    selectedDebt.value = selectedDebt.value!
+        .copyWith(balance: newBal, paymentsMade: newPaidList);
     list[idx] = selectedDebt.value!;
-    await debtsIO(model: debtsModel.value.copyWith(message: "payment deleted", debts: list));
+    await debtsIO(
+        model:
+            debtsModel.value.copyWith(message: "payment deleted", debts: list));
+
+    // ── Restore the balance on the linked card / bank account ──
+    await _restorePaymentFromAccount(list[idx], removedPayment.amount);
+
     Future.delayed(const Duration(milliseconds: 500), () {
       showSnackBar('Success', 'Payment removed from activities');
     });
   }
 
+  // ============================================================
+  // PRIVATE: Sync payment event to linked card / bank account
+  // ============================================================
+
+  /// Called AFTER recording a payment — reduces the linked card/bank balance.
+  Future<void> _syncPaymentToAccount(DebtItem debt, double amount) async {
+    final linkedId = debt.linkedCreditCardId;
+    if (linkedId == null || linkedId.trim().isEmpty) return;
+
+    // Is it a credit card?
+    final isCard = cards.cards.any((c) => c.id == linkedId);
+    if (isCard) {
+      // Payment on credit card → reduces the amount owed (creditLimitUsed goes down)
+      await cards.applyCreditPayment(cardId: linkedId, amount: amount);
+      return;
+    }
+
+    // Is it a bank account?
+    final isBankAcct = cards.banks.any((b) => b.id == linkedId);
+    if (isBankAcct) {
+      // Loan payment from bank → deducts from bank balance
+      await cards.applyBankAccountSpend(cardId: linkedId, amount: amount);
+    }
+  }
+
+  /// Called AFTER deleting a payment — restores the linked card/bank balance.
+  Future<void> _restorePaymentFromAccount(DebtItem debt, double amount) async {
+    final linkedId = debt.linkedCreditCardId;
+    if (linkedId == null || linkedId.trim().isEmpty) return;
+
+    // Is it a credit card?
+    final isCard = cards.cards.any((c) => c.id == linkedId);
+    if (isCard) {
+      // Undoing a credit payment → increases creditLimitUsed back up
+      await cards.applyCreditCharge(cardId: linkedId, amount: amount);
+      return;
+    }
+
+    // Is it a bank account?
+    final isBankAcct = cards.banks.any((b) => b.id == linkedId);
+    if (isBankAcct) {
+      // Undoing a bank-account payment → adds the money back to bank balance
+      await cards.applyBankAccountCredit(cardId: linkedId, amount: amount);
+    }
+  }
+
   // ---------------- SCHEDULE (unchanged logic, just reads overrides from model) ----------------
-  double monthlyRate(double aprPct) => aprPct <= 0 ? 0.0 : (aprPct / 100.0) / 12.0;
+  double monthlyRate(double aprPct) =>
+      aprPct <= 0 ? 0.0 : (aprPct / 100.0) / 12.0;
 
   int _daysInMonth(int y, int m) {
     final firstNext = (m == 12) ? DateTime(y + 1, 1, 1) : DateTime(y, m + 1, 1);

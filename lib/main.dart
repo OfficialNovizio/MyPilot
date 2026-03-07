@@ -32,9 +32,17 @@ import 'Working UI/Login User/Onboarding User.dart';
 //   }
 // }
 
+import 'package:flutter/foundation.dart';
+import 'SeedData.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
+
+  if (kDebugMode) {
+    await SeedData.seed();
+  }
+
   runApp(const MyApp());
 }
 

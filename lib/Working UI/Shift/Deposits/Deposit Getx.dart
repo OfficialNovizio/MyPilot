@@ -255,8 +255,7 @@ class DepositsController extends GetxController {
     final daysInMonth = DateUtils.getDaysInMonth(selectedMonth.value.year, selectedMonth.value.month);
 
     // --- jobs
-    final jobs = (cur.jobs ?? const <JobWeekly>[]).toList()
-      ..sort((a, b) => b.totals.pay.compareTo(a.totals.pay));
+    final jobs = (cur.jobs ?? const <JobWeekly>[]).toList()..sort((a, b) => b.totals.pay.compareTo(a.totals.pay));
     final topJob = jobs.isEmpty ? null : jobs.first;
 
     // rate map (fallback when shift.income == null)
@@ -305,39 +304,29 @@ class DepositsController extends GetxController {
       }
     }
 
-    final bestWeekLabel = (bestWeek == null)
-        ? "-"
-        : "${DateFormat('EEE dd').format(bestWeek.start)}-${DateFormat('EEE dd').format(bestWeek.end)}";
+    final bestWeekLabel = (bestWeek == null) ? "-" : "${DateFormat('EEE dd').format(bestWeek.start)}-${DateFormat('EEE dd').format(bestWeek.end)}";
 
     // --- result
     return DepositInsightsVM(
       monthLabel: monthName(selectedMonth.value),
       isCurrentMonth: true,
-
       jobCount: jobs.length,
       monthTotal: curPay,
       monthChangePct: monthChangePct,
-
       efficiency: effCur.toPrecision(1),
       efficiencyChangePct: effChangePct.toPrecision(1),
-
       bestDayLabel: bestDay == null ? const [] : <ShiftDay>[bestDay],
       bestDayEarned: bestDayIncome < 0 ? 0.0 : bestDayIncome.toPrecision(1),
-
       bestWeekLabel: bestWeekLabel,
       bestWeekEarned: (bestWeek?.pay ?? 0.0).toPrecision(1),
-
       workedDays: workedDays,
       daysInMonth: daysInMonth,
-
       topSourceName: topJob?.jobName ?? "-",
       topSourceValue: topJob?.totals.pay ?? 0.0,
       topSourceSharePct: (topJob == null || curPay <= 0) ? 0.0 : ((topJob.totals.pay / curPay) * 100).toPrecision(1),
-
       projectedMonthEnd: 0,
     );
   }
-
 
   LineChartCardModel buildMonthlyTrendCard() {
     final now = DateTime.now();
@@ -421,7 +410,11 @@ class DepositsController extends GetxController {
       final isBetween = currentDate >= weekStart && currentDate <= weekEnd;
       if (isBetween) {
         currentWeekPay = weekPay[files.weekIndex - 1];
-        calculateSurplus = (((currentWeekPay - weekPay[files.weekIndex - 2]) / weekPay[files.weekIndex - 2]) * 100).toPrecision(2);
+        print(currentWeekPay);
+        print(weekPay[files.weekIndex - 2]);
+        if (weekPay[files.weekIndex - 2] != 0) {
+          calculateSurplus = (((currentWeekPay - weekPay[files.weekIndex - 2]) / weekPay[files.weekIndex - 2]) * 100).toPrecision(2);
+        }
       }
       weeks.add("$weekStart - $weekEnd");
     }

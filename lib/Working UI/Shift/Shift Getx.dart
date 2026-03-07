@@ -92,7 +92,7 @@ class ShiftController extends GetxController {
 
   void getShiftsForDay() {
     final dKey = monthDate(selectedDay!.value);
-    if (currentMonth != null) {
+    if (currentMonth!.value != null) {
       if (currentMonth!.value!.dates!.any((t) => t.date == dKey)) {
         final dIdx = currentMonth!.value!.dates!.indexWhere((d) => d.date! == dKey);
         todayShifts!.value = currentMonth!.value!.dates![dIdx].data!;

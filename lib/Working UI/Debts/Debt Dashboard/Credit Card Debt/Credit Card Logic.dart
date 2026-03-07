@@ -307,3 +307,4 @@ class CreditCardDebtLogic {
     await buildScheduleAndSave(months: rebuildMonths);
   }
 }
+

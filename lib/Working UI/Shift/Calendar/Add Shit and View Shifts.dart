@@ -293,7 +293,7 @@ class CreateShift extends StatelessWidget {
                         SizedBox(height: height * 0.02),
                         // Job dropdown
                         Container(
-                          width: width * .44,
+                          width: width,
                           padding: EdgeInsets.symmetric(horizontal: width * 0.03, vertical: height * 0.004),
                           decoration: BoxDecoration(
                             color: ProjectColors.backgroundColor,
@@ -392,7 +392,7 @@ class CreateShift extends StatelessWidget {
                             Expanded(
                               child: DarkTextField(
                                 title: 'Unpaid Break',
-                                value: 'None',
+                                value: '',
                                 trailing: Switch(
                                   value: shift.unpaidBreak!.value,
                                   onChanged: (val) {
